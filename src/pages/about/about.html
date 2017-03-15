@@ -6,6 +6,13 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-
+  <ion-content padding>
+  <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
+  <ion-list >
+    <button ion-button block (click)="showToast(stop)" *ngFor="let stop of stopsNames">
+      {{ stop }}
+    </button>
+  </ion-list>
 </ion-content>
+
+
