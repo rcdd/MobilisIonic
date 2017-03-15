@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { NavController, ToastController } from 'ionic-angular';
 
-import 'leaflet';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'page-home',
