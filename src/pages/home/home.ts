@@ -13,7 +13,7 @@ import * as L from 'leaflet';
 export class HomePage {
 
   private stops: any;
-  public map: any;
+  private map: any;
 
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
@@ -27,9 +27,14 @@ export class HomePage {
     this.initMap();
     this.getStopsStations();
 
-
-    // this.map.on('locationerror', this.onLocationError);
-    // this.map.on('locationfound', this.onLocationFound);
+    var self = this;
+    this.map.on('locationerror', this.onLocationError);
+    this.map.on('locationfound', function (e) {
+      var radius = e.accuracy / 2;
+      L.marker(e.latlng).addTo(self.map)
+        .bindPopup("You are within " + radius + " meters from this point").openPopup();
+      L.circle(e.latlng, radius).addTo(self.map);
+    });
   }
 
   initMap(): void {
@@ -43,14 +48,6 @@ export class HomePage {
       id: 'mapbox.mapbox-traffic-v1',
       accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA'
     }).addTo(this.map);
-  }
-
-  onLocationFound(e) {
-    var _this = this;
-    var radius = e.accuracy / 2;
-    L.marker(e.latlng).addTo(this.map)
-      .bindPopup("You are within " + radius + " meters from this point").openPopup();
-    L.circle(e.latlng, radius).addTo(_this.map);
   }
 
   onLocationError(e) {
@@ -73,6 +70,8 @@ export class HomePage {
         });
       });
   }
+
+
   showToast(msg: string, ms: number): void {
     let toast = this.toastCtrl.create({
       message: msg,
