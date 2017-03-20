@@ -4,7 +4,8 @@ import { NavController, ToastController } from 'ionic-angular';
 
 import { Http, Response } from '@angular/http';
 import 'rxjs/add/operator/map';
-import * as L from 'leaflet';
+import 'leaflet';
+import 'leaflet.markercluster';
 
 @Component({
   selector: 'page-home',
@@ -14,6 +15,7 @@ export class HomePage {
 
   private stops: any;
   private map: any;
+  private markers: any;
 
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
@@ -43,11 +45,15 @@ export class HomePage {
     this.map.locate({ setView: true });
 
     L.tileLayer('https://api.mapbox.com/styles/v1/rcdd/cj0b89eqw005a2sqh9zew1bew/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
-      attribution: 'Application power by RP&RD :)',
+      attribution: 'Application power by RD&RP :)',
       maxZoom: 20,
       id: 'mapbox.mapbox-traffic-v1',
       accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA'
     }).addTo(this.map);
+
+
+    //this.markers = L.markerClusterGroup();
+
   }
 
   onLocationError(e) {
