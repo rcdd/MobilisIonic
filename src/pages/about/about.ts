@@ -28,7 +28,6 @@ export class AboutPage {
     //console.log(this.stops);
     this.resetNamesStops();
     });
-
   }
 
   resetNamesStops(){
