@@ -9,12 +9,9 @@ import { Geolocation } from 'ionic-native';
 import 'rxjs/add/operator/map';
 import 'leaflet';
 import 'leaflet.markercluster';
-<<<<<<< HEAD
 import 'leaflet-easybutton';
-
-=======
 import 'leaflet-search';
->>>>>>> 2b9c3b67b9c4f91d35f0d23b9aff8ccd0827d4c7
+
 declare var L: any;
 
 @Component({
@@ -168,10 +165,7 @@ export class HomePage {
 
         this.map.addLayer(markers);
         this.map.fitBounds(markers.getBounds());
-<<<<<<< HEAD
-=======
         this.map.addControl(controlSearch);
->>>>>>> 2b9c3b67b9c4f91d35f0d23b9aff8ccd0827d4c7
 
       });
   }
