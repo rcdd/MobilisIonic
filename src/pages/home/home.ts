@@ -9,8 +9,12 @@ import { Geolocation } from 'ionic-native';
 import 'rxjs/add/operator/map';
 import 'leaflet';
 import 'leaflet.markercluster';
+<<<<<<< HEAD
 import 'leaflet-easybutton';
 
+=======
+import 'leaflet-search';
+>>>>>>> 2b9c3b67b9c4f91d35f0d23b9aff8ccd0827d4c7
 declare var L: any;
 
 @Component({
@@ -142,10 +146,20 @@ export class HomePage {
     return this.http.get(`http://194.210.216.191/otp/routers/default/index/stops`)
       .map((res: Response) => res.json()).subscribe(a => {
         this.stops = a;
-        //console.log(this.stops);
+
+        
         let markers = L.markerClusterGroup();
+
+        var controlSearch = new L.Control.Search({
+          position: 'topright',
+          layer: markers,
+          initial: false,
+          zoom: 18,
+          marker: false
+        });
+
         this.stops.forEach(stop => {
-          markers.addLayer(L.marker([stop.lat, stop.lon], { icon: this.iconBus, title: stop.name })
+          markers.addLayer(new L.marker([stop.lat, stop.lon], { icon: this.iconBus, title: stop.name })
             .bindPopup(stop.name)
             .on('click', function (e) {
               this.openPopup();
@@ -154,6 +168,10 @@ export class HomePage {
 
         this.map.addLayer(markers);
         this.map.fitBounds(markers.getBounds());
+<<<<<<< HEAD
+=======
+        this.map.addControl(controlSearch);
+>>>>>>> 2b9c3b67b9c4f91d35f0d23b9aff8ccd0827d4c7
 
       });
   }
