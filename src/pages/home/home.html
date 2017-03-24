@@ -3,13 +3,16 @@
     <ion-title>
       Map
     </ion-title>
+
     <ion-buttons end>
-      <button ion-button (click)="showToast('Não mexe!!!', 3000)"><ion-icon name="add"></ion-icon>Add Marker</button>
+      <!-- <button ion-button (click)="showToast('Não mexe!!!', 3000)"><ion-icon name="add"></ion-icon>Add Marker</button> -->
     </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
+
+  <div id="findbox"></div>
   <div id="debug" *ngIf="debug">{{debug}}</div>
   <div id="mapid"></div>
 </ion-content>

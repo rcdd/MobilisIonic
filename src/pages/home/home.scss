@@ -1,5 +1,6 @@
 page-home {
-    #mapid {         
+    #mapid {   
+        position: absolute;   
         width: 100%;
         height: 100%;
     }
@@ -17,5 +18,99 @@ page-home {
         width: 300px;
         background-color: white;
         z-index: 2000;
+    }
+
+    // Search CSS
+    #findbox {
+        position: absolute;
+        top: 8px;
+        z-index: 500;
+        border-radius:.125em;	
+        margin-bottom: 20px;
+        margin-left: 55px; 
+        padding: 2px 0;
+        height: 10px;
+        float: left;
+        font-size: 12px;
+    }
+
+    .leaflet-control-search .search-input {
+        display:block;
+        float:left;
+        //background: #fff;
+        border: 2px solid rgba(0,0,0,0.3);
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        height: 34px;
+        line-height: 34px;
+        padding:0 18px 0 2px;
+        margin: 0px 3px;
+    }
+    
+    .leaflet-control-search.search-load .search-input {
+        background: url('../images/loader.gif') no-repeat center right #fff;
+    }
+    .leaflet-control-search.search-load .search-cancel {
+        visibility:hidden;
+    }
+
+    .leaflet-control-search .search-cancel {
+        position: static;
+        float: left;
+        margin-left: -23px;
+    }   
+
+    .leaflet-control-search .search-tooltip {
+        font-size: 14px;
+        position:absolute;
+        top:100%;
+        left:0px;
+        float:left;
+        list-style: none;
+        padding: 0px;
+        //width: 400px;
+        min-width:20px;
+        max-height:122px;
+        border: 1px solid rgba(0,0,0,0.3);
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        overflow-y:auto;
+        overflow-x:hidden;
+        cursor: pointer;
+        margin-top: 26px;
+    }
+
+    .leaflet-control-search .search-tip {
+        margin:2px;
+        padding:2px 4px;
+        display:block;
+        color:black;
+        background: #eee;
+        text-decoration:none;	
+        white-space:nowrap;
+        vertical-align:center;
+        height: 34px;
+    }
+
+    .leaflet-control-search.search-exp {/*expanded*/
+        box-shadow: 0 0px 0px #999;
+        background: transparent;
+    }
+
+    .leaflet-control-search .search-alert {
+        cursor:pointer;
+        clear:both;
+        font-size: 12px;
+        margin-left:5px;
+        padding:5px .25em;
+        color:#e00;
+        font-weight:bold;
+        border-radius:.25em;
+        width: 120px;
+        border: 2px solid rgba(0,0,0,0.3);
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        background: white;
+        opacity: 0.1px;
     }
 }

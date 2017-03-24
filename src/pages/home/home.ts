@@ -133,7 +133,7 @@ export class HomePage {
     }).addTo(this.map);
 
     L.easyButton('icon ion-pinpoint', function () {
-      self.map.panTo(new L.LatLng(39.7460465, -8.8059954), 15);
+      self.map.panTo(new L.LatLng(39.7460465, -8.8059954), 11);
     }).addTo(this.map);
 
   }
@@ -144,14 +144,16 @@ export class HomePage {
       .map((res: Response) => res.json()).subscribe(a => {
         this.stops = a;
 
-        
+
         let markers = L.markerClusterGroup();
 
         var controlSearch = new L.Control.Search({
-          position: 'topright',
+          container: 'findbox',
+          position: 'topleft',
+          placeholder: 'Search...:)',
           layer: markers,
           initial: false,
-          zoom: 18,
+          zoom: 20,
           marker: false
         });
 
