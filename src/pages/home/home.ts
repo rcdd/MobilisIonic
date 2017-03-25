@@ -24,6 +24,7 @@ export class HomePage {
   private stops: any;
   private map: any;
   private currentPosition: any;
+  private currentPositionCircle: any;
   public debug: any;
   private markers: any;
   private controlSearch: any;
@@ -62,7 +63,13 @@ export class HomePage {
       attribution: 'Application power by RD&RP :)',
       maxZoom: 20,
       id: 'mapbox.mapbox-traffic-v1',
-      accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA'
+      accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA',
+      // CACHE STUFF
+      useCache: true,
+      useOnlyCache: true,
+      crossOrigin: true,
+      saveToCache: true,
+      cacheMaxAge: (24 * 3600000), // 24h
     });
 
     this.map = L.map('mapid')
@@ -70,8 +77,21 @@ export class HomePage {
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });
 
+    /*// Listen to cache hits and misses and spam the console
+    tiles.on('tilecachehit', function (ev) {
+      console.log('Cache hit: ', ev.url);
+    });
+    tiles.on('tilecachemiss', function (ev) {
+      console.log('Cache miss: ', ev.url);
+    });
+    tiles.on('tilecacheerror', function (ev) {
+      console.log('Cache error: ', ev.tile, ev.error);
+    });*/
+
+
     this.currentPosition = L.marker(this.map.getCenter()).addTo(this.map);
-    //L.circle(this.map.getCenter()).addTo(self.map);
+    this.currentPositionCircle = L.circle(this.map.getCenter()).addTo(this.map);
+
 
     // CONTROLS OF THE MAP
     var self = this;
@@ -150,7 +170,6 @@ export class HomePage {
       zoom: 20,
       marker: false
     });
-    console.dir(self.controlSearch);
     this.map.addControl(self.controlSearch);
 
   }
@@ -203,7 +222,8 @@ export class HomePage {
     var currentPosition = [data.latitude, data.longitude];
     this.currentPosition.setLatLng(currentPosition);
     this.currentPosition.bindPopup("You are within " + radius + " meters from this point");
-    // var nearest = leafletKnn(this.markers).nearest(L.latLng(38, -78), 5);
+    this.currentPositionCircle.setLatLng(currentPosition);
+
   }
 
   updateClusterGroup() {
@@ -212,7 +232,14 @@ export class HomePage {
     this.stops.forEach(stop => {
       let dist: any;
       if (this.allowLocation == true) {
-        dist = 'Distance from me: ' + (this.currentPosition.getLatLng().distanceTo([stop.lat, stop.lon])).toFixed(0) + 'meters <hr>';
+        let meters = this.currentPosition.getLatLng().distanceTo([stop.lat, stop.lon]);
+        dist = '';
+        if (meters > 1000) {
+          dist += (meters / 1000).toFixed(0) + ' Kms';
+        } else {
+          dist += meters.toFixed(0) + ' meters';
+        }
+        dist += ' from me<hr>';
       } else {
         dist = '';
       }
