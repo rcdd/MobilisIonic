@@ -113,4 +113,12 @@ page-home {
         background: white;
         opacity: 0.1px;
     }
+
+    // css to customize Leaflet pop-up styles
+    .custom .leaflet-popup-tip,
+    .custom .leaflet-popup-content-wrapper {
+        font-size: 12px;
+        background: darkgrey;
+        color: #ffffff;
+    }
 }

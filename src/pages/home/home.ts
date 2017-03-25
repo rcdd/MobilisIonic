@@ -11,6 +11,7 @@ import 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet-easybutton';
 import 'leaflet-search';
+import 'leaflet-knn';
 
 declare var L: any;
 
@@ -24,6 +25,9 @@ export class HomePage {
   private map: any;
   private currentPosition: any;
   public debug: any;
+  private markers: any;
+  private controlSearch: any;
+  private allowLocation = false;
 
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
@@ -42,17 +46,14 @@ export class HomePage {
 
 
     //Cenas de Localização
-    var self = this;
+    let self = this;
     this.map.on('locationerror', function (e) {
+      self.allowLocation = false;
       alert('User denied localization. For better performance, please allow your location.');
     });
 
-    let watch = Geolocation.watchPosition();
-    watch.subscribe((data) => {
-      self.currentLocation(data.coords);
-      //self.debug = self.currentPosition;
-      //console.dir(data);
-    });
+    this.getCurrentLocation();
+
 
   }
 
@@ -72,6 +73,7 @@ export class HomePage {
     this.currentPosition = L.marker(this.map.getCenter()).addTo(this.map);
     //L.circle(this.map.getCenter()).addTo(self.map);
 
+    // CONTROLS OF THE MAP
     var self = this;
     L.easyButton({
       states: [
@@ -84,7 +86,7 @@ export class HomePage {
             control._map.on('locationfound', function (e) {
               this.setView(e.latlng, 17);
               let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accurancy };
-              self.currentLocation(data);
+              self.updateCurrentLocation(data);
               control.state('loaded');
             });
             control._map.on('locationerror', function () {
@@ -103,7 +105,7 @@ export class HomePage {
             control._map.on('locationfound', function (e) {
               this.setView(e.latlng, 17);
               let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accurancy };
-              self.currentLocation(data);
+              self.updateCurrentLocation(data);
               control.state('loaded');
             });
             control._map.on('locationerror', function () {
@@ -120,7 +122,7 @@ export class HomePage {
             control._map.on('locationfound', function (e) {
               this.setView(e.latlng, 17);
               let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accurancy };
-              self.currentLocation(data);
+              self.updateCurrentLocation(data);
               control.state('loaded');
             });
             control._map.on('locationerror', function () {
@@ -133,8 +135,23 @@ export class HomePage {
     }).addTo(this.map);
 
     L.easyButton('icon ion-pinpoint', function () {
-      self.map.panTo(new L.LatLng(39.7460465, -8.8059954), 11);
+
+      self.map.fitBounds(self.markers.getBounds());
+      //self.map.panTo(new L.LatLng(39.7460465, -8.8059954), 11);
     }).addTo(this.map);
+
+
+    self.controlSearch = new L.Control.Search({
+      container: 'findbox',
+      position: 'topleft',
+      placeholder: 'Search...:)',
+      layer: this.markers,
+      initial: false,
+      zoom: 20,
+      marker: false
+    });
+    console.dir(self.controlSearch);
+    this.map.addControl(self.controlSearch);
 
   }
 
@@ -143,32 +160,8 @@ export class HomePage {
     return this.http.get(`http://194.210.216.191/otp/routers/default/index/stops`)
       .map((res: Response) => res.json()).subscribe(a => {
         this.stops = a;
-
-
-        let markers = L.markerClusterGroup();
-
-        var controlSearch = new L.Control.Search({
-          container: 'findbox',
-          position: 'topleft',
-          placeholder: 'Search...:)',
-          layer: markers,
-          initial: false,
-          zoom: 20,
-          marker: false
-        });
-
-        this.stops.forEach(stop => {
-          markers.addLayer(new L.marker([stop.lat, stop.lon], { icon: this.iconBus, title: stop.name })
-            .bindPopup(stop.name)
-            .on('click', function (e) {
-              this.openPopup();
-            }));
-        });
-
-        this.map.addLayer(markers);
-        this.map.fitBounds(markers.getBounds());
-        this.map.addControl(controlSearch);
-
+        this.updateClusterGroup();
+        this.getCurrentLocation();
       });
   }
 
@@ -187,11 +180,69 @@ export class HomePage {
     toast.present();
   }
 
-  currentLocation(data): void {
+  getCurrentLocation() {
+    let self = this;
+    let watch = Geolocation.watchPosition();
+    watch.subscribe((data) => {
+      self.allowLocation = true;
+      /*console.log('Distances:');
+      console.dir(self.currentPosition.getLatLng());
+      console.dir(data.coords);*/
+      if (self.currentPosition.getLatLng().lat != data.coords.latitude ||
+        self.currentPosition.getLatLng().lng != data.coords.longitude) {
+        self.updateCurrentLocation(data.coords);
+        self.updateClusterGroup();
+      }
+      //self.debug = self.currentPosition;
+      //console.dir(data);
+    });
+  }
+
+  updateCurrentLocation(data): void {
     var radius = (data.accuracy / 2).toFixed(1);
     var currentPosition = [data.latitude, data.longitude];
     this.currentPosition.setLatLng(currentPosition);
     this.currentPosition.bindPopup("You are within " + radius + " meters from this point");
+    // var nearest = leafletKnn(this.markers).nearest(L.latLng(38, -78), 5);
   }
 
+  updateClusterGroup() {
+    this.markers = L.markerClusterGroup();
+
+    this.stops.forEach(stop => {
+      let dist: any;
+      if (this.allowLocation == true) {
+        dist = 'Distance from me: ' + (this.currentPosition.getLatLng().distanceTo([stop.lat, stop.lon])).toFixed(0) + 'meters <hr>';
+      } else {
+        dist = '';
+      }
+
+      let popUp = '<h6>' + stop.name + '</h6><hr>' + dist + 'Linhas:<br/>Mob1<br>Mob3';
+      let popUpOptions =
+        {
+          'className': 'custom'
+        }
+      this.markers.addLayer(new L.marker([stop.lat, stop.lon], { icon: this.iconBus, title: stop.name })
+        .bindPopup(popUp, popUpOptions)
+        .on('click', function (e) {
+          this.openPopup();
+        }));
+    });
+
+    console.log("Populate Search Box");
+    this.map.removeControl(this.controlSearch);
+    this.controlSearch = new L.Control.Search({
+      container: 'findbox',
+      position: 'topleft',
+      placeholder: 'Search...:)',
+      layer: this.markers,
+      initial: false,
+      zoom: 20,
+      marker: false
+    });
+
+    this.map.addControl(this.controlSearch);
+    this.map.addLayer(this.markers);
+
+  }
 }
