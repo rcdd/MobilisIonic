@@ -6,6 +6,7 @@ import { Http, Response } from '@angular/http';
 
 import { Geolocation } from 'ionic-native';
 
+
 import 'rxjs/add/operator/map';
 import 'leaflet';
 import 'leaflet.markercluster';
@@ -104,7 +105,7 @@ export class HomePage {
       states: [
         {
           stateName: 'unloaded',
-          icon: 'fa-location-arrow',
+          icon: 'fa fa-map-marker',
           title: 'load image',
           onClick: function (control) {
             control.state("loading");
@@ -159,10 +160,28 @@ export class HomePage {
       ]
     }).addTo(this.map);
 
-    L.easyButton('icon ion-pinpoint', function () {
+    L.easyButton('fa fa-map', function () {
 
       self.map.fitBounds(self.markers.getBounds());
       //self.map.panTo(new L.LatLng(39.7460465, -8.8059954), 11);
+    }).addTo(this.map);
+
+    L.easyButton('fa fa-bus', function () {
+      let min: any;
+      let minMetrs: number = Number.MAX_SAFE_INTEGER;
+      if (self.allowLocation == true) {
+        self.stops.forEach(stop => {
+          if (stop.meters <= minMetrs) {
+            minMetrs = stop.meters;
+            min = stop;
+          }
+        });
+        self.map.setView([min.lat, min.lon], 17);
+        self.showToast(min.message + " from you!", 3000);
+      } else {
+        self.showToast("We can't calculate your position", 3000);
+      }
+
     }).addTo(this.map);
 
 
@@ -207,18 +226,23 @@ export class HomePage {
   getCurrentLocation() {
     let self = this;
     let watch = Geolocation.watchPosition();
-    watch.subscribe((data) => {
-      self.allowLocation = true;
-      /*console.log('Distances:');
-      console.dir(self.currentPosition.getLatLng());
-      console.dir(data.coords);*/
-      if (self.currentPosition.getLatLng().lat != data.coords.latitude ||
-        self.currentPosition.getLatLng().lng != data.coords.longitude) {
-        self.updateCurrentLocation(data.coords);
-        self.updateClusterGroup();
+    watch.subscribe((data: any) => {
+      console.dir(data);
+      if (data.code != 1) {
+        self.allowLocation = true;
+        /*console.log('Distances:');
+        console.dir(self.currentPosition.getLatLng());
+        console.dir(data.coords);*/
+        if (self.currentPosition.getLatLng().lat != data.coords.latitude ||
+          self.currentPosition.getLatLng().lng != data.coords.longitude) {
+          self.updateCurrentLocation(data.coords);
+          self.updateClusterGroup();
+        }
+        //self.debug = self.currentPosition;
+        //console.dir(data);
+      } else {
+        this.allowLocation = false;
       }
-      //self.debug = self.currentPosition;
-      //console.dir(data);
     });
   }
 
@@ -237,13 +261,14 @@ export class HomePage {
     this.stops.forEach(stop => {
       let dist: any;
       if (this.allowLocation == true) {
-        let meters = this.currentPosition.getLatLng().distanceTo([stop.lat, stop.lon]);
+        stop.meters = this.currentPosition.getLatLng().distanceTo([stop.lat, stop.lon]);
         dist = '';
-        if (meters > 1000) {
-          dist += (meters / 1000).toFixed(0) + ' Kms';
+        if (stop.meters > 1000) {
+          dist += (stop.meters / 1000).toFixed(0) + ' Kms';
         } else {
-          dist += meters.toFixed(0) + ' meters';
+          dist += stop.meters.toFixed(0) + ' meters';
         }
+        stop.message = dist;
         dist += ' from me<hr>';
       } else {
         dist = '';
@@ -275,6 +300,5 @@ export class HomePage {
 
     this.map.addControl(this.controlSearch);
     this.map.addLayer(this.markers);
-
   }
 }
