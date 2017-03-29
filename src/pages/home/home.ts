@@ -72,21 +72,26 @@ export class HomePage {
       cacheMaxAge: (24 * 3600000), // 24h
     });
 
+    /*
+        // Listen to cache hits and misses and spam the console
+        this.tiles.on('tilecachehit', function (ev) {
+          console.log('Cache hit: ', ev.url);
+        });
+        this.tiles.on('tilecachemiss', function (ev) {
+          console.log('Cache miss: ', ev.url);
+        });
+        this.tiles.on('tilecacheerror', function (ev) {
+          console.log('Cache error: ', ev.tile, ev.error);
+        });
+    */
+
+
     this.map = L.map('mapid')
       .addLayer(tiles)
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });
 
-    /*// Listen to cache hits and misses and spam the console
-    tiles.on('tilecachehit', function (ev) {
-      console.log('Cache hit: ', ev.url);
-    });
-    tiles.on('tilecachemiss', function (ev) {
-      console.log('Cache miss: ', ev.url);
-    });
-    tiles.on('tilecacheerror', function (ev) {
-      console.log('Cache error: ', ev.tile, ev.error);
-    });*/
+
 
 
     this.currentPosition = L.marker(this.map.getCenter()).addTo(this.map);
@@ -256,7 +261,7 @@ export class HomePage {
         }));
     });
 
-    console.log("Populate Search Box");
+    //console.log("Populate Search Box");
     this.map.removeControl(this.controlSearch);
     this.controlSearch = new L.Control.Search({
       container: 'findbox',
