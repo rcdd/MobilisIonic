@@ -227,7 +227,7 @@ export class HomePage {
     let self = this;
     let watch = Geolocation.watchPosition();
     watch.subscribe((data: any) => {
-      console.dir(data);
+      //console.dir(data);
       if (data.code != 1) {
         self.allowLocation = true;
         /*console.log('Distances:');
@@ -252,7 +252,6 @@ export class HomePage {
     this.currentPosition.setLatLng(currentPosition);
     this.currentPosition.bindPopup("You are within " + radius + " meters from this point");
     this.currentPositionCircle.setLatLng(currentPosition);
-
   }
 
   updateClusterGroup() {
