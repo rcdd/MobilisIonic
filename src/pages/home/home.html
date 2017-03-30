@@ -15,4 +15,12 @@
   <div id="findbox"></div>
   <div id="debug" *ngIf="debug">{{debug}}</div>
   <div id="mapid"></div>
+
+  <ion-fab top right edge>
+    <button ion-fab mini><ion-icon name="add"></ion-icon></button>
+    <ion-fab-list>
+      <button ion-fab id="filter" (click)="showBusLines()"><ion-icon name="list"></ion-icon></button>
+    </ion-fab-list>
+  </ion-fab>
+
 </ion-content>

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { NavController, ToastController } from 'ionic-angular';
+import { AlertController, NavController, ToastController } from 'ionic-angular';
 
 import { Http, Response } from '@angular/http';
 
@@ -37,7 +37,7 @@ export class HomePage {
   });
 
 
-  constructor(public navCtrl: NavController, public toastCtrl: ToastController, public http: Http) {
+  constructor(public navCtrl: NavController, public toastCtrl: ToastController, public http: Http, public alertCtrl: AlertController) {
   }
 
   ngOnInit(): void {
@@ -299,5 +299,108 @@ export class HomePage {
 
     this.map.addControl(this.controlSearch);
     this.map.addLayer(this.markers);
+  }
+
+  showBusLines() {
+
+
+    let alert = this.alertCtrl.create({
+      title: 'Filter Bus Lines',
+      inputs: [
+        {
+          name: 'username',
+          label: 'Line1',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        },
+        {
+          name: 'password',
+          label: 'Line2',
+          type: "checkbox",
+          value: "true",
+          checked: false
+        }
+      ],
+      buttons: [{
+        text: 'Ok',
+        handler: () => {
+          alert.dismiss();
+          return false;
+        }
+      },
+      {
+        text: 'Cancel',
+        role: 'cancel',
+        handler: data => {
+          console.log('Cancel clicked');
+        }
+      }]
+    });
+
+    alert.present();
   }
 }
