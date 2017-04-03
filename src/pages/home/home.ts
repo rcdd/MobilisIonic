@@ -6,6 +6,7 @@ import { Http, Response } from '@angular/http';
 
 import { Geolocation } from 'ionic-native';
 
+// import { busLines } from 'busLines';
 
 import 'rxjs/add/operator/map';
 import 'leaflet';
@@ -23,6 +24,7 @@ declare var L: any;
 export class HomePage {
 
   private stops: any;
+  private routes: any;
   private map: any;
   private currentPosition: any;
   private currentPositionCircle: any;
@@ -45,6 +47,7 @@ export class HomePage {
 
     this.initMap();
     this.getStopsStations();
+    this.getBusLines();
 
 
     //Cenas de Localização
@@ -176,7 +179,22 @@ export class HomePage {
             min = stop;
           }
         });
-        self.map.setView([min.lat, min.lon], 17);
+        self.map.setView([min.lat, min.lon], 19);
+        self.markers.eachLayer(function (layer) {
+          if (layer.options.id == min.id) {
+            // self.markers.getVisibleParent(layer);
+            let popUpOptions =
+              {
+                'className': 'custom'
+              }
+            L.popup(popUpOptions)
+              .setLatLng(layer.getLatLng())
+              .setContent(layer._popup._content)
+              .openOn(self.map);
+            console.log(layer);
+          }
+        });
+
         self.showToast(min.message + " from you!", 3000);
       } else {
         self.showToast("We can't calculate your position", 3000);
@@ -189,7 +207,7 @@ export class HomePage {
       container: 'findbox',
       position: 'topleft',
       placeholder: 'Search...:)',
-      layer: this.markers,
+      layer: this.stops,
       initial: false,
       zoom: 20,
       marker: false
@@ -205,6 +223,16 @@ export class HomePage {
         this.stops = a;
         this.updateClusterGroup();
         this.getCurrentLocation();
+      });
+  }
+
+  getBusLines() {
+    return this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`)
+      .map((res: Response) => res.json()).subscribe(a => {
+        this.routes = a;
+        console.dir(this.routes);
+        //this.updateClusterGroup();
+        //this.getCurrentLocation();
       });
   }
 
@@ -255,7 +283,7 @@ export class HomePage {
   }
 
   updateClusterGroup() {
-    this.markers = L.markerClusterGroup();
+    this.markers = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
 
     this.stops.forEach(stop => {
       let dist: any;
@@ -278,7 +306,7 @@ export class HomePage {
         {
           'className': 'custom'
         }
-      this.markers.addLayer(new L.marker([stop.lat, stop.lon], { icon: this.iconBus, title: stop.name })
+      this.markers.addLayer(new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, title: stop.name })
         .bindPopup(popUp, popUpOptions)
         .on('click', function (e) {
           this.openPopup();
@@ -290,7 +318,7 @@ export class HomePage {
     this.controlSearch = new L.Control.Search({
       container: 'findbox',
       position: 'topleft',
-      placeholder: 'Search...:)',
+      placeholder: 'Search...',
       layer: this.markers,
       initial: false,
       zoom: 20,
@@ -302,89 +330,15 @@ export class HomePage {
   }
 
   showBusLines() {
-
-
+    let route: any = [];
+    //console.dir(this.routes);
+    this.routes.forEach(rota => {
+      route.push({ name: rota.id, label: rota.longName, type: "checkbox", value: "true", checked: false });
+    });
+    route.sort(function (a, b) { return (a.longName > b.longName) ? 1 : ((b.longName > a.longName) ? -1 : 0); });
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
-      inputs: [
-        {
-          name: 'username',
-          label: 'Line1',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        },
-        {
-          name: 'password',
-          label: 'Line2',
-          type: "checkbox",
-          value: "true",
-          checked: false
-        }
-      ],
+      inputs: route,
       buttons: [{
         text: 'Ok',
         handler: () => {
