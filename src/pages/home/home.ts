@@ -32,6 +32,12 @@ export class HomePage {
   private markers: any;
   private controlSearch: any;
   private allowLocation = false;
+  private CheckboxFilterLines: any;
+  private LinesStations: any = [];
+  // TESTE
+  private First: boolean = true;
+  private First2: boolean = true;
+  private CheckBoxRoutes: any = [];
 
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
@@ -236,6 +242,19 @@ export class HomePage {
       });
   }
 
+  getStationsFromBusLines() {
+    let i: any = 0;
+    this.routes.forEach(route => {
+      this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + ":0:01")
+        .map((res: Response) => res.json()).subscribe(a => {
+          this.LinesStations.push({ id: route.id, selected: true, stops: a.stops });
+          i++;
+        });
+    });
+    console.dir(this.LinesStations);
+  }
+
+
 
   showToast(msg: string, ms: number): void {
     let toast = this.toastCtrl.create({
@@ -330,18 +349,29 @@ export class HomePage {
   }
 
   showBusLines() {
-    let route: any = [];
+    // check box List
+    if (this.First2) {
+      this.routes.forEach(rota => {
+        this.CheckBoxRoutes.push({ id: rota.id, name: rota.id, label: rota.longName, type: "checkbox", value: rota.id, checked: true });
+      });
+      this.First2 = false;
+    }
     //console.dir(this.routes);
-    this.routes.forEach(rota => {
-      route.push({ name: rota.id, label: rota.longName, type: "checkbox", value: "true", checked: false });
-    });
-    route.sort(function (a, b) { return (a.longName > b.longName) ? 1 : ((b.longName > a.longName) ? -1 : 0); });
+   // this.CheckBoxRoutes.sort(function (a, b) { return (a.longName > b.longName) ? 1 : ((b.longName > a.longName) ? -1 : 0); });
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
-      inputs: route,
+      inputs: this.CheckBoxRoutes,
       buttons: [{
         text: 'Ok',
-        handler: () => {
+        handler: data => {
+          this.CheckboxFilterLines = data;
+          //updateBusLines();
+          //Encontrar forma de chamar isto ngOnInit
+          if (this.First) {
+            this.getStationsFromBusLines();
+            this.First = false;
+          }
+          this.updateMarkersStops();
           alert.dismiss();
           return false;
         }
@@ -354,7 +384,26 @@ export class HomePage {
         }
       }]
     });
-
     alert.present();
+  }
+
+  updateMarkersStops() {
+    this.LinesStations.forEach(line => {
+      if (this.CheckboxFilterLines.includes(line.id)) {
+        console.log("Eu estou selecionado", line);
+      } else {
+        line.checked = false;
+      }
+    });
+
+    //atualiza checkboxList Values
+    this.CheckBoxRoutes.forEach(checkBox =>{
+      if(!this.CheckboxFilterLines.includes(checkBox.id)){
+        checkBox.checked = false;
+      }else {
+        checkBox.checked = true;
+      }
+    });
+    console.dir(this.LinesStations);
   }
 }
