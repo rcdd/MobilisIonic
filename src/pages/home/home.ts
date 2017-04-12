@@ -14,6 +14,7 @@ import 'leaflet.markercluster';
 import 'leaflet-easybutton';
 import 'leaflet-search';
 import 'leaflet-knn';
+import 'leaflet.featuregroup.subgroup'
 
 declare var L: any;
 
@@ -29,14 +30,10 @@ export class HomePage {
   private currentPosition: any;
   private currentPositionCircle: any;
   public debug: any;
-  private markers: any;
+  private markersCluster: any;
+  private markers = {};
   private controlSearch: any;
   private allowLocation = false;
-  private CheckboxFilterLines: any;
-  private LinesStations: any = [];
-  // TESTE
-  private First: boolean = true;
-  private First2: boolean = true;
   private CheckBoxRoutes: any = [];
 
   private iconBus = L.icon({
@@ -52,6 +49,7 @@ export class HomePage {
 
 
     this.initMap();
+    this.getCurrentLocation();
     this.getStopsStations();
     this.getBusLines();
 
@@ -63,7 +61,6 @@ export class HomePage {
       alert('User denied localization. For better performance, please allow your location.');
     });
 
-    this.getCurrentLocation();
 
 
   }
@@ -101,8 +98,7 @@ export class HomePage {
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });
 
-
-
+    this.markersCluster = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
 
     this.currentPosition = L.marker(this.map.getCenter()).addTo(this.map);
     this.currentPositionCircle = L.circle(this.map.getCenter()).addTo(this.map);
@@ -171,7 +167,7 @@ export class HomePage {
 
     L.easyButton('fa fa-map', function () {
 
-      self.map.fitBounds(self.markers.getBounds());
+      self.map.fitBounds(self.markersCluster.getBounds());
       //self.map.panTo(new L.LatLng(39.7460465, -8.8059954), 11);
     }).addTo(this.map);
 
@@ -186,9 +182,9 @@ export class HomePage {
           }
         });
         self.map.setView([min.lat, min.lon], 19);
-        self.markers.eachLayer(function (layer) {
+        self.markersCluster.eachLayer(function (layer) {
           if (layer.options.id == min.id) {
-            // self.markers.getVisibleParent(layer);
+            // self.markersCluster.getVisibleParent(layer);
             let popUpOptions =
               {
                 'className': 'custom'
@@ -213,7 +209,7 @@ export class HomePage {
       container: 'findbox',
       position: 'topleft',
       placeholder: 'Search...:)',
-      layer: this.stops,
+      layer: this.markersCluster,
       initial: false,
       zoom: 20,
       marker: false
@@ -222,12 +218,12 @@ export class HomePage {
 
   }
 
-
+  // OLD VERSION
   getStopsStations() {
     return this.http.get(`http://194.210.216.191/otp/routers/default/index/stops`)
       .map((res: Response) => res.json()).subscribe(a => {
         this.stops = a;
-        this.updateClusterGroup();
+        //this.updateClusterGroup();
         this.getCurrentLocation();
       });
   }
@@ -236,22 +232,54 @@ export class HomePage {
     return this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`)
       .map((res: Response) => res.json()).subscribe(a => {
         this.routes = a;
+        console.log("BusLines:")
         console.dir(this.routes);
+        this.getStationsFromBusLines();
+        this.routes.forEach(rota => {
+          this.CheckBoxRoutes.push({ id: rota.id, name: rota.id, label: rota.longName, type: "checkbox", value: rota.id, checked: false });
+        });
+        // this.CheckBoxRoutes.sort(function (a, b) { return (a.longName > b.longName) ? 1 : ((b.longName > a.longName) ? -1 : 0); });
         //this.updateClusterGroup();
         //this.getCurrentLocation();
       });
   }
 
   getStationsFromBusLines() {
-    let i: any = 0;
+
     this.routes.forEach(route => {
-      this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + ":0:01")
-        .map((res: Response) => res.json()).subscribe(a => {
-          this.LinesStations.push({ id: route.id, selected: true, stops: a.stops });
-          i++;
+      this.markers[route.id] = L.featureGroup.subGroup(this.markersCluster);
+      this.http.get("http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops")
+        //this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + ":0:01")
+        .map((res: Response) => res.json()).subscribe(stops => {
+          // this.LinesStations.push({ id: route.id, selected: true, stops: a.stops });
+          //i++;
+          stops.forEach(stop => {
+            let popUp = '<h6>' + stop.name + '</h6><hr>' + 'Linha: ' + route.shortName + '<br>';
+            let popUpOptions =
+              {
+                'className': 'custom'
+              }
+            new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, title: stop.name })
+              .bindPopup(popUp, popUpOptions)
+              .on('click', function (e) {
+                this.openPopup();
+              })
+              .addTo(this.markers[route.id]);
+          });
+          //this.markers[route.id].addTo(this.map);
         });
     });
-    console.dir(this.LinesStations);
+    this.markersCluster.addTo(this.map);
+    this.controlSearch = new L.Control.Search({
+      container: 'findbox',
+      position: 'topleft',
+      placeholder: 'Search...',
+      layer: this.markersCluster,
+      initial: false,
+      zoom: 20,
+      marker: false
+    });
+
   }
 
 
@@ -283,7 +311,7 @@ export class HomePage {
         if (self.currentPosition.getLatLng().lat != data.coords.latitude ||
           self.currentPosition.getLatLng().lng != data.coords.longitude) {
           self.updateCurrentLocation(data.coords);
-          self.updateClusterGroup();
+          //self.updateClusterGroup();
         }
         //self.debug = self.currentPosition;
         //console.dir(data);
@@ -300,11 +328,11 @@ export class HomePage {
     this.currentPosition.bindPopup("You are within " + radius + " meters from this point");
     this.currentPositionCircle.setLatLng(currentPosition);
   }
-
-  updateClusterGroup() {
-    this.markers = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
-
-    this.stops.forEach(stop => {
+  /*
+    updateClusterGroup(stop: any) {
+      /* this.markersCluster = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
+   
+       this.stops.forEach(stop => {
       let dist: any;
       if (this.allowLocation == true) {
         stop.meters = this.currentPosition.getLatLng().distanceTo([stop.lat, stop.lon]);
@@ -319,59 +347,54 @@ export class HomePage {
       } else {
         dist = '';
       }
-
+  
       let popUp = '<h6>' + stop.name + '</h6><hr>' + dist + 'Linhas:<br/>Mob1<br>Mob3';
       let popUpOptions =
         {
           'className': 'custom'
         }
-      this.markers.addLayer(new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, title: stop.name })
+      let marker = new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, title: stop.name })
         .bindPopup(popUp, popUpOptions)
         .on('click', function (e) {
           this.openPopup();
-        }));
-    });
-
-    //console.log("Populate Search Box");
-    this.map.removeControl(this.controlSearch);
-    this.controlSearch = new L.Control.Search({
-      container: 'findbox',
-      position: 'topleft',
-      placeholder: 'Search...',
-      layer: this.markers,
-      initial: false,
-      zoom: 20,
-      marker: false
-    });
-
-    this.map.addControl(this.controlSearch);
-    this.map.addLayer(this.markers);
-  }
+        });
+  
+      /*});
+  
+      //console.log("Populate Search Box");
+      this.map.removeControl(this.controlSearch);
+      this.controlSearch = new L.Control.Search({
+        container: 'findbox',
+        position: 'topleft',
+        placeholder: 'Search...',
+        layer: this.markersCluster,
+        initial: false,
+        zoom: 20,
+        marker: false
+      });
+  
+      this.map.addControl(this.controlSearch);
+      this.map.addLayer(this.markersCluster);
+      return marker;
+    }*/
 
   showBusLines() {
-    // check box List
-    if (this.First2) {
-      this.routes.forEach(rota => {
-        this.CheckBoxRoutes.push({ id: rota.id, name: rota.id, label: rota.longName, type: "checkbox", value: rota.id, checked: true });
-      });
-      this.First2 = false;
-    }
-    //console.dir(this.routes);
-   // this.CheckBoxRoutes.sort(function (a, b) { return (a.longName > b.longName) ? 1 : ((b.longName > a.longName) ? -1 : 0); });
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
       inputs: this.CheckBoxRoutes,
       buttons: [{
         text: 'Ok',
         handler: data => {
-          this.CheckboxFilterLines = data;
-          //updateBusLines();
-          //Encontrar forma de chamar isto ngOnInit
-          if (this.First) {
-            this.getStationsFromBusLines();
-            this.First = false;
+          for (let marker in this.markers) {
+            this.map.removeLayer(this.markers[marker]);
           }
-          this.updateMarkersStops();
+          data.forEach(line => {
+            this.map.addLayer(this.markers[line]);
+          });
+          this.CheckBoxRoutes.forEach(checkBox => {
+            data.includes(checkBox.id) ? checkBox.checked = true : checkBox.checked = false;
+          });
+
           alert.dismiss();
           return false;
         }
@@ -387,23 +410,23 @@ export class HomePage {
     alert.present();
   }
 
-  updateMarkersStops() {
-    this.LinesStations.forEach(line => {
-      if (this.CheckboxFilterLines.includes(line.id)) {
-        console.log("Eu estou selecionado", line);
-      } else {
-        line.checked = false;
-      }
-    });
-
-    //atualiza checkboxList Values
-    this.CheckBoxRoutes.forEach(checkBox =>{
-      if(!this.CheckboxFilterLines.includes(checkBox.id)){
-        checkBox.checked = false;
-      }else {
-        checkBox.checked = true;
-      }
-    });
-    console.dir(this.LinesStations);
-  }
+  /*  updatemarkersClusterStops() {
+      this.LinesStations.forEach(line => {
+        if (this.CheckboxFilterLines.includes(line.id)) {
+          console.log("Eu estou selecionado", line);
+        } else {
+          line.checked = false;
+        }
+      });
+  
+      //atualiza checkboxList Values
+      this.CheckBoxRoutes.forEach(checkBox => {
+        if (!this.CheckboxFilterLines.includes(checkBox.id)) {
+          checkBox.checked = false;
+        } else {
+          checkBox.checked = true;
+        }
+      });
+      console.dir(this.LinesStations);
+    }*/
 }
