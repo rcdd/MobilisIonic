@@ -6,7 +6,9 @@ import { Http, Response } from '@angular/http';
 
 import { Geolocation } from 'ionic-native';
 
-import { busLines } from './busLines';
+// import { busLines } from './busLines';
+import { DatabaseProvider } from '../../providers/database-provider';
+import { Platform } from 'ionic-angular';
 
 import 'rxjs/add/operator/map';
 import 'leaflet';
@@ -43,7 +45,13 @@ export class HomePage {
   });
 
 
-  constructor(public navCtrl: NavController, public toastCtrl: ToastController, public http: Http, public alertCtrl: AlertController) {
+  constructor(platform: Platform, public navCtrl: NavController, public toastCtrl: ToastController, public http: Http, public alertCtrl: AlertController, public db: DatabaseProvider) {
+    platform.ready().then(() => {
+      // Okay, so the platform is ready and our plugins are available.
+      // Here you can do any higher level native things you might need.
+
+      // ISTO FOI PARA TESTES!
+    });
   }
 
   ngOnInit(): void {
@@ -61,9 +69,6 @@ export class HomePage {
       self.allowLocation = false;
       alert('User denied localization. For better performance, please allow your location.');
     });
-
-
-
   }
 
   initMap(): void {
@@ -214,9 +219,35 @@ export class HomePage {
         //this.updateClusterGroup();
         this.getCurrentLocation();
       });
+    /*this.db.query("SELECT * FROM STOPS")
+      .then(res => {
+        this.stops = res;
+        this.getCurrentLocation();
+        console.log(this.stops);
+      })
+      .catch(err => {
+        console.log("Error: ", err);
+      });*/
   }
 
   getBusLines() {
+    // NEW WAY
+    /*this.db.query("SELECT * FROM BUSLINES")
+      .then(res => {
+        res.forEach(route => {
+          this.routes[route.id] = {};
+          this.routes[route.id].id = route.id;
+          this.routes[route.id].longName = route.longName;
+          this.routes[route.id].mode = route.mode;
+          this.routes[route.id].shortName = route.shortName;
+          this.CheckBoxRoutes.push({ id: this.routes[route.id], name: this.routes[route.id], label: this.routes[route.id].longName, type: "checkbox", value: this.routes[route.id], checked: false });
+          this.CheckBoxRoutes.sort(function (a, b) { return (a.name.longName > b.name.longName) ? 1 : ((b.name.longName > a.name.longName) ? -1 : 0); });
+        });
+        this.getStationsFromBusLines();
+      })
+      .catch(err => {
+        console.log("Error: ", err);
+      });*/
     return this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`)
       .map((res: Response) => res.json()).subscribe(a => {
         a.forEach(route => {
@@ -229,7 +260,6 @@ export class HomePage {
           this.CheckBoxRoutes.sort(function (a, b) { return (a.name.longName > b.name.longName) ? 1 : ((b.name.longName > a.name.longName) ? -1 : 0); });
         });
         this.getStationsFromBusLines();
-
       });
   }
 

@@ -3,7 +3,9 @@ import { Platform } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 
 import { TabsPage } from '../pages/tabs/tabs';
-
+import { DatabaseProvider } from '../providers/database-provider';
+import { Http } from '@angular/http';
+import 'rxjs/add/operator/map';
 
 @Component({
   templateUrl: 'app.html'
@@ -11,12 +13,114 @@ import { TabsPage } from '../pages/tabs/tabs';
 export class MyApp {
   rootPage = TabsPage;
 
-  constructor(platform: Platform) {
+  // Session storage
+  private stops: any;
+  private busLines: any;
+
+  constructor(platform: Platform,
+    public db: DatabaseProvider,
+    public http: Http) {
+
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       StatusBar.styleDefault();
       Splashscreen.hide();
+      this.db.init();
+      this.ngOnStart();
     });
   }
+
+  ngOnStart(): void {
+    // Só para testar se mesmo que não tenha tabelas tempo e consegue criar ao iniciar a aplicação
+   // this.queryDbDrop("STOPS");
+   // this.queryDbDrop("BUSLINES");
+    this.createStorageStops();
+    this.createStorageBusLines();
+    this.initData();
+  }
+
+  createStorageStops() {
+    this.db.query("CREATE TABLE IF NOT EXISTS STOPS (NAME TEXT, IDSTOP TEXT, LAT TEXT, LON TEXT)")
+      .then(res => {
+        console.log("Result: ", res);
+      })
+      .catch(err => {
+        console.log("Error: ", err);
+      });
+  }
+
+  createStorageBusLines() {
+    this.db.query("CREATE TABLE IF NOT EXISTS BUSLINES (AGENCYNAME TEXT, IDLINE TEXT, LONGNAME TEXT, MODE TEXT, SHORTNAME TEXT)")
+      .then(res => {
+        console.log("Result: ", res);
+      })
+      .catch(err => {
+        console.log("Error: ", err);
+      });
+  }
+
+  initData() {
+    // stops
+    this.http.get('http://194.210.216.191/otp/routers/default/index/stops').map(res => res.json()).subscribe(data => {
+      this.stops = data;
+      //console.dir(this.stops);
+      this.queryDbDelete("STOPS");
+      this.queryDbAddStops();
+    });
+    //busLines
+    this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`).map(res => res.json()).subscribe(data => {
+      this.busLines = data;
+      console.dir(this.busLines);
+      this.queryDbDelete("BUSLINES");
+      this.queryDbAddBusLines();
+    });
+  }
+
+  queryDbDrop(tableName: string) {
+    this.db.query("DROP TABLE " + tableName)
+      .then(res => {
+        console.log("Result: ", res);
+      })
+      .catch(err => {
+        console.log("Error: ", err);
+      });
+  }
+
+
+
+  queryDbAddStops() {
+    // Store STOPS
+    this.stops.forEach(stop => {
+      this.db.query("INSERT INTO STOPS (NAME, IDSTOP, LAT, LON) VALUES(?,?,?,?);", [stop.name, stop.id, stop.lat, stop.lon]).then(res => {
+        //console.dir(res);
+      })
+        .catch(err => {
+          console.log("Error: ", err);
+        });
+    });
+  }
+
+  queryDbAddBusLines() {
+    // Store BUSLINES
+    this.busLines.forEach(busLine => {
+      this.db.query("INSERT INTO BUSLINES (AGENCYNAME, IDLINE, LONGNAME, MODE, SHORTNAME) VALUES(?,?,?,?,?);", [busLine.agencyName, busLine.id, busLine.longName, busLine.mode, busLine.shortName]).then(res => {
+        //console.dir(res);
+      })
+        .catch(err => {
+          console.log("Error: ", err);
+        });
+    });
+  }
+
+  queryDbDelete(tableName: string) {
+    this.db.query("DELETE FROM " + tableName)
+      .then(res => {
+        console.log("Result: ", res);
+      })
+      .catch(err => {
+        console.log("Error: ", err);
+      });
+  }
+
 }
