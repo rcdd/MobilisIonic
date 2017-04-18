@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { AlertController, NavController, ToastController } from 'ionic-angular';
+import { AlertController, NavController, NavParams, ToastController } from 'ionic-angular';
 
 import { Http, Response } from '@angular/http';
 
@@ -9,6 +9,8 @@ import { Geolocation } from 'ionic-native';
 // import { busLines } from './busLines';
 import { DatabaseProvider } from '../../providers/database-provider';
 import { Platform } from 'ionic-angular';
+import { DataProvider } from '../../providers/data-provider';
+//import { Observable } from 'rxjs/Observable';
 
 import 'rxjs/add/operator/map';
 import 'leaflet';
@@ -39,28 +41,57 @@ export class HomePage {
   private allowLocation = false;
   private CheckBoxRoutes: any = [];
 
+  //other tests
+  public testStops: any;
+  public testBusLines: any;
+  private data: any;
+
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
     iconSize: [25, 25]
   });
 
 
-  constructor(platform: Platform, public navCtrl: NavController, public toastCtrl: ToastController, public http: Http, public alertCtrl: AlertController, public db: DatabaseProvider) {
+  constructor(platform: Platform, public navCtrl: NavController, private navParams: NavParams, public toastCtrl: ToastController, public http: Http, public alertCtrl: AlertController, public db: DatabaseProvider, public DataProvider: DataProvider) {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
 
       // ISTO FOI PARA TESTES!
+     
+        this.DataProvider.getStops().then(data => {
+          this.testStops = data;
+        });
+
+        this.DataProvider.getBusLines().then(data => {
+          this.testBusLines = data;
+        });
+
     });
   }
 
   ngOnInit(): void {
 
-
+    //this.db.init();
     this.initMap();
     this.getCurrentLocation();
     this.getStopsStations();
     this.getBusLines();
+
+    /*this.data = new Observable(observer => {
+      this.DataProvider.getStops().then(data => {
+        this.testStops = data
+        console.dir(this.testStops);
+        observer.next(true);
+      });
+      this.DataProvider.getBusLines().then(data => {
+        this.testBusLines = data
+        console.dir(this.testBusLines);
+        observer.next(true);
+      });
+    });*/
+
+
 
 
     //Cenas de Localização
@@ -219,11 +250,11 @@ export class HomePage {
         //this.updateClusterGroup();
         this.getCurrentLocation();
       });
-    /*this.db.query("SELECT * FROM STOPS")
+    /*return this.db.query("SELECT * FROM STOPS")
       .then(res => {
         this.stops = res;
         this.getCurrentLocation();
-        console.log(this.stops);
+        console.dir(this.stops);
       })
       .catch(err => {
         console.log("Error: ", err);
@@ -232,7 +263,7 @@ export class HomePage {
 
   getBusLines() {
     // NEW WAY
-    /*this.db.query("SELECT * FROM BUSLINES")
+    /*return this.db.query("SELECT * FROM BUSLINES")
       .then(res => {
         res.forEach(route => {
           this.routes[route.id] = {};
@@ -415,6 +446,9 @@ export class HomePage {
   }
 
   showBusLines() {
+    console.dir(this.testStops);
+    console.dir(this.testBusLines);
+
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
       inputs: this.CheckBoxRoutes,
@@ -425,7 +459,7 @@ export class HomePage {
           this.markers = [];
           data.forEach(line => {
             line.stops.forEach(stop => {
-              console.log(stop.id);
+              //console.log(stop.id);
               let existMarker: boolean = false;
               this.markers.forEach(marker => {
                 if (marker.id == stop.id) {

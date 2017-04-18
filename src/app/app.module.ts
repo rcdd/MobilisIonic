@@ -6,6 +6,8 @@ import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
 import { DatabaseProvider } from '../providers/database-provider';
+import { NavController } from 'ionic-angular';
+import { DataProvider } from '../providers/data-provider';
 
 @NgModule({
   declarations: [
@@ -27,6 +29,6 @@ import { DatabaseProvider } from '../providers/database-provider';
     TabsPage
   ],
   providers: [{ provide: ErrorHandler, useClass: IonicErrorHandler },
-   [DatabaseProvider]]
+   [DatabaseProvider,NavController,DataProvider]]
 })
 export class AppModule { }
