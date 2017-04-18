@@ -37,13 +37,23 @@ export class MyApp {
   ngOnInit(): void {
     // Só para testar se mesmo que não tenha tabelas tempo e consegue criar ao iniciar a aplicação
     //this.db.init();
-    //this.queryDbDrop("STOPS");
-    //this.queryDbDrop("BUSLINES");
+    this.queryDbDrop("STOPS");
+    this.queryDbDrop("BUSLINES");
     this.createStorageStops();
     this.createStorageBusLines();
     this.DataProvider;
     //console.dir(this.DataProvider.loadStops());
   }
+
+  queryDbDrop(tableName: string) {
+        this.db.query("DROP TABLE " + tableName)
+            .then(res => {
+                // console.log("Result: ", res);
+            })
+            .catch(err => {
+                console.log("Error: ", err);
+            });
+    }
 
   createStorageStops() {
     this.db.query("CREATE TABLE IF NOT EXISTS STOPS (NAME TEXT, IDSTOP TEXT, LAT TEXT, LON TEXT)")

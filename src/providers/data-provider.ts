@@ -18,10 +18,20 @@ export class DataProvider {
         this.initData();
     }
 
+    getStopsStorage() {
+        if (this.stops)
+            return this.stops;
+    }
+
+    getbusLinesStorage() {
+        if (this.busLines)
+            return this.busLines;
+    }
+
     getStops() {
-        if (this.stops) {
-            return Promise.resolve(this.stops);
-        }
+        /* if (this.stops) {
+             return Promise.resolve(this.stops);
+         }*/
 
         /*return new Promise(resolve => {
           this.http.get('http://194.210.216.191/otp/routers/default/index/stops')
@@ -31,9 +41,9 @@ export class DataProvider {
               resolve(this.stops);
             });
         });*/
-        return new Promise(resolve => {
-            this.db.query("SELECT * FROM STOPS")
+        return this.db.query("SELECT * FROM STOPS")
             .then(res => {
+                this.stops=[];
                 this.stops = res;
                 console.dir(this.stops);
                 return this.stops;
@@ -41,17 +51,17 @@ export class DataProvider {
             .catch(err => {
                 console.log("Error: ", err);
             });
-        });
+
     }
 
     getBusLines() {
-        if (this.busLines) {
-            return Promise.resolve(this.busLines);
-        }
+        /* if (this.busLines) {
+             return Promise.resolve(this.busLines);
+         }*/
 
-        return new Promise(resolve => {
-            this.db.query("SELECT * FROM BUSLINES")
+        return this.db.query("SELECT * FROM BUSLINES")
             .then(res => {
+                this.busLines=[];
                 this.busLines = res;
                 console.dir(this.busLines);
                 return this.busLines;
@@ -59,7 +69,7 @@ export class DataProvider {
             .catch(err => {
                 console.log("Error: ", err);
             });
-        });
+
     }
 
     initData() {

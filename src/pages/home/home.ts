@@ -58,16 +58,28 @@ export class HomePage {
       // Here you can do any higher level native things you might need.
 
       // ISTO FOI PARA TESTES!
-     
-        this.DataProvider.getStops().then(data => {
-          this.testStops = data;
-        });
 
-        this.DataProvider.getBusLines().then(data => {
-          this.testBusLines = data;
-        });
+      /*this.DataProvider.getStops().then(data => {
+        this.testStops = data;
+      });
+
+      this.DataProvider.getBusLines().then(data => {
+        this.testBusLines = data;
+      });*/
 
     });
+  }
+
+  ionViewDidLoad() {
+    this.DataProvider.getStops().then(data => {
+        this.testStops = data;
+      });
+
+      this.DataProvider.getBusLines().then(data => {
+        this.testBusLines = data;
+      });
+      console.dir(this.testBusLines);
+      console.dir(this.testStops);
   }
 
   ngOnInit(): void {
@@ -446,6 +458,14 @@ export class HomePage {
   }
 
   showBusLines() {
+
+    /*this.DataProvider.getStops().then(res => {
+      this.testStops = res;
+    });
+    this.DataProvider.getBusLines().then(res => {
+      this.testBusLines = res;
+    });*/
+
     console.dir(this.testStops);
     console.dir(this.testBusLines);
 
