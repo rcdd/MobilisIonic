@@ -72,14 +72,14 @@ export class HomePage {
 
   ionViewDidLoad() {
     this.DataProvider.getStops().then(data => {
-        this.testStops = data;
-      });
-
-      this.DataProvider.getBusLines().then(data => {
-        this.testBusLines = data;
-      });
-      console.dir(this.testBusLines);
+      this.testStops = data;
       console.dir(this.testStops);
+    });
+
+    this.DataProvider.getBusLines().then(data => {
+      this.testBusLines = data;
+      console.dir(this.testBusLines);
+    });
   }
 
   ngOnInit(): void {
@@ -461,13 +461,12 @@ export class HomePage {
 
     /*this.DataProvider.getStops().then(res => {
       this.testStops = res;
+      console.dir(this.testStops);
     });
     this.DataProvider.getBusLines().then(res => {
       this.testBusLines = res;
+      console.dir(this.testBusLines);
     });*/
-
-    console.dir(this.testStops);
-    console.dir(this.testBusLines);
 
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
@@ -478,26 +477,34 @@ export class HomePage {
           console.dir(data);
           this.markers = [];
           data.forEach(line => {
-            line.stops.forEach(stop => {
-              //console.log(stop.id);
-              let existMarker: boolean = false;
-              this.markers.forEach(marker => {
-                if (marker.id == stop.id) {
-                  //console.log('Im old', marker);
-                  marker.lines.push(line.shortName);
-                  existMarker = true;
-                }
-              });
-              if (existMarker == false) {
-                // console.log('Im new', stop);
-                stop.lines = [line.shortName];
-                this.markers.push(stop);
-              }
+            this.DataProvider.getStopsFromBusLine(line.id).then(datax => {
+              console.dir(datax.rows);
 
+              if (datax.rows.length > 0) {
+                for (var i = 0; i < datax.rows.length; i++) {
+                  let item = datax.rows.item(i);
+                  //console.log(item);
+
+                  //console.log(stop.id);
+                  let existMarker: boolean = false;
+                  this.markers.forEach(marker => {
+                    if (marker.id == item.id) {
+                      //console.log('Im old', marker);
+                      marker.lines.push(line.shortName);
+                      existMarker = true;
+                    }
+                  });
+                  if (existMarker == false) {
+                    // console.log('Im new', stop);
+                    item.lines = [line.shortName];
+                    this.markers.push(item);
+                  }
+                }
+              }
             });
           });
-          //console.dir(this.markers);
-
+          
+          console.dir(this.markers);
           this.updateClusterGroup();
 
           this.CheckBoxRoutes.forEach(checkBox => {
