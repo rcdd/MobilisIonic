@@ -8,7 +8,6 @@ import { Geolocation } from 'ionic-native';
 
 // import { busLines } from './busLines';
 import { DatabaseProvider } from '../../providers/database-provider';
-import { Platform } from 'ionic-angular';
 import { DataProvider } from '../../providers/data-provider';
 //import { Observable } from 'rxjs/Observable';
 
@@ -40,11 +39,12 @@ export class HomePage {
   private controlSearch: any;
   private allowLocation = false;
   private CheckBoxRoutes: any = [];
+  public loading: number = 0;
 
   //other tests
   public testStops: any;
   public testBusLines: any;
-  private data: any;
+  //private data: any;
 
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
@@ -52,65 +52,35 @@ export class HomePage {
   });
 
 
-  constructor(platform: Platform, public navCtrl: NavController, private navParams: NavParams, public toastCtrl: ToastController, public http: Http, public alertCtrl: AlertController, public db: DatabaseProvider, public DataProvider: DataProvider) {
-    platform.ready().then(() => {
-      // Okay, so the platform is ready and our plugins are available.
-      // Here you can do any higher level native things you might need.
-
-      // ISTO FOI PARA TESTES!
-
-      /*this.DataProvider.getStops().then(data => {
-        this.testStops = data;
-      });
-
-      this.DataProvider.getBusLines().then(data => {
-        this.testBusLines = data;
-      });*/
-
-    });
+  constructor(public navCtrl: NavController, private navParams: NavParams,
+    public toastCtrl: ToastController, public http: Http,
+    public alertCtrl: AlertController, public db: DatabaseProvider,
+    public dataProvider: DataProvider
+  ) {
   }
 
   ionViewDidLoad() {
-    this.DataProvider.getStops().then(data => {
-      this.testStops = data;
-      console.dir(this.testStops);
-    });
 
-    this.DataProvider.getBusLines().then(data => {
-      this.testBusLines = data;
-      console.dir(this.testBusLines);
-    });
   }
+  ngOnInit() {
+    this.dataProvider.getDataFromServer().then(() => {
+      console.log("Init cenas");
+      this.stops = this.dataProvider.stops;
+      console.log("imported stops:", this.dataProvider.stops);
+      this.initMap();
+      this.getCurrentLocation();
+      //this.getStopsStations();
+      //this.getBusLines();
 
-  ngOnInit(): void {
 
-    //this.db.init();
-    this.initMap();
-    this.getCurrentLocation();
-    this.getStopsStations();
-    this.getBusLines();
 
-    /*this.data = new Observable(observer => {
-      this.DataProvider.getStops().then(data => {
-        this.testStops = data
-        console.dir(this.testStops);
-        observer.next(true);
+
+      //Cenas de Localização
+      let self = this;
+      this.map.on('locationerror', function (e) {
+        self.allowLocation = false;
+        alert('User denied localization. For better performance, please allow your location.');
       });
-      this.DataProvider.getBusLines().then(data => {
-        this.testBusLines = data
-        console.dir(this.testBusLines);
-        observer.next(true);
-      });
-    });*/
-
-
-
-
-    //Cenas de Localização
-    let self = this;
-    this.map.on('locationerror', function (e) {
-      self.allowLocation = false;
-      alert('User denied localization. For better performance, please allow your location.');
     });
   }
 
@@ -254,6 +224,18 @@ export class HomePage {
 
   }
 
+  async populateCheckBoxs() {
+    console.log("populate", this.dataProvider.stops);
+    await this.dataProvider.getStops().then((stops) => {
+      stops.forEach(route => { // PORQUE NAO ENTRA AQUI????? BAH :(
+        console.log("route: ", route);
+        this.CheckBoxRoutes.push({ id: this.routes[route.id], name: this.routes[route.id], label: this.routes[route.id].longName, type: "checkbox", value: this.routes[route.id], checked: false });
+        this.CheckBoxRoutes.sort(function (a, b) { return (a.name.longName > b.name.longName) ? 1 : ((b.name.longName > a.name.longName) ? -1 : 0); });
+      });
+    });
+
+  }
+
   // OLD VERSION
   getStopsStations() {
     return this.http.get(`http://194.210.216.191/otp/routers/default/index/stops`)
@@ -377,8 +359,8 @@ export class HomePage {
     let self = this;
     let watch = Geolocation.watchPosition();
     watch.subscribe((data: any) => {
-      //console.dir(data);
-      if (data.code != 1) {
+      console.log("GeoLocation:", data);
+      if (data.code == undefined) {
         self.allowLocation = true;
         /*console.log('Distances:');
         console.dir(self.currentPosition.getLatLng());
@@ -457,7 +439,7 @@ export class HomePage {
     this.map.addLayer(this.markersCluster);
   }
 
-  showBusLines() {
+  async showBusLines() {
 
     /*this.DataProvider.getStops().then(res => {
       this.testStops = res;
@@ -468,6 +450,7 @@ export class HomePage {
       console.dir(this.testBusLines);
     });*/
 
+    this.populateCheckBoxs();
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
       inputs: this.CheckBoxRoutes,
@@ -477,14 +460,14 @@ export class HomePage {
           console.dir(data);
           this.markers = [];
           data.forEach(line => {
-            this.DataProvider.getStopsFromBusLine(line.id).then(datax => {
+            /*this.DataProvider.getStopsFromBusLine(line.id).then(datax => {
               console.dir(datax.rows);
 
-              if (datax.rows.length > 0) {
+              /*if (datax.rows.length > 0) {
                 for (var i = 0; i < datax.rows.length; i++) {
                   let item = datax.rows.item(i);
                   //console.log(item);
-
+ 
                   //console.log(stop.id);
                   let existMarker: boolean = false;
                   this.markers.forEach(marker => {
@@ -501,9 +484,9 @@ export class HomePage {
                   }
                 }
               }
-            });
+            });*/
           });
-          
+
           console.dir(this.markers);
           this.updateClusterGroup();
 

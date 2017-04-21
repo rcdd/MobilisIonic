@@ -121,4 +121,48 @@ page-home {
         background: darkgrey;
         color: #ffffff;
     }
+
+
+    // LOADING BAR
+
+
+/* ========================================================
+  Progress Bar
+======================================================== */
+
+// ANIMATIONS
+@-webkit-keyframes progress-bar-animate {
+  from  { background-position: 40px 0; }
+  to    { background-position: 0 0; }
+}
+
+@keyframes progress-bar-animate {
+  from  { background-position: 40px 0; }
+  to    { background-position: 0 0; }
+}
+
+
+// outer container
+.progress {
+  overflow: hidden;
+  top:50%;
+  height: 20px;
+  border-radius: 10px;
+  text-align: center;
+
+  // inner progress bar
+  &-bar {
+    width: 0%;
+    height: 100%;
+    float: left;
+    box-sizing: border-box;
+    background-color: #79b;
+    background-size: 40px 40px;
+    border-radius: 10px 0 0 10px;
+
+    -webkit-animation: progress-bar-animate 1s linear infinite;
+            animation: progress-bar-animate 1s linear infinite;
+  }
+}
+
 }
