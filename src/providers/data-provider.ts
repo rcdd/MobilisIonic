@@ -24,32 +24,34 @@ export class DataProvider {
 
     async getDataFromServer(): Promise<any> {
         this.loading = 0;
-        await this.isUpdated().then((up) => {
-            //console.log("up", up);
-            if (!up) {
-                console.log("DB Not updated!");
-                console.log("Innit download...");
-                this.getRoutes().then(() => {
-                    this.loading = 30;
-                    this.getStationsFromBusLines().then(() => {
-                        this.loading = 75;
-                        this.dataInfoToDB();
-                        console.log("Download DONE!", this.stops);
-                        this.getStopsFromDB().then(() => {
-                            this.loading = 100;
-                        });
-                    })
-                });
-            } else {
-                this.loading = 90;
-                this.getStopsFromDB().then(() => {
-                    this.loading = 100;
-                });
-                console.log("DB updated!");
-            }
-
+        return new Promise((resolve, reject) => {
+            this.isUpdated().then((up) => {
+                //console.log("up", up);
+                if (!up) {
+                    console.log("DB Not updated!");
+                    console.log("Innit download...");
+                    return this.getRoutes().then(() => {
+                        this.loading = 30;
+                        return this.getStationsFromBusLines().then(() => {
+                            this.loading = 65;
+                            this.dataInfoToDB();
+                            console.log("Download DONE!", this.stops);
+                        })
+                    });
+                }
+            }).then(() => {
+                this.loading = 80;
+                return this.getStopsFromDB().then((stops) => {
+                    //this.loading = 100;
+                    //console.log("Stops", Object.keys(stops).length);
+                    console.log("DB updated!");
+                    resolve(this.stops)
+                })
+            });
+        }).then((stops) => {
+            //console.log("return promise then", Object.keys(this.stops).length);
+            return this.stops;
         });
-
     }
 
     async isUpdated() {
@@ -69,8 +71,8 @@ export class DataProvider {
 
     }
 
-    queryDbDrop(tableName: string) {
-        this.db.query("DROP TABLE " + tableName)
+    async DBDropTable(tableName: string) {
+        await this.db.query("DROP TABLE " + tableName)
             .then(res => {
                 console.log("Table Dropped: ", res);
             })
@@ -120,12 +122,8 @@ export class DataProvider {
     }
 
     async createStorageLines() {
-        await this.db.query("DROP TABLE BUSLINES").then(res => {
-            // console.log("Result: ", res);
-        })
-            .catch(err => {
-                console.log("Error: ", err);
-            });
+        await this.DBDropTable("BUSLINES");
+
         await this.db.query("CREATE TABLE IF NOT EXISTS BUSLINES (AGENCYNAME TEXT, IDLINE TEXT, LONGNAME TEXT, MODE TEXT, SHORTNAME TEXT)")
             .then(res => {
                 this.lines.forEach(route => {
@@ -146,12 +144,7 @@ export class DataProvider {
     async createStorageStops(route: any, stops: any) {
         let id = route.id.split(":");
 
-        this.db.query("DROP TABLE ID_" + id[1]).then(res => {
-            // console.log("Result: ", res);
-        })
-            .catch(err => {
-                console.log("Error: ", err);
-            });
+        await this.DBDropTable("ID_" + id[1]);
 
         await this.db.query("CREATE TABLE IF NOT EXISTS ID_" + id[1] + " (name TEXT, id TEXT, lat TEXT, lon TEXT)")
             .then(res => {
@@ -166,12 +159,7 @@ export class DataProvider {
     }
 
     async dataInfoToDB() {
-        this.db.query("DROP TABLE SETTINGS").then(res => {
-            // console.log("Result: ", res);
-        })
-            .catch(err => {
-                console.log("Error: ", err);
-            });
+        await this.DBDropTable("SETTINGS");
 
         await this.db.query("CREATE TABLE IF NOT EXISTS SETTINGS (name TEXT, value TEXT)")
             .then(res => {
@@ -183,34 +171,43 @@ export class DataProvider {
     }
 
     async getStopsFromDB() {
-        return await this.db.query("SELECT * FROM BUSLINES")
-            .then(res => {
-                //console.log("BUSLINES:", res);
-                for (let i = 0; i < res.rows.length; i++) {
-                    //console.log("BUSLINE " + res.rows.item(i).IDLINE);
-                    let id = res.rows.item(i).IDLINE.split(":");
-                    this.db.query("SELECT * FROM ID_" + id[1])
-                        .then(resp => {
-                            let stops: any[] = [];
-                            //console.log("Stops from line " + id[1], resp.rows);
-                            for (let i = 0; i < resp.rows.length; i++) {
-                                //console.log("stop cenas", resp.rows.item(i));
-                                stops.push(resp.rows.item(i))
-                            }
-                            this.stops[res.rows.item(i).IDLINE] = {};
-                            this.stops[res.rows.item(i).IDLINE].id = res.rows.item(i).IDLINE;
-                            this.stops[res.rows.item(i).IDLINE].longName = res.rows.item(i).LONGNAME;
-                            this.stops[res.rows.item(i).IDLINE].shortName = res.rows.item(i).SHORTNAME;
-                            this.stops[res.rows.item(i).IDLINE].stops = stops;
-                        })
-                        .catch(err => {
-                            console.log("Error: ", err);
-                        });
-                }
-            })
-            .catch(err => {
-                console.log("Error: ", err);
-            });
+        return new Promise((resolve, reject) => {
+            this.db.query("SELECT * FROM BUSLINES")
+                .then(res => {
+                    //console.log("BUSLINES:", res);
+                    for (let i = 0; i < res.rows.length; i++) {
+                        //console.log("BUSLINE " + res.rows.item(i).IDLINE);
+                        let id = res.rows.item(i).IDLINE.split(":");
+                        this.db.query("SELECT * FROM ID_" + id[1])
+                            .then(resp => {
+                                let stop: any[] = [];
+                                //console.log("Stops from line " + id[1], resp.rows);
+                                for (let i = 0; i < resp.rows.length; i++) {
+                                    //console.log("stop cenas", resp.rows.item(i));
+                                    stop.push(resp.rows.item(i))
+                                }
+                                this.stops[res.rows.item(i).IDLINE] = {};
+                                this.stops[res.rows.item(i).IDLINE].id = res.rows.item(i).IDLINE;
+                                this.stops[res.rows.item(i).IDLINE].longName = res.rows.item(i).LONGNAME;
+                                this.stops[res.rows.item(i).IDLINE].shortName = res.rows.item(i).SHORTNAME;
+                                this.stops[res.rows.item(i).IDLINE].stops = stop;
+
+                                if (Object.keys(this.stops).length == res.rows.length) {
+                                    resolve(this.stops);
+                                }
+                            })
+                            .catch(err => {
+                                console.log("Error: ", err);
+                            })
+                    }
+                })
+                .catch(err => {
+                    console.log("Error: ", err);
+                })
+        }).then(() => {
+            //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
+            return this.stops;
+        });
     }
 
 }

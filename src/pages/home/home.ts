@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { AlertController, NavController, NavParams, ToastController } from 'ionic-angular';
 
-import { Http, Response } from '@angular/http';
+import { Http } from '@angular/http';
 
 import { Geolocation } from 'ionic-native';
 
@@ -28,9 +28,8 @@ declare var L: any;
 export class HomePage {
 
   public stops: any; // PARAGENS
-  public routes: any = {}; // LINHAS
   public markersCluster: any; // CLUSTER
-  private markers;
+  private markers: any = []; // CLUSTER ON MAP
 
   private map: any;
   private currentPosition: any;
@@ -39,12 +38,6 @@ export class HomePage {
   private controlSearch: any;
   private allowLocation = false;
   private CheckBoxRoutes: any = [];
-  public loading: number = 0;
-
-  //other tests
-  public testStops: any;
-  public testBusLines: any;
-  //private data: any;
 
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
@@ -56,24 +49,18 @@ export class HomePage {
     public toastCtrl: ToastController, public http: Http,
     public alertCtrl: AlertController, public db: DatabaseProvider,
     public dataProvider: DataProvider
-  ) {
-  }
+  ) { }
 
-  ionViewDidLoad() {
-
-  }
-  ngOnInit() {
-    this.dataProvider.getDataFromServer().then(() => {
-      console.log("Init cenas");
-      this.stops = this.dataProvider.stops;
-      console.log("imported stops:", this.dataProvider.stops);
+  async ngOnInit() {
+    console.log("Init cenas");
+    this.dataProvider.getDataFromServer().then((resp) => {
+      this.dataProvider.loading = 100;
+      this.stops = resp;
+      //console.log("imported stops:", Object.keys(this.stops).length);
+      //console.log("imported stops:", this.stops);
       this.initMap();
+      this.populateCheckBoxs();
       this.getCurrentLocation();
-      //this.getStopsStations();
-      //this.getBusLines();
-
-
-
 
       //Cenas de Localização
       let self = this;
@@ -82,6 +69,7 @@ export class HomePage {
         alert('User denied localization. For better performance, please allow your location.');
       });
     });
+    console.log("Init Done!");
   }
 
   initMap(): void {
@@ -178,32 +166,35 @@ export class HomePage {
     }).addTo(this.map);
 
     L.easyButton('fa fa-bus', function () {
-      let min: any;
+      let closestStop: any;
       let minMetrs: number = Number.MAX_SAFE_INTEGER;
       if (self.allowLocation == true) {
-        self.stops.forEach(stop => {
-          if (stop.meters <= minMetrs) {
-            minMetrs = stop.meters;
-            min = stop;
-          }
-        });
-        self.map.setView([min.lat, min.lon], 19);
-        self.markersCluster.eachLayer(function (layer) {
-          if (layer.options.id == min.id) {
-            // self.markersCluster.getVisibleParent(layer);
-            let popUpOptions =
-              {
-                'className': 'custom'
-              }
-            L.popup(popUpOptions)
-              .setLatLng(layer.getLatLng())
-              .setContent(layer._popup._content)
-              .openOn(self.map);
-            console.log(layer);
-          }
-        });
+        if (self.markers.length != 0) {
+          self.markersCluster.eachLayer(stop => {
+            //console.log("stop on layer", stop);
+            if (stop.options.meters <= minMetrs) {
+              minMetrs = stop.options.meters;
+              closestStop = stop;
+            }
+          });
+          self.map.setView(closestStop.getLatLng(), 19);
+          self.markersCluster.eachLayer(function (layer) {
+            if (layer.options.id == closestStop.options.id) {
+              let popUpOptions =
+                {
+                  'className': 'custom'
+                }
+              L.popup(popUpOptions)
+                .setLatLng(layer.getLatLng())
+                .setContent(layer._popup._content)
+                .openOn(self.map);
+            }
+          });
 
-        self.showToast(min.message + " from you!", 3000);
+          self.showToast(closestStop.options.message + " from you!", 3000);
+        } else {
+          self.showToast("You need select at least one line route", 3000);
+        }
       } else {
         self.showToast("We can't calculate your position", 3000);
       }
@@ -225,121 +216,15 @@ export class HomePage {
   }
 
   async populateCheckBoxs() {
-    console.log("populate", this.dataProvider.stops);
-    await this.dataProvider.getStops().then((stops) => {
-      stops.forEach(route => { // PORQUE NAO ENTRA AQUI????? BAH :(
-        console.log("route: ", route);
-        this.CheckBoxRoutes.push({ id: this.routes[route.id], name: this.routes[route.id], label: this.routes[route.id].longName, type: "checkbox", value: this.routes[route.id], checked: false });
-        this.CheckBoxRoutes.sort(function (a, b) { return (a.name.longName > b.name.longName) ? 1 : ((b.name.longName > a.name.longName) ? -1 : 0); });
-      });
-    });
+    //console.log("populate", Object.keys(this.stops).length);
+    for (var index = 0; index < Object.keys(this.stops).length; index++) {
+      let route = this.stops[Object.keys(this.stops)[index]];
+      //console.log("route: ", route);
+      this.CheckBoxRoutes.push({ id: route, label: route.longName, type: "checkbox", value: route, checked: false });
+      this.CheckBoxRoutes.sort(function (a, b) { return (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0); });
+    };
 
   }
-
-  // OLD VERSION
-  getStopsStations() {
-    return this.http.get(`http://194.210.216.191/otp/routers/default/index/stops`)
-      .map((res: Response) => res.json()).subscribe(a => {
-        this.stops = a;
-        //this.updateClusterGroup();
-        this.getCurrentLocation();
-      });
-    /*return this.db.query("SELECT * FROM STOPS")
-      .then(res => {
-        this.stops = res;
-        this.getCurrentLocation();
-        console.dir(this.stops);
-      })
-      .catch(err => {
-        console.log("Error: ", err);
-      });*/
-  }
-
-  getBusLines() {
-    // NEW WAY
-    /*return this.db.query("SELECT * FROM BUSLINES")
-      .then(res => {
-        res.forEach(route => {
-          this.routes[route.id] = {};
-          this.routes[route.id].id = route.id;
-          this.routes[route.id].longName = route.longName;
-          this.routes[route.id].mode = route.mode;
-          this.routes[route.id].shortName = route.shortName;
-          this.CheckBoxRoutes.push({ id: this.routes[route.id], name: this.routes[route.id], label: this.routes[route.id].longName, type: "checkbox", value: this.routes[route.id], checked: false });
-          this.CheckBoxRoutes.sort(function (a, b) { return (a.name.longName > b.name.longName) ? 1 : ((b.name.longName > a.name.longName) ? -1 : 0); });
-        });
-        this.getStationsFromBusLines();
-      })
-      .catch(err => {
-        console.log("Error: ", err);
-      });*/
-    return this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`)
-      .map((res: Response) => res.json()).subscribe(a => {
-        a.forEach(route => {
-          this.routes[route.id] = {};
-          this.routes[route.id].id = route.id;
-          this.routes[route.id].longName = route.longName;
-          this.routes[route.id].mode = route.mode;
-          this.routes[route.id].shortName = route.shortName;
-          this.CheckBoxRoutes.push({ id: this.routes[route.id], name: this.routes[route.id], label: this.routes[route.id].longName, type: "checkbox", value: this.routes[route.id], checked: false });
-          this.CheckBoxRoutes.sort(function (a, b) { return (a.name.longName > b.name.longName) ? 1 : ((b.name.longName > a.name.longName) ? -1 : 0); });
-        });
-        this.getStationsFromBusLines();
-      });
-  }
-
-  getStationsFromBusLines() {
-    for (let route in this.routes) {
-      this.http.get("http://194.210.216.191/otp/routers/default/index/routes/" + route + "/stops")
-        .map((res: Response) => res.json()).subscribe(stops => {
-          this.routes[route].stops = stops;
-        });
-    }
-
-
-    /* console.log("Stops:")
-     console.dir(this.routes);*/
-
-
-
-    /*   this.routes.forEach(route => {
-         this.markers[route.id] = L.featureGroup.subGroup(this.markersCluster);
-         this.http.get("http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops")
-           //this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + ":0:01")
-           .map((res: Response) => res.json()).subscribe(stops => {
-             // this.LinesStations.push({ id: route.id, selected: true, stops: a.stops });
-             //i++;
-             stops.forEach(stop => {
-               let popUp = '<h6>' + stop.name + '</h6><hr>' + 'Linha: ' + route.shortName + '<br>';
-               let popUpOptions =
-                 {
-                   'className': 'custom'
-                 }
-               new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, title: stop.name })
-                 .bindPopup(popUp, popUpOptions)
-                 .on('click', function (e) {
-                   this.openPopup();
-                 })
-                 .addTo(this.markers[route.id]);
-             });
-             //this.markers[route.id].addTo(this.map);
-           });
-       });
-       this.markersCluster.addTo(this.map);
-   */
-
-    /* this.controlSearch = new L.Control.Search({
-       container: 'findbox',
-       position: 'topleft',
-       placeholder: 'Search...',
-       layer: this.markersCluster,
-       initial: false,
-       zoom: 20,
-       marker: false
-     });*/
-
-  }
-
 
   showToast(msg: string, ms: number): void {
     let toast = this.toastCtrl.create({
@@ -390,39 +275,41 @@ export class HomePage {
 
     this.map.removeLayer(this.markersCluster);
     this.markersCluster = new L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
-
-    this.markers.forEach(stop => {
-      let dist: any;
-      if (this.allowLocation == true) {
-        stop.meters = this.currentPosition.getLatLng().distanceTo([stop.lat, stop.lon]);
-        dist = '';
-        if (stop.meters > 1000) {
-          dist += (stop.meters / 1000).toFixed(0) + ' Kms';
+    //console.log("makers", this.markers);
+    if (this.markers.length != 0) {
+      this.markers.forEach(stop => {
+        let dist: any;
+        if (this.allowLocation == true) {
+          stop.meters = this.currentPosition.getLatLng().distanceTo([stop.lat, stop.lon]);
+          dist = '';
+          if (stop.meters > 1000) {
+            dist += (stop.meters / 1000).toFixed(0) + ' Kms';
+          } else {
+            dist += stop.meters.toFixed(0) + ' meters';
+          }
+          stop.message = dist;
+          dist += ' from me<hr>';
         } else {
-          dist += stop.meters.toFixed(0) + ' meters';
+          dist = '';
         }
-        stop.message = dist;
-        dist += ' from me<hr>';
-      } else {
-        dist = '';
-      }
-      let popUp = '<h6>' + stop.name + '</h6><hr>' + dist + 'Linhas:';
-      stop.lines.forEach(line => {
-        popUp += '<br>' + line;
+        let popUp = '<h6>' + stop.name + '</h6><hr>' + dist + 'Linhas:';
+        stop.lines.forEach(line => {
+          popUp += '<br>' + line;
+        });
+        let popUpOptions =
+          {
+            'className': 'custom'
+          }
+        new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, meters: stop.meters, message: stop.message, title: stop.name })
+          .bindPopup(popUp, popUpOptions)
+          .on('click', function (e) {
+            this.openPopup();
+          }).addTo(this.markersCluster);
       });
-      let popUpOptions =
-        {
-          'className': 'custom'
-        }
-      new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, title: stop.name })
-        .bindPopup(popUp, popUpOptions)
-        .on('click', function (e) {
-          this.openPopup();
-        }).addTo(this.markersCluster);
-    });
-
+      this.map.fitBounds(this.markersCluster.getBounds());
+    }
     this.map.addLayer(this.markersCluster);
-
+    this.map.closePopup();
     //console.log("Populate Search Box");
     this.map.removeControl(this.controlSearch);
     this.controlSearch = new L.Control.Search({
@@ -436,58 +323,37 @@ export class HomePage {
     });
 
     this.map.addControl(this.controlSearch);
-    this.map.addLayer(this.markersCluster);
   }
 
   async showBusLines() {
-
-    /*this.DataProvider.getStops().then(res => {
-      this.testStops = res;
-      console.dir(this.testStops);
-    });
-    this.DataProvider.getBusLines().then(res => {
-      this.testBusLines = res;
-      console.dir(this.testBusLines);
-    });*/
-
-    this.populateCheckBoxs();
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
       inputs: this.CheckBoxRoutes,
       buttons: [{
         text: 'Ok',
         handler: data => {
-          console.dir(data);
+          //console.dir(data);
           this.markers = [];
           data.forEach(line => {
-            /*this.DataProvider.getStopsFromBusLine(line.id).then(datax => {
-              console.dir(datax.rows);
-
-              /*if (datax.rows.length > 0) {
-                for (var i = 0; i < datax.rows.length; i++) {
-                  let item = datax.rows.item(i);
-                  //console.log(item);
- 
-                  //console.log(stop.id);
-                  let existMarker: boolean = false;
-                  this.markers.forEach(marker => {
-                    if (marker.id == item.id) {
-                      //console.log('Im old', marker);
-                      marker.lines.push(line.shortName);
-                      existMarker = true;
-                    }
-                  });
-                  if (existMarker == false) {
-                    // console.log('Im new', stop);
-                    item.lines = [line.shortName];
-                    this.markers.push(item);
-                  }
+            //console.log("data from checkbox:", line);
+            line.stops.forEach(stop => {
+              //console.log(stop.id);
+              let existMarker: boolean = false;
+              this.markers.forEach(marker => {
+                if (marker.id == stop.id) {
+                  //console.log('Im old', marker);
+                  marker.lines.push(line.shortName);
+                  existMarker = true;
                 }
+              });
+              if (existMarker == false) {
+                // console.log('Im new', stop);
+                stop.lines = [line.shortName];
+                this.markers.push(stop);
               }
-            });*/
+            });
           });
-
-          console.dir(this.markers);
+          //console.dir(this.markers);
           this.updateClusterGroup();
 
           this.CheckBoxRoutes.forEach(checkBox => {

@@ -5,7 +5,6 @@ import { NavController } from 'ionic-angular';
 import { TabsPage } from '../pages/tabs/tabs';
 import { DatabaseProvider } from '../providers/database-provider';
 import { Http } from '@angular/http';
-import { HomePage } from '../pages/home/home'
 import 'rxjs/add/operator/map';
 import { DataProvider } from '../providers/data-provider';
 
@@ -14,10 +13,6 @@ import { DataProvider } from '../providers/data-provider';
 })
 export class MyApp {
   rootPage = TabsPage;
-
-  // Session storage
-  private stops: any;
-  private busLines: any;
 
   constructor(platform: Platform,
     public db: DatabaseProvider,

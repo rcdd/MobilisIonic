@@ -144,11 +144,14 @@ page-home {
 
 // outer container
 .progress {
-  overflow: hidden;
+  overflow: hidden;     
+  position: absolute;
   top:50%;
   height: 20px;
+    width: 100%;
   border-radius: 10px;
-  text-align: center;
+  text-align: center; 
+  z-index: 10000;
 
   // inner progress bar
   &-bar {
