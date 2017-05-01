@@ -31,6 +31,7 @@
     "leaflet": "^1.0.3",
     "leaflet-easybutton": "^2.2.0",
     "leaflet-knn": "^0.1.0",
+    "leaflet-routing-machine": "^3.2.5",
     "leaflet-search": "^2.7.0",
     "leaflet-search-control": "^1.0.3",
     "leaflet.featuregroup.subgroup": "^1.0.2",
