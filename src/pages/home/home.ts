@@ -6,6 +6,7 @@ import { Http } from '@angular/http';
 
 import { Geolocation } from 'ionic-native';
 
+
 // import { busLines } from './busLines';
 import { DatabaseProvider } from '../../providers/database-provider';
 import { DataProvider } from '../../providers/data-provider';
@@ -18,6 +19,7 @@ import 'leaflet-easybutton';
 import 'leaflet-search';
 import 'leaflet-knn';
 import 'leaflet.featuregroup.subgroup'
+import 'leaflet-routing-machine'
 
 declare var L: any;
 
@@ -51,6 +53,8 @@ export class HomePage {
     public dataProvider: DataProvider
   ) { }
 
+  
+
   async ngOnInit() {
     console.log("Init cenas");
     this.dataProvider.getDataFromServer().then((resp) => {
@@ -71,6 +75,7 @@ export class HomePage {
     });
     console.log("Init Done!");
   }
+  
 
   initMap(): void {
     let tiles = L.tileLayer('https://api.mapbox.com/styles/v1/rcdd/cj0lffm3h006c2qjretw3henw/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
@@ -86,7 +91,6 @@ export class HomePage {
       cacheMaxAge: (24 * 3600000), // 24h
     });
 
-
     this.map = L.map('mapid')
       .addLayer(tiles)
       .setView([39.7460465, -8.8059954], 14);
@@ -96,6 +100,15 @@ export class HomePage {
 
     this.currentPosition = L.marker(this.map.getCenter()).addTo(this.map);
     this.currentPositionCircle = L.circle(this.map.getCenter()).addTo(this.map);
+
+    // ROUTING OF THE MAP
+    L.Routing.control({
+    waypoints: [
+        L.latLng(39.75313, -8.81104),
+        L.latLng(39.73326, -8.76160)
+    ],
+    routeWhileDragging: true
+    }).addTo(this.map);
 
 
     // CONTROLS OF THE MAP
@@ -225,6 +238,7 @@ export class HomePage {
     };
 
   }
+  
 
   showToast(msg: string, ms: number): void {
     let toast = this.toastCtrl.create({
