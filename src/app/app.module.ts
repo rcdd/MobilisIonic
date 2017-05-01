@@ -8,6 +8,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { DatabaseProvider } from '../providers/database-provider';
 import { NavController } from 'ionic-angular';
 import { DataProvider } from '../providers/data-provider';
+import { Geolocation } from '@ionic-native/geolocation';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { DataProvider } from '../providers/data-provider';
     HomePage,
     TabsPage
   ],
-  providers: [{ provide: ErrorHandler, useClass: IonicErrorHandler },
-   [DatabaseProvider,NavController,DataProvider]]
+  providers:
+  [{ provide: ErrorHandler, useClass: IonicErrorHandler },
+  [DatabaseProvider, NavController, DataProvider, Geolocation]]
 })
 export class AppModule { }

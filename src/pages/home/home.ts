@@ -4,7 +4,7 @@ import { AlertController, NavController, NavParams, ToastController } from 'ioni
 
 import { Http } from '@angular/http';
 
-import { Geolocation } from 'ionic-native';
+import { Geolocation } from '@ionic-native/geolocation';
 
 // import { busLines } from './busLines';
 import { DatabaseProvider } from '../../providers/database-provider';
@@ -48,7 +48,7 @@ export class HomePage {
   constructor(public navCtrl: NavController, private navParams: NavParams,
     public toastCtrl: ToastController, public http: Http,
     public alertCtrl: AlertController, public db: DatabaseProvider,
-    public dataProvider: DataProvider
+    public dataProvider: DataProvider, public geolocation: Geolocation
   ) { }
 
   async ngOnInit() {
@@ -66,7 +66,7 @@ export class HomePage {
       let self = this;
       this.map.on('locationerror', function (e) {
         self.allowLocation = false;
-        alert('User denied localization. For better performance, please allow your location.');
+        alert('You denied localization. For better performance, please allow your location.');
       });
     });
     console.log("Init Done!");
@@ -100,6 +100,7 @@ export class HomePage {
 
     // CONTROLS OF THE MAP
     var self = this;
+    // LOCATION
     L.easyButton({
       states: [
         {
@@ -159,12 +160,18 @@ export class HomePage {
       ]
     }).addTo(this.map);
 
+    // FIT MARKERS
     L.easyButton('fa fa-map', function () {
 
-      self.map.fitBounds(self.markersCluster.getBounds());
+      if (self.markers.length != 0) {
+        self.map.fitBounds(self.markersCluster.getBounds());
+      } else {
+        self.showToast("You need select at least one line route", 3000);
+      }
       //self.map.panTo(new L.LatLng(39.7460465, -8.8059954), 11);
     }).addTo(this.map);
 
+    // GET CLOSEST STOPS
     L.easyButton('fa fa-bus', function () {
       let closestStop: any;
       let minMetrs: number = Number.MAX_SAFE_INTEGER;
@@ -242,24 +249,23 @@ export class HomePage {
 
   getCurrentLocation() {
     let self = this;
-    let watch = Geolocation.watchPosition();
-    watch.subscribe((data: any) => {
-      console.log("GeoLocation:", data);
-      if (data.code == undefined) {
-        self.allowLocation = true;
-        /*console.log('Distances:');
-        console.dir(self.currentPosition.getLatLng());
-        console.dir(data.coords);*/
-        if (self.currentPosition.getLatLng().lat != data.coords.latitude ||
-          self.currentPosition.getLatLng().lng != data.coords.longitude) {
-          self.updateCurrentLocation(data.coords);
-          //self.updateClusterGroup();
-        }
-        //self.debug = self.currentPosition;
-        //console.dir(data);
-      } else {
-        this.allowLocation = false;
+    this.geolocation.getCurrentPosition().then((resp) => {
+      console.log("GeoLocation:", resp);
+      self.allowLocation = true;
+      /*console.log('Distances:');
+      console.dir(self.currentPosition.getLatLng());
+      console.dir(data.coords);*/
+      if (self.currentPosition.getLatLng().lat != resp.coords.latitude ||
+        self.currentPosition.getLatLng().lng != resp.coords.longitude) {
+        self.updateCurrentLocation(resp.coords);
+        //self.updateClusterGroup();
       }
+      //self.debug = self.currentPosition;
+      //console.dir(data);
+    }).catch((error) => {
+      console.log('Error getting location', error);
+      self.showToast(error.message, 3000);
+      self.allowLocation = false;
     });
   }
 
