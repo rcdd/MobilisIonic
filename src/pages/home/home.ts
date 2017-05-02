@@ -39,7 +39,6 @@ export class HomePage {
   public debug: any;
   private controlSearch: any;
   private allowLocation = false;
-  private CheckBoxRoutes: any = [];
 
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
@@ -63,7 +62,7 @@ export class HomePage {
       //console.log("imported stops:", Object.keys(this.stops).length);
       //console.log("imported stops:", this.stops);
       this.initMap();
-      this.populateCheckBoxs();
+      this.dataProvider.populateCheckBoxs();
       this.getCurrentLocation();
 
       //Cenas de Localização
@@ -235,18 +234,6 @@ export class HomePage {
 
   }
 
-  async populateCheckBoxs() {
-    //console.log("populate", Object.keys(this.stops).length);
-    for (var index = 0; index < Object.keys(this.stops).length; index++) {
-      let route = this.stops[Object.keys(this.stops)[index]];
-      //console.log("route: ", route);
-      this.CheckBoxRoutes.push({ id: route, label: route.longName, type: "checkbox", value: route, checked: false });
-      this.CheckBoxRoutes.sort(function (a, b) { return (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0); });
-    };
-
-  }
-  
-
   showToast(msg: string, ms: number): void {
     let toast = this.toastCtrl.create({
       message: msg,
@@ -348,7 +335,7 @@ export class HomePage {
   async showBusLines() {
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
-      inputs: this.CheckBoxRoutes,
+      inputs: this.dataProvider.CheckBoxRoutes,
       buttons: [{
         text: 'Ok',
         handler: data => {
@@ -376,7 +363,7 @@ export class HomePage {
           //console.dir(this.markers);
           this.updateClusterGroup();
 
-          this.CheckBoxRoutes.forEach(checkBox => {
+          this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
             data.includes(checkBox.id) ? checkBox.checked = true : checkBox.checked = false;
           });
 
