@@ -20,6 +20,7 @@ import 'leaflet-search';
 import 'leaflet-knn';
 import 'leaflet.featuregroup.subgroup'
 import 'leaflet-routing-machine'
+import 'leaflet-control-geocoder'
 
 declare var L: any;
 
@@ -52,7 +53,7 @@ export class HomePage {
     public dataProvider: DataProvider, public geolocation: Geolocation
   ) { }
 
-  
+
 
   async ngOnInit() {
     console.log("Init cenas");
@@ -74,7 +75,7 @@ export class HomePage {
     });
     console.log("Init Done!");
   }
-  
+
 
   initMap(): void {
     let tiles = L.tileLayer('https://api.mapbox.com/styles/v1/rcdd/cj0lffm3h006c2qjretw3henw/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
@@ -101,14 +102,52 @@ export class HomePage {
     this.currentPositionCircle = L.circle(this.map.getCenter()).addTo(this.map);
 
     // ROUTING OF THE MAP
-    L.Routing.control({
-    waypoints: [
+    let control = L.Routing.control({
+      waypoints: [
         L.latLng(39.75313, -8.81104),
         L.latLng(39.73326, -8.76160)
-    ],
-    routeWhileDragging: true
+      ],
+      routeWhileDragging: true,
+      geocoder: L.Control.Geocoder.nominatim(),
+      waypointNameFallback: function (latLng) {
+        function zeroPad(n) {
+          n = Math.round(n);
+          return n < 10 ? '0' + n : n;
+        }
+        function sexagesimal(p, pos, neg) {
+          var n = Math.abs(p),
+            degs = Math.floor(n),
+            mins = (n - degs) * 60,
+            secs = (mins - Math.floor(mins)) * 60,
+            frac = Math.round((secs - Math.floor(secs)) * 100);
+          return (n >= 0 ? pos : neg) + degs + '°' +
+            zeroPad(mins) + '\'' +
+            zeroPad(secs) + '.' + zeroPad(frac) + '"';
+        }
+
+        return sexagesimal(latLng.lat, 'N', 'S') + ' ' + sexagesimal(latLng.lng, 'E', 'W');
+      }
     }).addTo(this.map);
 
+    this.map.on('click', function (e) {
+      var container = L.DomUtil.create('div'),
+        startBtn = self.createButton('Start from here', container),
+        destBtn = self.createButton('Go to', container);
+
+      L.popup()
+        .setContent(container)
+        .setLatLng(e.latlng)
+        .openOn(self.map);
+
+      L.DomEvent.on(startBtn, 'click', function () {
+        control.spliceWaypoints(0, 1, e.latlng);
+        self.map.closePopup();
+      });
+      L.DomEvent.on(destBtn, 'click', function () {
+        control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
+        self.map.closePopup();
+      });
+    });
 
     // CONTROLS OF THE MAP
     var self = this;
@@ -172,6 +211,8 @@ export class HomePage {
       ]
     }).addTo(this.map);
 
+
+
     // FIT MARKERS
     L.easyButton('fa fa-map', function () {
 
@@ -232,6 +273,13 @@ export class HomePage {
     });
     this.map.addControl(self.controlSearch);
 
+  }
+
+  createButton(label, container) {
+    var btn = L.DomUtil.create('button', '', container);
+    btn.setAttribute('type', 'button');
+    btn.innerHTML = label;
+    return btn;
   }
 
   showToast(msg: string, ms: number): void {
