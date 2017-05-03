@@ -70,7 +70,7 @@ export class HomePage {
       let self = this;
       this.map.on('locationerror', function (e) {
         self.allowLocation = false;
-        alert('You denied localization. For better performance, please allow your location.');
+        self.showToast('You denied localization. For better performance, please allow your location.', 3000);
       });
     });
     console.log("Init Done!");
@@ -95,6 +95,7 @@ export class HomePage {
       .addLayer(tiles)
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });
+
 
     this.markersCluster = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
 
@@ -429,4 +430,41 @@ export class HomePage {
     });
     alert.present();
   }
+
+
+  /*async showRoute() {
+    if (this.planning.orig.latlng != "" && this.planning.dest.latlng != "")
+      await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
+        //this.route = resp;
+        let waypoints = [];
+        let i = 0;
+        resp.plan.itineraries.forEach(element => {
+          waypoints[i] = [];
+          console.dir(element);
+          element.legs.forEach(element2 => {
+            element2.steps.forEach(element3 => {
+              waypoints[i].push({ lat: element3.lat, lon: element3.lon });
+            });
+          });
+          i++;
+        });
+        //console.dir(waypoints);
+
+        this.route = L.Routing.control({
+          waypoints: waypoints[0],
+          routeWhileDragging: true
+        }).addTo(this.map);
+
+        L.Routing.control({
+          waypoints: waypoints[1],
+          routeWhileDragging: true
+        }).addTo(this.map);
+
+        L.Routing.control({
+          waypoints: waypoints[2],
+          routeWhileDragging: true
+        }).addTo(this.map);
+
+      });
+  }*/
 }
