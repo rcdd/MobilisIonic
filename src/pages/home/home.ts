@@ -20,6 +20,7 @@ import 'leaflet-search';
 import 'leaflet-knn';
 import 'leaflet.featuregroup.subgroup'
 import 'leaflet-routing-machine'
+import 'leaflet-control-geocoder'
 
 declare var L: any;
 
@@ -39,9 +40,6 @@ export class HomePage {
   public debug: any;
   private controlSearch: any;
   private allowLocation = false;
-  private CheckBoxRoutes: any = [];
-  public planning: any = [];
-  public route: any;
 
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
@@ -65,7 +63,7 @@ export class HomePage {
       //console.log("imported stops:", Object.keys(this.stops).length);
       //console.log("imported stops:", this.stops);
       this.initMap();
-      this.populateCheckBoxs();
+      this.dataProvider.populateCheckBoxs();
       this.getCurrentLocation();
 
       //Cenas de Localização
@@ -98,29 +96,6 @@ export class HomePage {
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });
 
-    this.map.on('click', (e) => {
-      if (!this.planning.orig) {
-        this.planning.dest = "";
-        this.planning.orig = L.marker(e.latlng, { draggable: true })
-          .bindPopup("Origem")
-          .addTo(this.map)
-          .on('dragend', (e) => {
-            console.log("drag", e);
-            this.planning.orig.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
-          });
-        this.planning.orig.latlng = e.latlng.lat + "," + e.latlng.lng;
-      } else if (!this.planning.dest) {
-        this.planning.dest = L.marker(e.latlng, { draggable: true })
-          .bindPopup("Destino")
-          .addTo(this.map)
-          .on('dragend', (e) => {
-            console.log("drag", e);
-            this.planning.dest.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
-          });
-        this.planning.dest.latlng = e.latlng.lat + "," + e.latlng.lng;
-      }
-    });
-
 
     this.markersCluster = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
 
@@ -128,14 +103,52 @@ export class HomePage {
     this.currentPositionCircle = L.circle(this.map.getCenter()).addTo(this.map);
 
     // ROUTING OF THE MAP
-    /*this.route = L.Routing.control({
+    let control = L.Routing.control({
       waypoints: [
         L.latLng(39.75313, -8.81104),
         L.latLng(39.73326, -8.76160)
       ],
-      routeWhileDragging: true
+      routeWhileDragging: true,
+      geocoder: L.Control.Geocoder.nominatim(),
+      waypointNameFallback: function (latLng) {
+        function zeroPad(n) {
+          n = Math.round(n);
+          return n < 10 ? '0' + n : n;
+        }
+        function sexagesimal(p, pos, neg) {
+          var n = Math.abs(p),
+            degs = Math.floor(n),
+            mins = (n - degs) * 60,
+            secs = (mins - Math.floor(mins)) * 60,
+            frac = Math.round((secs - Math.floor(secs)) * 100);
+          return (n >= 0 ? pos : neg) + degs + '°' +
+            zeroPad(mins) + '\'' +
+            zeroPad(secs) + '.' + zeroPad(frac) + '"';
+        }
+
+        return sexagesimal(latLng.lat, 'N', 'S') + ' ' + sexagesimal(latLng.lng, 'E', 'W');
+      }
     }).addTo(this.map);
-*/
+
+    this.map.on('click', function (e) {
+      var container = L.DomUtil.create('div'),
+        startBtn = self.createButton('Start from here', container),
+        destBtn = self.createButton('Go to', container);
+
+      L.popup()
+        .setContent(container)
+        .setLatLng(e.latlng)
+        .openOn(self.map);
+
+      L.DomEvent.on(startBtn, 'click', function () {
+        control.spliceWaypoints(0, 1, e.latlng);
+        self.map.closePopup();
+      });
+      L.DomEvent.on(destBtn, 'click', function () {
+        control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
+        self.map.closePopup();
+      });
+    });
 
     // CONTROLS OF THE MAP
     var self = this;
@@ -199,6 +212,8 @@ export class HomePage {
       ]
     }).addTo(this.map);
 
+
+
     // FIT MARKERS
     L.easyButton('fa fa-map', function () {
 
@@ -261,17 +276,12 @@ export class HomePage {
 
   }
 
-  async populateCheckBoxs() {
-    //console.log("populate", Object.keys(this.stops).length);
-    for (var index = 0; index < Object.keys(this.stops).length; index++) {
-      let route = this.stops[Object.keys(this.stops)[index]];
-      //console.log("route: ", route);
-      this.CheckBoxRoutes.push({ id: route, label: route.longName, type: "checkbox", value: route, checked: false });
-      this.CheckBoxRoutes.sort(function (a, b) { return (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0); });
-    };
-
+  createButton(label, container) {
+    var btn = L.DomUtil.create('button', '', container);
+    btn.setAttribute('type', 'button');
+    btn.innerHTML = label;
+    return btn;
   }
-
 
   showToast(msg: string, ms: number): void {
     let toast = this.toastCtrl.create({
@@ -374,7 +384,7 @@ export class HomePage {
   async showBusLines() {
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
-      inputs: this.CheckBoxRoutes,
+      inputs: this.dataProvider.CheckBoxRoutes,
       buttons: [{
         text: 'Ok',
         handler: data => {
@@ -402,7 +412,7 @@ export class HomePage {
           //console.dir(this.markers);
           this.updateClusterGroup();
 
-          this.CheckBoxRoutes.forEach(checkBox => {
+          this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
             data.includes(checkBox.id) ? checkBox.checked = true : checkBox.checked = false;
           });
 
@@ -422,11 +432,7 @@ export class HomePage {
   }
 
 
-  showPlanning() {
-    this.planning.orig = "cenas";
-  }
-
-  async showRoute() {
+  /*async showRoute() {
     if (this.planning.orig.latlng != "" && this.planning.dest.latlng != "")
       await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
         //this.route = resp;
@@ -460,5 +466,5 @@ export class HomePage {
         }).addTo(this.map);
 
       });
-  }
+  }*/
 }

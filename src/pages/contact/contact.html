@@ -1,16 +1,25 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Contact
+      BUSLINES
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
+<ion-list>
+  <ion-item>
+    <ion-label>Select Bus Line</ion-label>
+
+    <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)"  multiple="false">
+      <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}" >{{busLine.label}} </ion-option>
+    </ion-select>
+
+  </ion-item>
+</ion-list>
   <ion-list>
-    <button ion-button block (click)="showToast(stop)" *ngFor="let stop of stopsNames">
-      {{ stop }}
+    <button ion-button block (click)="showToast(stop)" *ngFor="let stop of stops">
+      {{ stop.name }}
     </button>
   </ion-list>
 </ion-content>

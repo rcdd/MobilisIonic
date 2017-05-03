@@ -13,6 +13,7 @@ export class DataProvider {
     public lines: any = [];
     public stops: any[] = [];
     public loading: number = 0;
+    public CheckBoxRoutes : any= [];
 
     constructor(private http: Http, private db: DatabaseProvider) {
         this.db.init();
@@ -59,6 +60,16 @@ export class DataProvider {
             return this.stops;
         });
     }
+
+async populateCheckBoxs() {
+    //console.log("populate", Object.keys(this.stops).length);
+    for (var index = 0; index < Object.keys(this.stops).length; index++) {
+      let route = this.stops[Object.keys(this.stops)[index]];
+      //console.log("route: ", route);
+      this.CheckBoxRoutes.push({ id: route, label: route.longName, type: "checkbox", value: route, checked: false });
+      this.CheckBoxRoutes.sort(function (a, b) { return (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0); });
+    };
+  }
 
     async isUpdated() {
         return await this.db.query("SELECT * FROM SETTINGS")

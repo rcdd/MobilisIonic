@@ -24,7 +24,8 @@ export class AboutPage {
 
   getStopsStations() {
     return this.http.get(`http://194.210.216.191/otp/routers/default/index/stops`)
-    .map((res:Response) => res.json()).subscribe(a => {this.stops=a;
+    .map((res:Response) => res.json()).subscribe(a => {
+      this.stops=a;
     //console.log(this.stops);
     this.resetNamesStops();
     });
