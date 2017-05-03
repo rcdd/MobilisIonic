@@ -104,8 +104,8 @@ export class HomePage {
     // ROUTING OF THE MAP
     let control = L.Routing.control({
       waypoints: [
-        L.latLng(39.75313, -8.81104),
-        L.latLng(39.73326, -8.76160)
+       // L.latLng(39.75313, -8.81104),
+       // L.latLng(39.73326, -8.76160)
       ],
       routeWhileDragging: true,
       geocoder: L.Control.Geocoder.nominatim(),
