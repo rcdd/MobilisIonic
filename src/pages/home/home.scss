@@ -20,6 +20,35 @@ page-home {
         z-index: 2000;
     }
 
+    #planning {
+        position: absolute;
+        bottom: 10px;
+        left: 2%;
+        width: 260px;
+        font-size: 8px; 
+        z-index: 1000;
+    }
+
+    #planning .item{
+        font-size: 10px; 
+        width: 180px;
+        background-color: lightgrey;
+    }
+
+    #planning .list{
+        float: left;
+        border: 2px solid white;
+        border-radius: 15px;
+        margin-right: 10px;
+    }
+    #planning .input{
+        color: white;
+    }
+    #planning .button{
+        float: center;
+        margin-top: 15%;
+    }
+
     // Search CSS
     #findbox {
         position: absolute;

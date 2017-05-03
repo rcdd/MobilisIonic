@@ -40,6 +40,8 @@ export class HomePage {
   private controlSearch: any;
   private allowLocation = false;
   private CheckBoxRoutes: any = [];
+  public planning: any = [];
+  public route: any;
 
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
@@ -53,7 +55,7 @@ export class HomePage {
     public dataProvider: DataProvider, public geolocation: Geolocation
   ) { }
 
-  
+
 
   async ngOnInit() {
     console.log("Init cenas");
@@ -70,12 +72,12 @@ export class HomePage {
       let self = this;
       this.map.on('locationerror', function (e) {
         self.allowLocation = false;
-        alert('You denied localization. For better performance, please allow your location.');
+        self.showToast('You denied localization. For better performance, please allow your location.', 3000);
       });
     });
     console.log("Init Done!");
   }
-  
+
 
   initMap(): void {
     let tiles = L.tileLayer('https://api.mapbox.com/styles/v1/rcdd/cj0lffm3h006c2qjretw3henw/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
@@ -96,20 +98,44 @@ export class HomePage {
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });
 
+    this.map.on('click', (e) => {
+      if (!this.planning.orig) {
+        this.planning.dest = "";
+        this.planning.orig = L.marker(e.latlng, { draggable: true })
+          .bindPopup("Origem")
+          .addTo(this.map)
+          .on('dragend', (e) => {
+            console.log("drag", e);
+            this.planning.orig.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
+          });
+        this.planning.orig.latlng = e.latlng.lat + "," + e.latlng.lng;
+      } else if (!this.planning.dest) {
+        this.planning.dest = L.marker(e.latlng, { draggable: true })
+          .bindPopup("Destino")
+          .addTo(this.map)
+          .on('dragend', (e) => {
+            console.log("drag", e);
+            this.planning.dest.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
+          });
+        this.planning.dest.latlng = e.latlng.lat + "," + e.latlng.lng;
+      }
+    });
+
+
     this.markersCluster = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
 
     this.currentPosition = L.marker(this.map.getCenter()).addTo(this.map);
     this.currentPositionCircle = L.circle(this.map.getCenter()).addTo(this.map);
 
     // ROUTING OF THE MAP
-    L.Routing.control({
-    waypoints: [
+    /*this.route = L.Routing.control({
+      waypoints: [
         L.latLng(39.75313, -8.81104),
         L.latLng(39.73326, -8.76160)
-    ],
-    routeWhileDragging: true
+      ],
+      routeWhileDragging: true
     }).addTo(this.map);
-
+*/
 
     // CONTROLS OF THE MAP
     var self = this;
@@ -245,7 +271,7 @@ export class HomePage {
     };
 
   }
-  
+
 
   showToast(msg: string, ms: number): void {
     let toast = this.toastCtrl.create({
@@ -393,5 +419,46 @@ export class HomePage {
       }]
     });
     alert.present();
+  }
+
+
+  showPlanning() {
+    this.planning.orig = "cenas";
+  }
+
+  async showRoute() {
+    if (this.planning.orig.latlng != "" && this.planning.dest.latlng != "")
+      await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
+        //this.route = resp;
+        let waypoints = [];
+        let i = 0;
+        resp.plan.itineraries.forEach(element => {
+          waypoints[i] = [];
+          console.dir(element);
+          element.legs.forEach(element2 => {
+            element2.steps.forEach(element3 => {
+              waypoints[i].push({ lat: element3.lat, lon: element3.lon });
+            });
+          });
+          i++;
+        });
+        //console.dir(waypoints);
+
+        this.route = L.Routing.control({
+          waypoints: waypoints[0],
+          routeWhileDragging: true
+        }).addTo(this.map);
+
+        L.Routing.control({
+          waypoints: waypoints[1],
+          routeWhileDragging: true
+        }).addTo(this.map);
+
+        L.Routing.control({
+          waypoints: waypoints[2],
+          routeWhileDragging: true
+        }).addTo(this.map);
+
+      });
   }
 }

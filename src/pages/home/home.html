@@ -22,10 +22,26 @@
   <div id="mapid">
   </div>
 
-  <ion-fab top right edge>
+  <ion-fab right bottom>
     <button ion-fab mini><ion-icon name="add"></ion-icon></button>
-    <ion-fab-list>
+    <ion-fab-list side="left">
       <button ion-fab id="filter" (click)="showBusLines()"> <ion-icon name="list"></ion-icon></button>
+      <button ion-fab id="plan" (click)="showPlanning()"> <ion-icon name="compass"></ion-icon></button>
     </ion-fab-list>
   </ion-fab>
+
+  <div id="planning" *ngIf='planning.orig'>
+    <ion-list>
+      <ion-item>
+        <ion-label color="primary" stacked>Origin</ion-label>
+        <ion-input [(ngModel)]="planning.orig.latlng" type="text" placeholder="Origin coordenates"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label color="primary" stacked>Destination</ion-label>
+        <ion-input [(ngModel)]="planning.dest.latlng" type="text" placeholder="Destination coordenates"></ion-input>
+      </ion-item>
+    </ion-list>
+    <button ion-button (click)="showRoute()"><ion-icon name="navigate"></ion-icon></button>
+
+  </div>
 </ion-content>
