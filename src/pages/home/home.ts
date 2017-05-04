@@ -20,7 +20,8 @@ import 'leaflet-search';
 import 'leaflet-knn';
 import 'leaflet.featuregroup.subgroup'
 import 'leaflet-routing-machine'
-import 'leaflet-control-geocoder'
+import 'leaflet-control-geocoder';
+import 'polyline-encoded';
 
 declare var L: any;
 
@@ -33,6 +34,7 @@ export class HomePage {
   public stops: any; // PARAGENS
   public markersCluster: any; // CLUSTER
   private markers: any = []; // CLUSTER ON MAP
+  private routingControl: any; //CONTROLER OF ROUTING
 
   private map: any;
   private currentPosition: any;
@@ -41,9 +43,18 @@ export class HomePage {
   private controlSearch: any;
   private allowLocation = false;
 
+
+  public planning: any = [];
+  public route: any;
+
   private iconBus = L.icon({
     iconUrl: 'assets/icon/android-bus.png',
     iconSize: [25, 25]
+  });
+
+  private redMarker = L.icon({
+    iconUrl: 'assets/icon/android-bus.png',
+    iconSize: [0, 0]
   });
 
 
@@ -51,7 +62,11 @@ export class HomePage {
     public toastCtrl: ToastController, public http: Http,
     public alertCtrl: AlertController, public db: DatabaseProvider,
     public dataProvider: DataProvider, public geolocation: Geolocation
-  ) { }
+  ) {
+    this.planning.orig = [];
+    this.planning.dest = [];
+    this.routingControl = [];
+  }
 
 
 
@@ -102,35 +117,36 @@ export class HomePage {
     this.currentPosition = L.marker(this.map.getCenter()).addTo(this.map);
     this.currentPositionCircle = L.circle(this.map.getCenter()).addTo(this.map);
 
-    // ROUTING OF THE MAP
-    let control = L.Routing.control({
-      waypoints: [
-        L.latLng(39.75313, -8.81104),
-        L.latLng(39.73326, -8.76160)
-      ],
-      routeWhileDragging: true,
-      geocoder: L.Control.Geocoder.nominatim(),
-      waypointNameFallback: function (latLng) {
-        function zeroPad(n) {
-          n = Math.round(n);
-          return n < 10 ? '0' + n : n;
-        }
-        function sexagesimal(p, pos, neg) {
-          var n = Math.abs(p),
-            degs = Math.floor(n),
-            mins = (n - degs) * 60,
-            secs = (mins - Math.floor(mins)) * 60,
-            frac = Math.round((secs - Math.floor(secs)) * 100);
-          return (n >= 0 ? pos : neg) + degs + '°' +
-            zeroPad(mins) + '\'' +
-            zeroPad(secs) + '.' + zeroPad(frac) + '"';
-        }
 
-        return sexagesimal(latLng.lat, 'N', 'S') + ' ' + sexagesimal(latLng.lng, 'E', 'W');
-      }
-    }).addTo(this.map);
+    // ROUTING CONTROL
+    /* this.routingControl = L.Routing.control({
+       //serviceUrl: 'http://194.210.216.191/otp/routers/default',
+       routeWhileDragging: true,
+       reverseWaypoints: true,
+       //itinerary: L.Routing.itinerary([39.7365272,-8.822886], [39.7350394,-8.8232237], [39.7331818,-8.8226327]),
+       // geocoder: L.Control.Geocoder.nominatim(),
+       waypointNameFallback: function (latLng) {
+         function zeroPad(n) {
+           n = Math.round(n);
+           return n < 10 ? '0' + n : n;
+         }
+         function sexagesimal(p, pos, neg) {
+           var n = Math.abs(p),
+             degs = Math.floor(n),
+             mins = (n - degs) * 60,
+             secs = (mins - Math.floor(mins)) * 60,
+             frac = Math.round((secs - Math.floor(secs)) * 100);
+           return (n >= 0 ? pos : neg) + degs + '°' +
+             zeroPad(mins) + '\'' +
+             zeroPad(secs) + '.' + zeroPad(frac) + '"';
+         }
+ 
+         return sexagesimal(latLng.lat, 'N', 'S') + ' ' + sexagesimal(latLng.lng, 'E', 'W');
+       }
+     });*/
 
-    this.map.on('click', function (e) {
+    var self = this;
+    this.map.on('contextmenu', function (e) {
       var container = L.DomUtil.create('div'),
         startBtn = self.createButton('Start from here', container),
         destBtn = self.createButton('Go to', container);
@@ -140,18 +156,43 @@ export class HomePage {
         .setLatLng(e.latlng)
         .openOn(self.map);
 
-      L.DomEvent.on(startBtn, 'click', function () {
-        control.spliceWaypoints(0, 1, e.latlng);
+      L.DomEvent.on(startBtn, 'click', function () {      // ROUTING OF THE MAP
+        self.map.removeLayer(self.planning.orig);
+        self.planning.orig = L.marker(e.latlng, { draggable: true })
+          .bindPopup("Origem")
+          .addTo(self.map)
+          .on('dragend', (e) => {
+            console.log("drag", e);
+            self.planning.orig.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
+          });
+        self.planning.orig.latlng = e.latlng.lat + ',' + e.latlng.lng;
+        //self.map.removeControl(self.routingControl);
+        //self.routingControl.addTo(self.map);
+        //self.routingControl.spliceWaypoints(0, 1, e.latlng);
+
         self.map.closePopup();
       });
+
       L.DomEvent.on(destBtn, 'click', function () {
-        control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
+        self.map.removeLayer(self.planning.dest);
+        self.planning.dest = L.marker(e.latlng, { draggable: true })
+          .bindPopup("Destino")
+          .addTo(self.map)
+          .on('dragend', (e) => {
+            console.log("drag", e);
+            self.planning.dest.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
+          });
+        self.planning.dest.latlng = e.latlng.lat + ',' + e.latlng.lng;
+        //self.map.removeControl(self.routingControl);
+        //self.routingControl.addTo(self.map);
+        //self.routingControl.spliceWaypoints(self.routingControl.getWaypoints().length - 1, 1, e.latlng);
+
         self.map.closePopup();
       });
+
     });
 
     // CONTROLS OF THE MAP
-    var self = this;
     // LOCATION
     L.easyButton({
       states: [
@@ -220,9 +261,8 @@ export class HomePage {
       if (self.markers.length != 0) {
         self.map.fitBounds(self.markersCluster.getBounds());
       } else {
-        self.showToast("You need select at least one line route", 3000);
+        self.map.setView(new L.LatLng(39.7481437, -8.810919), 13);
       }
-      //self.map.panTo(new L.LatLng(39.7460465, -8.8059954), 11);
     }).addTo(this.map);
 
     // GET CLOSEST STOPS
@@ -431,17 +471,21 @@ export class HomePage {
     alert.present();
   }
 
-
-  /*async showRoute() {
-    if (this.planning.orig.latlng != "" && this.planning.dest.latlng != "")
+  // ####################    TO MUCH TO DO HERE!!!!!!!!!! ########################
+  async showRoute() {
+    if (this.planning.orig.latlng != undefined && this.planning.dest.latlng != undefined)
       await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
+        this.cancelRoute(false);
         //this.route = resp;
         let waypoints = [];
+        let legGeometry = [];
         let i = 0;
         resp.plan.itineraries.forEach(element => {
           waypoints[i] = [];
+          legGeometry[i] = [];
           console.dir(element);
           element.legs.forEach(element2 => {
+            legGeometry[i].push(element2.legGeometry.points);
             element2.steps.forEach(element3 => {
               waypoints[i].push({ lat: element3.lat, lon: element3.lon });
             });
@@ -449,22 +493,57 @@ export class HomePage {
           i++;
         });
         //console.dir(waypoints);
-
-        this.route = L.Routing.control({
-          waypoints: waypoints[0],
-          routeWhileDragging: true
-        }).addTo(this.map);
-
-        L.Routing.control({
+        let self = this;
+        //this.map.removeLayer(this.routingControl);
+        this.routingControl.route = L.Routing.control({
           waypoints: waypoints[1],
-          routeWhileDragging: true
+          routeWhileDragging: true,
+          createMarker: function (i, wp, nWaypoints) {
+            var options = {
+              draggable: false, icon: self.redMarker
+            },
+              marker = L.marker(wp.latLng, options);
+
+            return marker;
+          },
         }).addTo(this.map);
 
-        L.Routing.control({
-          waypoints: waypoints[2],
-          routeWhileDragging: true
-        }).addTo(this.map);
+        //console.log("geometry", legGeometry[1]);
+        let j = 0;
+        legGeometry[1].forEach(element => {
+          //console.log("geometry->encoded", element);
+          //console.log("geometry->decoded", L.Polyline.fromEncoded(element));
+          //console.log("geometry->LatLng", L.Polyline.fromEncoded(element).getLatLngs());
+          if (j != 1) {
+            this.routingControl.polyline = new L.Polyline.fromEncoded(element);
+          }
+          j++;
+
+          console.log("poly", this.routingControl.polyline.getLatLngs());
+          this.routingControl.polyline.addTo(this.map);
+        });
 
       });
-  }*/
+  }
+
+  cancelRoute(all: boolean) {
+    if (this.routingControl.route != undefined) {
+      this.map.removeControl(this.routingControl.route);
+      this.routingControl.route = undefined;
+    }
+    if (this.map.hasLayer(this.routingControl.polyline)) {
+      this.routingControl.polyline.remove();
+    }
+    this.routingControl = [];
+    if (all) {
+      if (this.map.hasLayer(this.planning.orig)) {
+        this.planning.orig.remove();
+      }
+      if (this.map.hasLayer(this.planning.dest)) {
+        this.planning.dest.remove();
+      }
+      this.planning.orig = [];
+      this.planning.dest = [];
+    }
+  }
 }

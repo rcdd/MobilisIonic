@@ -26,11 +26,11 @@
     <button ion-fab mini><ion-icon name="add"></ion-icon></button>
     <ion-fab-list side="left">
       <button ion-fab id="filter" (click)="showBusLines()"> <ion-icon name="list"></ion-icon></button>
-      <button ion-fab id="plan" (click)="showPlanning()"> <ion-icon name="compass"></ion-icon></button>
+      <!-- <button ion-fab id="plan" (click)="showPlanning()"> <ion-icon name="compass"></ion-icon></button> -->
     </ion-fab-list>
   </ion-fab>
 
-  <div id="planning" *ngIf='planning.orig'>
+    <div id="planning" *ngIf='planning.orig.latlng || planning.dest.latlng'>
     <ion-list>
       <ion-item>
         <ion-label color="primary" stacked>Origin</ion-label>
@@ -42,6 +42,7 @@
       </ion-item>
     </ion-list>
     <button ion-button (click)="showRoute()"><ion-icon name="navigate"></ion-icon></button>
+    <button ion-button (click)="cancelRoute(true)"><ion-icon name="close"></ion-icon></button>
 
   </div>
 </ion-content>

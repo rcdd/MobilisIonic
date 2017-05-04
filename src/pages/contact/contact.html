@@ -7,16 +7,16 @@
 </ion-header>
 
 <ion-content padding>
-<ion-list>
-  <ion-item>
-    <ion-label>Select Bus Line</ion-label>
+  <ion-list>
+    <ion-item>
+      <ion-label>Select Bus Line</ion-label>
 
-    <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)"  multiple="false">
-      <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}" >{{busLine.label}} </ion-option>
-    </ion-select>
+      <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)" multiple="false">
+        <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}">{{busLine.label}} </ion-option>
+      </ion-select>
 
-  </ion-item>
-</ion-list>
+    </ion-item>
+  </ion-list>
   <ion-list>
     <button ion-button block (click)="showToast(stop)" *ngFor="let stop of stops">
       {{ stop.name }}

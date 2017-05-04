@@ -15,6 +15,8 @@ export class DataProvider {
     public loading: number = 0;
     public CheckBoxRoutes : any= [];
 
+    public test: any;
+
     constructor(private http: Http, private db: DatabaseProvider) {
         this.db.init();
     }
