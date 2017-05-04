@@ -43,7 +43,6 @@ export class ContactPage {
       this.timesToShow = [];
       let resp = a;
       //console.dir(resp);
-      let msg = " Lines:";
       let storeTimes: any;
 
       resp.forEach(pat => {
