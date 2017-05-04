@@ -135,9 +135,10 @@ async populateCheckBoxs() {
     }
 
     async getStationsFromBusLines() {
-        for (let route of this.lines) {
-            this.loading += 5;
-            let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops").toPromise();
+        for (let route of this.lines) { // http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops
+            this.loading += 5; //http://194.210.216.191/otp/routers/default/index/patterns/1:1018:0:01
+            let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + ":0:01").toPromise();
+            console.dir(stops);
             await this.createStorageStops(route, stops.json());
         }
     }
@@ -170,7 +171,7 @@ async populateCheckBoxs() {
 
         await this.db.query("CREATE TABLE IF NOT EXISTS ID_" + id[1] + " (name TEXT, id TEXT, lat TEXT, lon TEXT)")
             .then(res => {
-                stops.forEach(stp => {
+                stops.stops.forEach(stp => {
                     //console.log("inserir linha " + id[1]);
                     this.db.query("INSERT INTO ID_" + id[1] + " (name, id, lat, lon) VALUES(?,?,?,?);", [stp.name, stp.id, stp.lat, stp.lon])
                 });
@@ -232,4 +233,9 @@ async populateCheckBoxs() {
         });
     }
 
+   async getTimeFromStop(stop:any) {
+        console.log("TOUUUU!"+stop);
+        let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/"+stop+"/stoptimes/20170503").toPromise();
+        return resp.json();
+    }
 }
