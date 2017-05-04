@@ -466,5 +466,5 @@ export class HomePage {
         }).addTo(this.map);
 
       });
-  }*/
+  }*/ 
 }
