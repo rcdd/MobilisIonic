@@ -1,6 +1,6 @@
 import { Component, Injectable } from '@angular/core';
 import { NavController, ToastController } from 'ionic-angular';
-import { Http, Response } from '@angular/http';
+import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { DataProvider } from '../../providers/data-provider';
 import { AlertController } from 'ionic-angular';
@@ -20,7 +20,7 @@ export class ContactPage {
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider,
     public alertCtrl: AlertController) {
-    
+
     this.busLinesToPresent = dataProvider.CheckBoxRoutes;
     // console.dir(this.busLinesToPresent);
   }
@@ -57,7 +57,7 @@ export class ContactPage {
       resp.forEach(pat => {
         timesL[pat.pattern.desc] = [];
         msg += " " + pat.pattern.desc + "; ";
-        
+
         pat.times.forEach(time => {
           timesL[pat.pattern.desc].push({ realtimeArrival: time.realtimeArrival, realtimeDeparture: time.realtimeDeparture });
         });
@@ -65,11 +65,11 @@ export class ContactPage {
 
       console.dir(timesL);
       msg += "<br>TIME-STOP</br>";
-      this.showAlert(stop.name,msg);
+      this.showAlert(stop.name, msg);
     });
   }
 
-  showAlert(title:any , msg:any) {
+  showAlert(title: any, msg: any) {
     let alert = this.alertCtrl.create({
       title: title,
       subTitle: msg,

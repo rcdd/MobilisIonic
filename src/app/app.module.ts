@@ -9,6 +9,7 @@ import { DatabaseProvider } from '../providers/database-provider';
 import { NavController } from 'ionic-angular';
 import { DataProvider } from '../providers/data-provider';
 import { Geolocation } from '@ionic-native/geolocation';
+import { Network } from '@ionic-native/network';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,6 @@ import { Geolocation } from '@ionic-native/geolocation';
   ],
   providers:
   [{ provide: ErrorHandler, useClass: IonicErrorHandler },
-  [DatabaseProvider, NavController, DataProvider, Geolocation]]
+  [DatabaseProvider, NavController, DataProvider, Geolocation, Network]]
 })
 export class AppModule { }

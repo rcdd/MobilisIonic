@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { AlertController, NavController, NavParams, ToastController } from 'ionic-angular';
+import { AlertController, NavController, NavParams, ToastController, Platform, Alert } from 'ionic-angular';
 
 import { Http } from '@angular/http';
 
@@ -52,9 +52,18 @@ export class HomePage {
     iconSize: [25, 25]
   });
 
-  private redMarker = L.icon({
-    iconUrl: 'assets/icon/android-bus.png',
-    iconSize: [0, 0]
+  private iconStart = L.icon({
+    iconUrl: 'assets/icon/startPin.png',
+    iconSize: [75, 75],
+    iconAnchor: [40, 65],
+    popupAnchor: [0, -50],
+  });
+
+  private iconDest = L.icon({
+    iconUrl: 'assets/icon/destPin.png',
+    iconSize: [75, 75],
+    iconAnchor: [40, 65],
+    popupAnchor: [0, -50],
   });
 
 
@@ -67,7 +76,6 @@ export class HomePage {
     this.planning.dest = [];
     this.routingControl = [];
   }
-
 
 
   async ngOnInit() {
@@ -96,6 +104,7 @@ export class HomePage {
     let tiles = L.tileLayer('https://api.mapbox.com/styles/v1/rcdd/cj0lffm3h006c2qjretw3henw/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
       attribution: 'Application power by RD&RP :)',
       maxZoom: 20,
+      minZoom: 8,
       id: 'mapbox.mapbox-traffic-v1',
       accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA',
       // CACHE STUFF
@@ -158,7 +167,7 @@ export class HomePage {
 
       L.DomEvent.on(startBtn, 'click', function () {      // ROUTING OF THE MAP
         self.map.removeLayer(self.planning.orig);
-        self.planning.orig = L.marker(e.latlng, { draggable: true })
+        self.planning.orig = L.marker(e.latlng, { draggable: true, icon: self.iconStart })
           .bindPopup("Origem")
           .addTo(self.map)
           .on('dragend', (e) => {
@@ -175,7 +184,7 @@ export class HomePage {
 
       L.DomEvent.on(destBtn, 'click', function () {
         self.map.removeLayer(self.planning.dest);
-        self.planning.dest = L.marker(e.latlng, { draggable: true })
+        self.planning.dest = L.marker(e.latlng, { draggable: true, icon: self.iconDest })
           .bindPopup("Destino")
           .addTo(self.map)
           .on('dragend', (e) => {
@@ -388,9 +397,9 @@ export class HomePage {
         } else {
           dist = '';
         }
-        let popUp = '<h6>' + stop.name + '</h6><hr>' + dist + 'Linhas:';
+        let popUp = '<h6>' + stop.name + '</h6><hr>' + dist + 'Lines:';
         stop.lines.forEach(line => {
-          popUp += '<br>' + line;
+          popUp += '<br>Line ' + line;
         });
         let popUpOptions =
           {
@@ -475,54 +484,59 @@ export class HomePage {
   async showRoute() {
     if (this.planning.orig.latlng != undefined && this.planning.dest.latlng != undefined)
       await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
-        this.cancelRoute(false);
-        //this.route = resp;
-        let waypoints = [];
-        let legGeometry = [];
-        let i = 0;
-        resp.plan.itineraries.forEach(element => {
-          waypoints[i] = [];
-          legGeometry[i] = [];
-          console.dir(element);
-          element.legs.forEach(element2 => {
-            legGeometry[i].push(element2.legGeometry.points);
-            element2.steps.forEach(element3 => {
-              waypoints[i].push({ lat: element3.lat, lon: element3.lon });
+        if (resp.error == undefined) {
+          this.cancelRoute(false);
+          //this.route = resp;
+          let waypoints = [];
+          let legGeometry = [];
+          let i = 0;
+          resp.plan.itineraries.forEach(element => {
+            waypoints[i] = [];
+            legGeometry[i] = [];
+            console.dir(element);
+            element.legs.forEach(element2 => {
+              legGeometry[i].push(element2.legGeometry.points);
+              element2.steps.forEach(element3 => {
+                waypoints[i].push({ lat: element3.lat, lon: element3.lon });
+              });
             });
+            i++;
           });
-          i++;
-        });
-        //console.dir(waypoints);
-        let self = this;
-        //this.map.removeLayer(this.routingControl);
-        this.routingControl.route = L.Routing.control({
-          waypoints: waypoints[1],
-          routeWhileDragging: true,
-          createMarker: function (i, wp, nWaypoints) {
-            var options = {
-              draggable: false, icon: self.redMarker
+          //console.dir(waypoints);
+          //this.map.removeLayer(this.routingControl);
+          /*this.routingControl.route = L.Routing.control({
+            waypoints: waypoints[1],
+            routeWhileDragging: true,
+            createMarker: function (i, wp, nWaypoints) {
+              var options = {
+                draggable: false, icon: self.redMarker
+              },
+                marker = L.marker(wp.latLng, options);
+  
+              return marker;
             },
-              marker = L.marker(wp.latLng, options);
+          }).addTo(this.map);*/
 
-            return marker;
-          },
-        }).addTo(this.map);
+          //console.log("geometry", legGeometry[1]);
+          let j = 0;
+          let poly = [];
+          legGeometry[0].forEach(element => {
+            //console.log("geometry->encoded", element);
+            //console.log("geometry->decoded", L.Polyline.fromEncoded(element));
+            //console.log("geometry->LatLng", L.Polyline.fromEncoded(element).getLatLngs());
+            //if (j != 1) {
+            //}
+            poly = poly.concat(L.Polyline.fromEncoded(element).getLatLngs());
+            j++;
+          });
 
-        //console.log("geometry", legGeometry[1]);
-        let j = 0;
-        legGeometry[1].forEach(element => {
-          //console.log("geometry->encoded", element);
-          //console.log("geometry->decoded", L.Polyline.fromEncoded(element));
-          //console.log("geometry->LatLng", L.Polyline.fromEncoded(element).getLatLngs());
-          if (j != 1) {
-            this.routingControl.polyline = new L.Polyline.fromEncoded(element);
-          }
-          j++;
+          console.log("poly", this.routingControl.polyline);
+          this.routingControl.polyline = new L.Polyline(poly);
 
-          console.log("poly", this.routingControl.polyline.getLatLngs());
           this.routingControl.polyline.addTo(this.map);
-        });
-
+        } else {
+          this.showToast(resp.error.msg, 3000);
+        }
       });
   }
 

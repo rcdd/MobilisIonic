@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Platform, AlertController } from 'ionic-angular';
+import { Network } from '@ionic-native/network';
 import 'rxjs/Rx';
 import { DatabaseProvider } from './database-provider';
 import { Http } from '@angular/http';
@@ -13,13 +15,47 @@ export class DataProvider {
     public lines: any = [];
     public stops: any[] = [];
     public loading: number = 0;
-    public CheckBoxRoutes : any= [];
+    public CheckBoxRoutes: any = [];
 
     public test: any;
 
-    constructor(private http: Http, private db: DatabaseProvider) {
+
+
+    constructor(private http: Http, private db: DatabaseProvider,
+        private alertCtrl: AlertController, private network: Network, private platform: Platform) {
         this.db.init();
+        // watch network for a connection
+        this.platform.ready().then(() => {
+
+            network.onDisconnect().subscribe(() => {
+                let alert = this.alertCtrl.create({
+                    title: "Internet Connection",
+                    subTitle: "Please Check Your Network connection",
+                    buttons: [{
+                        text: 'Ok',
+                        handler: () => {
+                            this.platform.exitApp();
+                        }
+                    }]
+                });
+                alert.present();
+            });
+
+            network.onConnect().subscribe(() => {
+                console.log('you are online');
+            });
+
+            if (navigator.onLine) {
+                console.log("NETwork On");
+            } else {
+                console.log("NETwork Off");
+
+            }
+            console.log("Network state:", this.network.type);
+
+        });
     }
+
 
     async getStops() {
         return this.stops;
@@ -63,17 +99,17 @@ export class DataProvider {
         });
     }
 
-async populateCheckBoxs() {
-    //console.log("populate", Object.keys(this.stops).length);
-    for (var index = 0; index < Object.keys(this.stops).length; index++) {
-      let route = this.stops[Object.keys(this.stops)[index]];
-      //console.log("route: ", route);
-      this.CheckBoxRoutes.push({ id: route, label: route.longName, type: "checkbox", value: route, checked: false });
-      this.CheckBoxRoutes.sort(function (a, b) { return (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0); });
-    };
-  }
+    async populateCheckBoxs() {
+        //console.log("populate", Object.keys(this.stops).length);
+        for (var index = 0; index < Object.keys(this.stops).length; index++) {
+            let route = this.stops[Object.keys(this.stops)[index]];
+            //console.log("route: ", route);
+            this.CheckBoxRoutes.push({ id: route, label: route.longName, type: "checkbox", value: route, checked: false });
+            this.CheckBoxRoutes.sort(function (a, b) { return (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0); });
+        };
+    }
 
-    async isUpdated() {
+    async  isUpdated() {
         return await this.db.query("SELECT * FROM SETTINGS")
             .then(res => {
                 let diff = (moment(new Date(), "YYYYMMDD").diff(res.rows.item(0).value, 'days'));
@@ -84,11 +120,12 @@ async populateCheckBoxs() {
                     return false;
                 }
             })
+
             .catch(err => {
                 console.log("Error: ", err);
             });
-
     }
+
 
     async DBDropTable(tableName: string) {
         await this.db.query("DROP TABLE " + tableName)
@@ -137,11 +174,12 @@ async populateCheckBoxs() {
     async getStationsFromBusLines() {
         for (let route of this.lines) { // http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops
             this.loading += 5; //http://194.210.216.191/otp/routers/default/index/patterns/1:1018:0:01
-            let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + ":0:01").toPromise();
+            let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + "::01").toPromise();
             console.dir(stops);
             await this.createStorageStops(route, stops.json());
         }
     }
+
 
     async createStorageLines() {
         await this.DBDropTable("BUSLINES");
@@ -157,6 +195,7 @@ async populateCheckBoxs() {
                             console.log("Error: ", err);
                         });
                 });
+
 
             })
             .catch(err => {
@@ -176,6 +215,7 @@ async populateCheckBoxs() {
                     this.db.query("INSERT INTO ID_" + id[1] + " (name, id, lat, lon) VALUES(?,?,?,?);", [stp.name, stp.id, stp.lat, stp.lon])
                 });
             })
+
             .catch(err => {
                 console.log("Error: ", err);
             });
@@ -233,9 +273,9 @@ async populateCheckBoxs() {
         });
     }
 
-   async getTimeFromStop(stop:any) {
-        console.log("TOUUUU!"+stop);
-        let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/"+stop+"/stoptimes/20170503").toPromise();
+    async getTimeFromStop(stop: any) {
+        console.log("TOUUUU!" + stop);
+        let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/" + stop + "/stoptimes/20170503").toPromise();
         return resp.json();
     }
 }
