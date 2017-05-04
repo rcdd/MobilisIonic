@@ -274,8 +274,7 @@ export class DataProvider {
     }
 
     async getTimeFromStop(stop: any) {
-        console.log("TOUUUU!" + stop);
-        let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/" + stop + "/stoptimes/20170503").toPromise();
+        let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/" + stop + "/stoptimes/" + moment(new Date(), "YYYYMMDD")).toPromise();
         return resp.json();
     }
 }
