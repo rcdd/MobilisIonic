@@ -234,7 +234,7 @@ async populateCheckBoxs() {
     }
 
    async getTimeFromStop(stop:any) {
-        console.log("TOUUUU!"+stop);
+        //console.log("TOUUUU!"+stop);
         let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/"+stop+"/stoptimes/20170504").toPromise();
         return resp.json();
     }

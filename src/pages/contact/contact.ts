@@ -16,17 +16,20 @@ export class ContactPage {
   private stops: any[];
   public selectedBusLine: any = [];
   public busLinesToPresent: any;
+  public timesToShow: any = [];
+  public timesToShowInList: any = [];
 
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider,
     public alertCtrl: AlertController) {
-    
+
     this.busLinesToPresent = dataProvider.CheckBoxRoutes;
-    // console.dir(this.busLinesToPresent);
   }
 
   updateSelectedValue() {
     //console.dir(this.selectedBusLine);
+    this.timesToShowInList = [];
+    this.timesToShow = [];
     this.dataProvider.CheckBoxRoutes.forEach(line => {
       if (line.id.id == this.selectedBusLine) {
         this.stops = line.id.stops;
@@ -35,41 +38,47 @@ export class ContactPage {
     });
   }
 
-  showToast(stop: any) {
-    console.dir(stop);
-    let toast = this.toastCtrl.create({
-      message: "Name: " + stop.name + "latitude: " + stop.lat + "Longitude: " + stop.lon,
-      duration: 3000,
-      position: 'top',
-      showCloseButton: true
-    });
-    toast.onDidDismiss(() => {
-      //console.log('Dismissed toast');
-    });
-
-    toast.present();
+  showTimes(stop: any) {
     this.dataProvider.getTimeFromStop(stop.id).then(a => {
+      this.timesToShow = [];
       let resp = a;
-      console.dir(resp);
-      let timesL: any[] = [];
+      //console.dir(resp);
       let msg = " Lines:";
+      let storeTimes: any;
 
       resp.forEach(pat => {
-        timesL[pat.pattern.desc] = [];
-        msg += "<br> " + pat.pattern.desc + ";</br> ";
-        
+        storeTimes = [];
+        storeTimes.line = pat.pattern;
+        let listTimes: any[] = [];
         pat.times.forEach(time => {
-          timesL[pat.pattern.desc].push({ realtimeArrival: time.realtimeArrival, realtimeDeparture: time.realtimeDeparture , serviceDay: time.serviceDay, hour: time.serviceDay+ time.realtimeArrival});
+          listTimes.push(time);
         });
+        storeTimes.times = listTimes;
+        this.timesToShow.push(storeTimes);
       });
-
-      console.dir(timesL);
+      //console.dir(this.timesToShow);
       msg += "<br>TIME-STOP</br>";
-      this.showAlert(stop.name,msg);
+      //this.showAlert(stop.name, msg);
     });
   }
 
-  showAlert(title:any , msg:any) {
+  selectedLine(time) {
+    this.timesToShowInList = [];
+    time.forEach(timeToShow => {
+      if (this.timesToShowInList.indexOf((timeToShow.realtimeArrival + timeToShow.serviceDay) * 1000) == -1) {
+        this.timesToShowInList.push((timeToShow.realtimeArrival + timeToShow.serviceDay) * 1000);
+      }
+    });
+
+    // console.dir(this.timesToShowInList);
+    this.timesToShowInList.sort(function (a, b) {
+      a = new Date(a);
+      b = new Date(b);
+      return a > b ? -1 : a < b ? 1 : 0;
+    });
+  }
+
+  showAlert(title: any, msg: any) {
     let alert = this.alertCtrl.create({
       title: title,
       subTitle: msg,

@@ -1,25 +1,35 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      BUSLINES
+      <ion-item>
+        <ion-label>Select Bus Line</ion-label>
+
+        <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)" multiple="false">
+          <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}">{{busLine.label}} </ion-option>
+        </ion-select>
+      </ion-item>
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <ion-list>
-    <ion-item>
-      <ion-label>Select Bus Line</ion-label>
 
-      <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)" multiple="false">
-        <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}">{{busLine.label}} </ion-option>
-      </ion-select>
-
-    </ion-item>
-  </ion-list>
   <ion-list>
-    <button ion-button block color="light" (click)="showToast(stop)" *ngFor="let stop of stops">
+    <button ion-button block color="light" (click)="showTimes(stop)" *ngFor="let stop of stops">
       {{ stop.name }}
     </button>
   </ion-list>
+
+  <div>
+    <ion-segment color="danger">
+      <ion-segment-button *ngFor="let time of timesToShow" value="time" (ionSelect)="selectedLine(time.times)"> Line {{time.line.desc}}
+      </ion-segment-button>
+    </ion-segment>
+    <ion-list>
+      <ion-item *ngFor="let time of timesToShowInList">
+        {{time | date: 'HH:MM'}} H
+      </ion-item>
+    </ion-list>
+  </div>
+
 </ion-content>
