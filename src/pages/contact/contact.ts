@@ -56,10 +56,10 @@ export class ContactPage {
 
       resp.forEach(pat => {
         timesL[pat.pattern.desc] = [];
-        msg += " " + pat.pattern.desc + "; ";
+        msg += "<br> " + pat.pattern.desc + ";</br> ";
         
         pat.times.forEach(time => {
-          timesL[pat.pattern.desc].push({ realtimeArrival: time.realtimeArrival, realtimeDeparture: time.realtimeDeparture });
+          timesL[pat.pattern.desc].push({ realtimeArrival: time.realtimeArrival, realtimeDeparture: time.realtimeDeparture , serviceDay: time.serviceDay, hour: time.serviceDay+ time.realtimeArrival});
         });
       });
 

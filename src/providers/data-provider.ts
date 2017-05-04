@@ -137,7 +137,7 @@ async populateCheckBoxs() {
     async getStationsFromBusLines() {
         for (let route of this.lines) { // http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops
             this.loading += 5; //http://194.210.216.191/otp/routers/default/index/patterns/1:1018:0:01
-            let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + ":0:01").toPromise();
+            let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + "::01").toPromise();
             console.dir(stops);
             await this.createStorageStops(route, stops.json());
         }
@@ -235,7 +235,7 @@ async populateCheckBoxs() {
 
    async getTimeFromStop(stop:any) {
         console.log("TOUUUU!"+stop);
-        let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/"+stop+"/stoptimes/20170503").toPromise();
+        let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/"+stop+"/stoptimes/20170504").toPromise();
         return resp.json();
     }
 }
