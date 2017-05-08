@@ -39,8 +39,9 @@ export class ContactPage {
   }
 
   showTimes(stop: any) {
+    this.timesToShowInList = [];
+    this.timesToShow = [];
     this.dataProvider.getTimeFromStop(stop.id).then(a => {
-      this.timesToShow = [];
       let resp = a;
       //console.dir(resp);
       let msg = " Lines:";
@@ -56,9 +57,6 @@ export class ContactPage {
         storeTimes.times = listTimes;
         this.timesToShow.push(storeTimes);
       });
-      //console.dir(this.timesToShow);
-      msg += "<br>TIME-STOP</br>";
-      //this.showAlert(stop.name, msg);
     });
   }
 
@@ -71,7 +69,7 @@ export class ContactPage {
     });
 
     // console.dir(this.timesToShowInList);
-    this.timesToShowInList.sort(function (a, b) {
+    this.timesToShowInList.sort(function (b, a) {
       a = new Date(a);
       b = new Date(b);
       return a > b ? -1 : a < b ? 1 : 0;
