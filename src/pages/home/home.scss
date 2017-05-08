@@ -162,43 +162,31 @@ page-home {
 /* ========================================================
   Progress Bar
 ======================================================== */
-
-// ANIMATIONS
-@-webkit-keyframes progress-bar-animate {
-  from  { background-position: 40px 0; }
-  to    { background-position: 0 0; }
-}
-
-@keyframes progress-bar-animate {
-  from  { background-position: 40px 0; }
-  to    { background-position: 0 0; }
-}
-
-
-// outer container
 .progress {
-  overflow: hidden;     
-  position: absolute;
-  top:50%;
-  height: 20px;
+    overflow: hidden;     
+    position: absolute;
+    top:50%;
+    height: 35px;
     width: 100%;
-  border-radius: 10px;
-  text-align: center; 
-  z-index: 10000;
-
-  // inner progress bar
-  &-bar {
-    width: 0%;
-    height: 100%;
-    float: left;
-    box-sizing: border-box;
-    background-color: #79b;
-    background-size: 40px 40px;
-    border-radius: 10px 0 0 10px;
-
-    -webkit-animation: progress-bar-animate 1s linear infinite;
-            animation: progress-bar-animate 1s linear infinite;
-  }
+    margin: 10px 2%;
+    padding: 3px;
+    text-align: center;
+    background-color: #f4f4f4;
+    border: 1px solid #dcdcdc;
+    color: #fff;
+    border-radius: 20px;
+    text-align: center; 
+    z-index: -10;
 }
+
+.progress-bar {
+    min-width: 15%;
+    white-space: nowrap;
+    overflow: hidden;
+    padding: 5px;
+    border-radius: 20px;
+    background-color: map-get($colors, primary);
+}
+
 
 }

@@ -1,6 +1,6 @@
 import { Component, Injectable } from '@angular/core';
 import { NavController, ToastController } from 'ionic-angular';
-import { Http, Response } from '@angular/http';
+import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { DataProvider } from '../../providers/data-provider';
 import { AlertController } from 'ionic-angular';
@@ -44,13 +44,13 @@ export class ContactPage {
     this.dataProvider.getTimeFromStop(stop.id).then(a => {
       let resp = a;
       //console.dir(resp);
-      let msg = " Lines:";
       let storeTimes: any;
 
       resp.forEach(pat => {
         storeTimes = [];
         storeTimes.line = pat.pattern;
         let listTimes: any[] = [];
+
         pat.times.forEach(time => {
           listTimes.push(time);
         });
