@@ -3,24 +3,25 @@
     <ion-title>
       <ion-item>
         <ion-label>Select Bus Line</ion-label>
-
         <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)" multiple="false">
           <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}">{{busLine.label}} </ion-option>
         </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-searchbar *ngIf='isVisibleSearchbar'  (ionInput)="getItems($event)"></ion-searchbar>
       </ion-item>
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-
-  <ion-list>
-    <button ion-button block color="light" (click)="showTimes(stop)" *ngFor="let stop of stops">
+  <ion-list padding>
+    <button ion-button block color="light" (click)="showTimes(stop)" *ngFor="let stop of stopsToShow">
       {{ stop.name }}
     </button>
   </ion-list>
 
-  <div>
+  <div *ngIf='isVisible'>
     <ion-segment color="danger">
       <ion-segment-button *ngFor="let time of timesToShow" value="time" (ionSelect)="selectedLine(time.times)"> Line {{time.line.desc}}
       </ion-segment-button>
