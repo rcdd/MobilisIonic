@@ -39,8 +39,9 @@ export class ContactPage {
   }
 
   showTimes(stop: any) {
+    this.timesToShowInList = [];
+    this.timesToShow = [];
     this.dataProvider.getTimeFromStop(stop.id).then(a => {
-      this.timesToShow = [];
       let resp = a;
       //console.dir(resp);
       let storeTimes: any;

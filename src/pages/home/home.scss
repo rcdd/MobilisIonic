@@ -22,12 +22,24 @@ page-home {
 
     #planning {
         position: absolute;
-        bottom: 10px;
+        bottom: -15px;
         left: 2%;
         width: 260px;
         font-size: 8px; 
         z-index: 1000;
+        animation: fadeIn 0.3s;
     }
+
+
+@-webkit-keyframes fadeIn {
+    from { bottom: -100px; }
+      to { bottom: -15px; }
+}  
+@keyframes fadeIn {
+    from { bottom: -100px; }
+      to { bottom: -15px; }
+}
+
 
     #planning .item{
         font-size: 10px; 
@@ -165,21 +177,23 @@ page-home {
 .progress {
     overflow: hidden;     
     position: absolute;
-    top:50%;
-    height: 35px;
+    //top:50%;
+    //height: 100%;
     width: 100%;
     margin: 10px 2%;
     padding: 3px;
     text-align: center;
-    background-color: #f4f4f4;
-    border: 1px solid #dcdcdc;
-    color: #fff;
-    border-radius: 20px;
+    //background-color: #f4f4f4;
+    //border: 1px solid #dcdcdc;
+    color: black;
+    //border-radius: 20px;
     text-align: center; 
+    vertical-align: middle;
     z-index: -10;
 }
 
 .progress-bar {
+    color: #fff;
     min-width: 15%;
     white-space: nowrap;
     overflow: hidden;
@@ -187,6 +201,22 @@ page-home {
     border-radius: 20px;
     background-color: map-get($colors, primary);
 }
+
+#loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -100px;
+    z-index: 5000;
+}
+
+
+#loading img {
+    position: fixed;
+    text-align: center;
+}
+
 
 
 }
