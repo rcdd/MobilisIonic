@@ -69,7 +69,7 @@ export class ContactPage {
     });
 
     // console.dir(this.timesToShowInList);
-    this.timesToShowInList.sort(function (a, b) {
+    this.timesToShowInList.sort(function (b, a) {
       a = new Date(a);
       b = new Date(b);
       return a > b ? -1 : a < b ? 1 : 0;
