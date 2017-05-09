@@ -42,7 +42,15 @@
         "polyline-encoded": "0.0.8",
         "rxjs": "5.0.1",
         "sw-toolbox": "3.4.0",
-        "zone.js": "0.7.2"
+        "zone.js": "0.7.2",
+        "cordova-plugin-console": "1.0.5",
+        "cordova-plugin-device": "1.1.4",
+        "cordova-plugin-network-information": "~1.3.3",
+        "cordova-plugin-splashscreen": "~4.0.1",
+        "cordova-plugin-statusbar": "2.2.1",
+        "cordova-plugin-whitelist": "1.3.1",
+        "cordova-sqlite-storage": "~2.0.3",
+        "ionic-plugin-keyboard": "~2.2.1"
     },
     "devDependencies": {
         "@ionic/app-scripts": "1.1.4",
@@ -61,7 +69,14 @@
     "description": "MobilisApp: An Ionic project",
     "cordova": {
         "plugins": {
-            "cordova-plugin-network-information": {}
+            "cordova-plugin-network-information": {},
+            "cordova-plugin-console": {},
+            "cordova-plugin-device": {},
+            "cordova-plugin-splashscreen": {},
+            "cordova-plugin-statusbar": {},
+            "cordova-plugin-whitelist": {},
+            "cordova-sqlite-storage": {},
+            "ionic-plugin-keyboard": {}
         }
     }
 }

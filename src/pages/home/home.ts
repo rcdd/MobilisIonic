@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { AlertController, NavController, NavParams, ToastController, Platform, Alert } from 'ionic-angular';
+import { AlertController, NavController, NavParams, ToastController } from 'ionic-angular';
 
 import { Http } from '@angular/http';
 
@@ -38,7 +38,6 @@ export class HomePage {
 
   private map: any;
   private currentPosition: any;
-  private currentPositionCircle: any;
   public debug: any;
   private controlSearch: any;
   private allowLocation = false;
@@ -48,8 +47,9 @@ export class HomePage {
   public route: any;
 
   private iconBus = L.icon({
-    iconUrl: 'assets/icon/android-bus.png',
-    iconSize: [25, 25]
+    iconUrl: 'assets/icon/busStop.png',
+    iconSize: [50, 50],
+    popupAnchor: [0, -25]
   });
 
   private iconStart = L.icon({
@@ -75,13 +75,14 @@ export class HomePage {
     this.planning.orig = [];
     this.planning.dest = [];
     this.routingControl = [];
+    this.currentPosition = [];
   }
 
 
   async ngOnInit() {
     console.log("Init cenas");
     this.dataProvider.getDataFromServer().then((resp) => {
-      this.dataProvider.loading = 100;
+      this.dataProvider.innit = 100;
       this.stops = resp;
       //console.log("imported stops:", Object.keys(this.stops).length);
       //console.log("imported stops:", this.stops);
@@ -123,8 +124,8 @@ export class HomePage {
 
     this.markersCluster = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
 
-    this.currentPosition = L.marker(this.map.getCenter()).addTo(this.map);
-    this.currentPositionCircle = L.circle(this.map.getCenter()).addTo(this.map);
+    this.currentPosition.marker = L.marker(this.map.getCenter()).addTo(this.map);
+    this.currentPosition.circle = L.circle(this.map.getCenter()).addTo(this.map);
 
 
     // ROUTING CONTROL
@@ -168,10 +169,11 @@ export class HomePage {
       L.DomEvent.on(startBtn, 'click', function () {      // ROUTING OF THE MAP
         self.map.removeLayer(self.planning.orig);
         self.planning.orig = L.marker(e.latlng, { draggable: true, icon: self.iconStart })
-          .bindPopup("Origem")
+          .bindPopup("Origin")
           .addTo(self.map)
           .on('dragend', (e) => {
-            console.log("drag", e);
+            console.log("dragOrigin", e);
+            self.cancelRoute(false);
             self.planning.orig.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
           });
         self.planning.orig.latlng = e.latlng.lat + ',' + e.latlng.lng;
@@ -188,7 +190,8 @@ export class HomePage {
           .bindPopup("Destino")
           .addTo(self.map)
           .on('dragend', (e) => {
-            console.log("drag", e);
+            console.log("dragDest", e);
+            self.cancelRoute(false);
             self.planning.dest.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
           });
         self.planning.dest.latlng = e.latlng.lat + ',' + e.latlng.lng;
@@ -212,8 +215,9 @@ export class HomePage {
           onClick: function (control) {
             control.state("loading");
             control._map.on('locationfound', function (e) {
+              //console.log("ButtonLocation", e);
               this.setView(e.latlng, 17);
-              let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accurancy };
+              let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accuracy };
               self.updateCurrentLocation(data);
               control.state('loaded');
             });
@@ -232,7 +236,7 @@ export class HomePage {
             control.state("loading");
             control._map.on('locationfound', function (e) {
               this.setView(e.latlng, 17);
-              let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accurancy };
+              let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accuracy };
               self.updateCurrentLocation(data);
               control.state('loaded');
             });
@@ -249,7 +253,7 @@ export class HomePage {
             control.state("loading");
             control._map.on('locationfound', function (e) {
               this.setView(e.latlng, 17);
-              let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accurancy };
+              let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accuracy };
               self.updateCurrentLocation(data);
               control.state('loaded');
             });
@@ -351,11 +355,11 @@ export class HomePage {
     this.geolocation.getCurrentPosition().then((resp) => {
       console.log("GeoLocation:", resp);
       self.allowLocation = true;
-      /*console.log('Distances:');
-      console.dir(self.currentPosition.getLatLng());
-      console.dir(data.coords);*/
-      if (self.currentPosition.getLatLng().lat != resp.coords.latitude ||
-        self.currentPosition.getLatLng().lng != resp.coords.longitude) {
+      //console.log('Distances:');
+      // console.dir(self.currentPosition.getLatLng());
+      //console.log("Location", resp);
+      if (self.currentPosition.marker.getLatLng().lat != resp.coords.latitude ||
+        self.currentPosition.marker.getLatLng().lng != resp.coords.longitude) {
         self.updateCurrentLocation(resp.coords);
         //self.updateClusterGroup();
       }
@@ -369,15 +373,15 @@ export class HomePage {
   }
 
   updateCurrentLocation(data): void {
+    console.log("updateLocation", data);
     var radius = (data.accuracy / 2).toFixed(1);
     var currentPosition = [data.latitude, data.longitude];
-    this.currentPosition.setLatLng(currentPosition);
-    this.currentPosition.bindPopup("You are within " + radius + " meters from this point");
-    this.currentPositionCircle.setLatLng(currentPosition);
+    this.currentPosition.marker.setLatLng(currentPosition);
+    this.currentPosition.marker.bindPopup("You are within " + radius + " meters from this point");
+    this.currentPosition.circle.setLatLng(currentPosition);
   }
 
   updateClusterGroup() {
-
     this.map.removeLayer(this.markersCluster);
     this.markersCluster = new L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
     //console.log("makers", this.markers);
@@ -385,7 +389,7 @@ export class HomePage {
       this.markers.forEach(stop => {
         let dist: any;
         if (this.allowLocation == true) {
-          stop.meters = this.currentPosition.getLatLng().distanceTo([stop.lat, stop.lon]);
+          stop.meters = this.currentPosition.marker.getLatLng().distanceTo([stop.lat, stop.lon]);
           dist = '';
           if (stop.meters > 1000) {
             dist += (stop.meters / 1000).toFixed(0) + ' Kms';
@@ -482,7 +486,8 @@ export class HomePage {
 
   // ####################    TO MUCH TO DO HERE!!!!!!!!!! ########################
   async showRoute() {
-    if (this.planning.orig.latlng != undefined && this.planning.dest.latlng != undefined)
+    this.dataProvider.loading = true;
+    if (this.planning.orig.latlng != undefined && this.planning.dest.latlng != undefined) {
       await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
         if (resp.error == undefined) {
           this.cancelRoute(false);
@@ -503,50 +508,50 @@ export class HomePage {
             i++;
           });
           //console.dir(waypoints);
-          //this.map.removeLayer(this.routingControl);
-          /*this.routingControl.route = L.Routing.control({
-            waypoints: waypoints[1],
-            routeWhileDragging: true,
-            createMarker: function (i, wp, nWaypoints) {
-              var options = {
-                draggable: false, icon: self.redMarker
-              },
-                marker = L.marker(wp.latLng, options);
-  
-              return marker;
-            },
-          }).addTo(this.map);*/
 
           //console.log("geometry", legGeometry[1]);
           let j = 0;
           let poly = [];
-          legGeometry[0].forEach(element => {
-            //console.log("geometry->encoded", element);
-            //console.log("geometry->decoded", L.Polyline.fromEncoded(element));
-            //console.log("geometry->LatLng", L.Polyline.fromEncoded(element).getLatLngs());
-            //if (j != 1) {
-            //}
-            poly = poly.concat(L.Polyline.fromEncoded(element).getLatLngs());
+          this.routingControl.route = [];
+          legGeometry.forEach(element => {
+            poly[j] = [];
+            element.forEach(element2 => {
+              //console.log("geometry->encoded", element);
+              //console.log("geometry->decoded", L.Polyline.fromEncoded(element));
+              //console.log("geometry->LatLng", L.Polyline.fromEncoded(element).getLatLngs());
+              //if (j != 1) {
+              //}
+              poly[j] = poly[j].concat(L.Polyline.fromEncoded(element2).getLatLngs());
+            });
+            console.log("PolyEach" + [j], poly[j]);
+            this.routingControl.route[j] = new L.Polyline(poly[j], {
+              color: (j == 0 ? 'red' : j == 1 ? 'green' : j == 2 ? 'blue' : 'black'),
+            }).addTo(this.map);
             j++;
           });
 
-          console.log("poly", this.routingControl.polyline);
-          this.routingControl.polyline = new L.Polyline(poly);
+          console.log("poly", this.routingControl.route);
 
-          this.routingControl.polyline.addTo(this.map);
         } else {
-          this.showToast(resp.error.msg, 3000);
+          this.showToast(resp.error.msg, 5000);
         }
       });
+    } else {
+      this.showToast("You need to select origin and destinations points", 3000);
+    }
+    this.dataProvider.loading = false;
   }
 
   cancelRoute(all: boolean) {
-    if (this.routingControl.route != undefined) {
+    /*if (this.routingControl.route != undefined) {
       this.map.removeControl(this.routingControl.route);
       this.routingControl.route = undefined;
-    }
-    if (this.map.hasLayer(this.routingControl.polyline)) {
-      this.routingControl.polyline.remove();
+    }*/
+    console.log("routes:", this.routingControl.route)
+    if (this.routingControl.route != undefined) {
+      for (var i = 0; i < Object.keys(this.routingControl.route).length; i++) {
+        this.routingControl.route[i].remove();
+      }
     }
     this.routingControl = [];
     if (all) {

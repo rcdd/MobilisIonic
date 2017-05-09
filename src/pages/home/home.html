@@ -5,19 +5,27 @@
     </ion-title>
 
     <ion-buttons end>
-      <!-- <button ion-button (click)="changeLayer()"><ion-icon name="add"></ion-icon>Add Marker</button> -->
+      <!-- <button ion-button (click)="dataProvider.loading = 1"><ion-icon name="debug"></ion-icon>Debug</button> -->
     </ion-buttons>
   </ion-navbar>
 </ion-header>
-
 <ion-content>
 
   <div id="findbox"></div>
   <div id="debug" *ngIf="debug">{{debug}}</div>
 
-  <div class="progress">
-    <div class="progress-bar" *ngIf="dataProvider.loading != 100" [style.width.%]=dataProvider.loading>{{dataProvider.loading}}%</div>
+  <div class="progress" *ngIf="dataProvider.innit != 100">
+    <ion-img width="300" height="300" src="../../assets/icon/loading_init.gif"></ion-img>
+
+    <h3>Loading...</h3>
+    <div class="progress-bar" [style.width.%]=dataProvider.loading>{{dataProvider.innit}}%</div>
   </div>
+
+  <div id="loading" *ngIf="dataProvider.loading">
+    <img width="200" height="200" src="../../assets/icon/loading.gif" />
+  </div>
+
+
   <div id="mapid">
   </div>
 
@@ -29,7 +37,7 @@
     </ion-fab-list>
   </ion-fab>
 
-    <div id="planning" *ngIf='planning.orig.latlng || planning.dest.latlng'>
+  <div id="planning" *ngIf='planning.orig.latlng || planning.dest.latlng'>
     <ion-list>
       <ion-item>
         <ion-label color="primary" stacked>Origin</ion-label>
@@ -43,5 +51,5 @@
     <button ion-button (click)="showRoute()"><ion-icon name="navigate"></ion-icon></button>
     <button ion-button (click)="cancelRoute(true)"><ion-icon name="close"></ion-icon></button>
 
-  </div>-->
+  </div>
 </ion-content>

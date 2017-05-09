@@ -14,7 +14,8 @@ export class DataProvider {
 
     public lines: any = [];
     public stops: any[] = [];
-    public loading: number = 0;
+    public innit: number = 0;
+    public loading: boolean = false;
     public CheckBoxRoutes: any = [];
 
     public test: any;
@@ -26,7 +27,6 @@ export class DataProvider {
         this.db.init();
         // watch network for a connection
         this.platform.ready().then(() => {
-
             network.onDisconnect().subscribe(() => {
                 let alert = this.alertCtrl.create({
                     title: "Internet Connection",
@@ -62,14 +62,19 @@ export class DataProvider {
     }
 
     async planningRoute(origin: any, destination: any) {
+        this.loading = true;
+        let date = moment().format("YYYYMMDD");
+        let time = moment().format("HH:mm");
+
         //http://194.210.216.191/otp/routers/default/plan?fromPlace=39.73983136620544%2C-8.804597854614258&toPlace=39.74448420653371%2C-8.798589706420898&time=5%3A27pm&date=05-01-2017&mode=TRANSIT%2CWALK&maxWalkDistance=750
-        let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=5%3A27pm&date=05-01-2017&mode=TRANSIT%2CWALK&maxWalkDistance=750`).toPromise();
+        let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=TRANSIT%2CWALK&maxWalkDistance=750`).toPromise();
         console.log("planningRoute", resp.json());
+        this.loading = false;
         return resp.json();
     }
 
     async getDataFromServer(): Promise<any> {
-        this.loading = 0;
+        this.innit = 0;
         return new Promise((resolve, reject) => {
             this.isUpdated().then((up) => {
                 //console.log("up", up);
@@ -77,7 +82,7 @@ export class DataProvider {
                     console.log("DB Not updated!");
                     console.log("Innit download...");
                     return this.getRoutes().then(() => {
-                        this.loading = 10;
+                        this.innit = 10;
                         return this.getStationsFromBusLines().then(() => {
                             this.dataInfoToDB();
                             console.log("Download DONE!", this.stops);
@@ -85,9 +90,9 @@ export class DataProvider {
                     });
                 }
             }).then(() => {
-                this.loading = 80;
+                this.innit = 80;
                 return this.getStopsFromDB().then((stops) => {
-                    //this.loading = 100;
+                    //this.innit = 100;
                     //console.log("Stops", Object.keys(stops).length);
                     console.log("DB updated!");
                     resolve(this.stops)
@@ -166,14 +171,14 @@ export class DataProvider {
         let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`).toPromise();
         for (let route of resp.json()) {
             this.lines.push(route);
-            this.loading += 5;
+            this.innit += 5;
         }
         await this.createStorageLines();
     }
 
     async getStationsFromBusLines() {
         for (let route of this.lines) { // http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops
-            this.loading += 5; //http://194.210.216.191/otp/routers/default/index/patterns/1:1018:0:01
+            this.innit += 5; //http://194.210.216.191/otp/routers/default/index/patterns/1:1018:0:01
             let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + "::01").toPromise();
             console.dir(stops);
             await this.createStorageStops(route, stops.json());
@@ -187,7 +192,7 @@ export class DataProvider {
         await this.db.query("CREATE TABLE IF NOT EXISTS BUSLINES (AGENCYNAME TEXT, IDLINE TEXT, LONGNAME TEXT, MODE TEXT, SHORTNAME TEXT)")
             .then(res => {
                 this.lines.forEach(route => {
-                    this.loading += 1;
+                    this.innit += 1;
                     this.db.query("INSERT INTO BUSLINES (AGENCYNAME, IDLINE, LONGNAME, MODE, SHORTNAME) VALUES(?,?,?,?,?);", [route.agencyName, route.id, route.longName, route.mode, route.shortName]).then(res => {
                         // console.dir(res);
                     })
@@ -254,7 +259,7 @@ export class DataProvider {
                                 this.stops[res.rows.item(i).IDLINE].longName = res.rows.item(i).LONGNAME;
                                 this.stops[res.rows.item(i).IDLINE].shortName = res.rows.item(i).SHORTNAME;
                                 this.stops[res.rows.item(i).IDLINE].stops = stop;
-                                this.loading += 1;
+                                this.innit += 1;
                                 if (Object.keys(this.stops).length == res.rows.length) {
                                     resolve(this.stops);
                                 }
@@ -274,8 +279,10 @@ export class DataProvider {
     }
 
     async getTimeFromStop(stop: any) {
+        this.loading = true;
         let date = moment().format("YYYYMMDD");
         let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/" + stop + "/stoptimes/" + date).toPromise();
+        this.loading = false;
         return resp.json();
     }
 }
