@@ -47,20 +47,21 @@ export class HomePage {
   public route: any;
 
   private iconBus = L.icon({
-    iconUrl: 'assets/icon/busStop.png',
+    iconUrl: 'assets/img/busStop.png',
     iconSize: [50, 50],
-    popupAnchor: [0, -25]
+    //iconAnchor: [-50, 45],
+    popupAnchor: [0, -35]
   });
 
   private iconStart = L.icon({
-    iconUrl: 'assets/icon/startPin.png',
+    iconUrl: 'assets/img/startPin.png',
     iconSize: [75, 75],
     iconAnchor: [40, 65],
     popupAnchor: [0, -50],
   });
 
   private iconDest = L.icon({
-    iconUrl: 'assets/icon/destPin.png',
+    iconUrl: 'assets/img/destPin.png',
     iconSize: [75, 75],
     iconAnchor: [40, 65],
     popupAnchor: [0, -50],
@@ -128,33 +129,6 @@ export class HomePage {
     this.currentPosition.circle = L.circle(this.map.getCenter()).addTo(this.map);
 
 
-    // ROUTING CONTROL
-    /* this.routingControl = L.Routing.control({
-       //serviceUrl: 'http://194.210.216.191/otp/routers/default',
-       routeWhileDragging: true,
-       reverseWaypoints: true,
-       //itinerary: L.Routing.itinerary([39.7365272,-8.822886], [39.7350394,-8.8232237], [39.7331818,-8.8226327]),
-       // geocoder: L.Control.Geocoder.nominatim(),
-       waypointNameFallback: function (latLng) {
-         function zeroPad(n) {
-           n = Math.round(n);
-           return n < 10 ? '0' + n : n;
-         }
-         function sexagesimal(p, pos, neg) {
-           var n = Math.abs(p),
-             degs = Math.floor(n),
-             mins = (n - degs) * 60,
-             secs = (mins - Math.floor(mins)) * 60,
-             frac = Math.round((secs - Math.floor(secs)) * 100);
-           return (n >= 0 ? pos : neg) + degs + '°' +
-             zeroPad(mins) + '\'' +
-             zeroPad(secs) + '.' + zeroPad(frac) + '"';
-         }
- 
-         return sexagesimal(latLng.lat, 'N', 'S') + ' ' + sexagesimal(latLng.lng, 'E', 'W');
-       }
-     });*/
-
     var self = this;
     this.map.on('contextmenu', function (e) {
       var container = L.DomUtil.create('div'),
@@ -194,10 +168,11 @@ export class HomePage {
             self.cancelRoute(false);
             self.planning.dest.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
           });
+        console.log("originData", self.planning.orig.latlng);
+        if (self.planning.orig.latlng == undefined) {
+          self.planning.orig.latlng = self.currentPosition.marker.getLatLng().lat + ',' + self.currentPosition.marker.getLatLng().lng;
+        }
         self.planning.dest.latlng = e.latlng.lat + ',' + e.latlng.lng;
-        //self.map.removeControl(self.routingControl);
-        //self.routingControl.addTo(self.map);
-        //self.routingControl.spliceWaypoints(self.routingControl.getWaypoints().length - 1, 1, e.latlng);
 
         self.map.closePopup();
       });
@@ -530,6 +505,27 @@ export class HomePage {
             j++;
           });
 
+          /*let alert = this.alertCtrl.create({
+             title: 'Filter Bus Lines',
+             inputs: [this.routingControl.route],
+             buttons: [{
+               text: 'Ok',
+               handler: data => {
+ 
+                 alert.dismiss();
+                 return false;
+               }
+             },
+             {
+               text: 'Cancel',
+               role: 'cancel',
+               handler: data => {
+                 console.log('Cancel clicked');
+               }
+             }]
+           });
+           alert.present();
+ */
           console.log("poly", this.routingControl.route);
 
         } else {

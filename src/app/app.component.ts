@@ -24,16 +24,12 @@ export class MyApp {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       StatusBar.styleDefault();
-      Splashscreen.hide();
-      //this.ngOnStart();
+      setTimeout(() => {
+        Splashscreen.hide();
+      }, 100);
     });
   }
 
-  ngOnInit(): void {
-    // Só para testar se mesmo que não tenha tabelas tempo e consegue criar ao iniciar a aplicação
-    //this.DataProvider.getDataFromServer();
-    //console.dir(this.DataProvider.loadStops());
-  }
 
 
 }

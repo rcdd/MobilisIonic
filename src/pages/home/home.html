@@ -5,7 +5,7 @@
     </ion-title>
 
     <ion-buttons end>
-      <!-- <button ion-button (click)="dataProvider.loading = 1"><ion-icon name="debug"></ion-icon>Debug</button> -->
+      <!-- <button ion-button (click)="dataProvider.loading = 1"><ion-icon name="debug"></ion-icon>Debug</button>  -->
     </ion-buttons>
   </ion-navbar>
 </ion-header>
@@ -15,23 +15,23 @@
   <div id="debug" *ngIf="debug">{{debug}}</div>
 
   <div class="progress" *ngIf="dataProvider.innit != 100">
-    <ion-img width="300" height="300" src="../../assets/icon/loading_init.gif"></ion-img>
+    <img src="assets/img/LogoMobilis.png" />
 
     <h3>Loading...</h3>
-    <div class="progress-bar" [style.width.%]=dataProvider.loading>{{dataProvider.innit}}%</div>
+    <div class="progress-bar" [style.width.%]=dataProvider.innit>{{dataProvider.innit}}%</div>
   </div>
 
   <div id="loading" *ngIf="dataProvider.loading">
-    <img width="200" height="200" src="../../assets/icon/loading.gif" />
+    <img src="assets/img/loading.png" />
   </div>
 
 
   <div id="mapid">
   </div>
 
-  <ion-fab right bottom>
+  <ion-fab top right *ngIf="dataProvider.innit == 100">
     <button ion-fab mini><ion-icon name="add"></ion-icon></button>
-    <ion-fab-list side="left">
+    <ion-fab-list>
       <button ion-fab id="filter" (click)="showBusLines()"> <ion-icon name="list"></ion-icon></button>
       <!-- <button ion-fab id="plan" (click)="showPlanning()"> <ion-icon name="compass"></ion-icon></button> -->
     </ion-fab-list>
@@ -42,6 +42,7 @@
       <ion-item>
         <ion-label color="primary" stacked>Origin</ion-label>
         <ion-input [(ngModel)]="planning.orig.latlng" type="text" placeholder="Origin coordenates"></ion-input>
+        <button ion-button (click)="showRoute()">(My Location)</button>
       </ion-item>
       <ion-item>
         <ion-label color="primary" stacked>Destination</ion-label>
