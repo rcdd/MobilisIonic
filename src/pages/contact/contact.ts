@@ -19,8 +19,10 @@ export class ContactPage {
   public timesToShow: any = [];
   public timesToShowInList: any = [];
   public stopsToShow: any = [];
-  public isVisible : boolean = false;
+  public isVisible: boolean = false;
   public isVisibleSearchbar: boolean = false;
+  public isVisibleCkeckBox : boolean = true;
+  public stopNameSelected : any;
 
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider,
@@ -36,37 +38,43 @@ export class ContactPage {
     this.timesToShow = [];
     this.dataProvider.CheckBoxRoutes.forEach(line => {
       if (line.id.id == this.selectedBusLine) {
-       // this.stopsToShow = line.id.stops;
-       // this.stops = line.id.stops;
+        // this.stopsToShow = line.id.stops;
+        // this.stops = line.id.stops;
         this.removeDuplicates(line.id.stops)
       }
     });
   }
 
   showTimes(stop: any) {
+    this.stopNameSelected = stop.name;
+    this.isVisibleCkeckBox = false;
+    this.isVisibleSearchbar = false;
     this.timesToShowInList = [];
     this.timesToShow = [];
     this.dataProvider.getTimeFromStop(stop.id).then(a => {
-      let resp = a;
-      //console.dir(resp);
-      let storeTimes: any;
+    let resp = a;
 
       resp.forEach(pat => {
-        storeTimes = [];
+        let storeTimes: any = [];
         storeTimes.line = pat.pattern;
-        let listTimes: any[] = [];
 
-        pat.times.forEach(time => {
-          listTimes.push(time);
-        });
-        storeTimes.times = listTimes;
-        this.timesToShow.push(storeTimes);
+        let listTimes: any[] = [];
+        if (pat.times.length != 0) {
+          pat.times.forEach(time => {
+            listTimes.push(time);
+            storeTimes.times = listTimes;
+            if(this.timesToShow.indexOf(storeTimes) == -1)
+            this.timesToShow.push(storeTimes);
+          });
+        }
       });
     });
-    this.isVisible=true;
+    this.isVisible = true;
+    console.dir(this.timesToShow);
   }
 
   selectedLine(time) {
+
     this.timesToShowInList = [];
     time.forEach(timeToShow => {
       if (this.timesToShowInList.indexOf((timeToShow.realtimeArrival + timeToShow.serviceDay) * 1000) == -1) {
@@ -80,6 +88,7 @@ export class ContactPage {
       b = new Date(b);
       return a > b ? -1 : a < b ? 1 : 0;
     });
+    //console.dir(this.timesToShowInList);
   }
 
   showAlert(title: any, msg: any) {
@@ -92,7 +101,7 @@ export class ContactPage {
   }
 
   getItems(ev) {
-    this.isVisible=false;
+    this.isVisible = false;
     // Reset items back to all of the items
     this.resetNamesStops();
 
@@ -144,6 +153,21 @@ export class ContactPage {
         this.stopsToShow.push(element);
       }
     });
+  }
+
+  hideTimes() {
+    this.isVisible = false;
+    this.isVisibleSearchbar = true;
+    this.isVisibleCkeckBox = true;
+  }
+
+  showToast(msg: string) {
+    let toast = this.toastCtrl.create({
+      message: msg,
+      duration: 3000,
+    });
+
+    toast.present(toast);
   }
 
 }
