@@ -1,14 +1,22 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
+      <ion-item *ngIf='isVisible' class="buttonHide">
+        <button ion-button color="danger" (click)="hideTimes()">X</button>
+      </ion-item>
       <ion-item *ngIf='isVisibleCkeckBox'>
         <ion-label>Select Bus Line</ion-label>
         <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)" multiple="false">
           <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}">{{busLine.label}} </ion-option>
         </ion-select>
       </ion-item>
-      <ion-item>
-        <ion-searchbar *ngIf='isVisibleSearchbar' (ionInput)="getItems($event)"></ion-searchbar>
+      <ion-item *ngIf='isVisibleCkeckBox'>
+        <ion-label>Date</ion-label>
+        <ion-datetime displayFormat="YYYY-MM-DD" min="{{minDate | date:'yyyy-MM-dd'}}" max="{{maxDate | date:'yyyy-MM-dd'}}" [(ngModel)]="selectedDate">
+        </ion-datetime>
+      </ion-item>
+      <ion-item *ngIf='isVisibleSearchbar'>
+        <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
       </ion-item>
     </ion-title>
   </ion-navbar>
@@ -24,12 +32,7 @@
 
   <div *ngIf='isVisible' class="center">
     <ion-row>
-      <ion-col>
-        <h3>{{stopNameSelected}}  </h3>
-      </ion-col>
-      <ion-col>
-        <button ion-button color="danger" (click)="hideTimes()">X</button>
-      </ion-col>
+      <h3> {{stopNameSelected}} </h3>
     </ion-row>
     <ion-row>
       <ion-segment color="danger">
@@ -38,16 +41,22 @@
         </ion-segment-button>
       </ion-segment>
     </ion-row>
-    </div>
-    <div class="listTimes" *ngIf='isVisible'>
+  </div>
+  <div class="notTimeAvailable">
+    <ion-row *ngIf='timesToShow.length==0 && isVisible'>
+      <h2> Not stops time available at this date: </h2><br>
+      <h3> {{selectedDate | date: 'yyyy-MMMM-dd'}} </h3>
+    </ion-row>
+  </div>
+  <div class="listTimes" *ngIf='isVisible'>
     <ion-row>
       <ion-list *ngIf='timesToShowInList.length !=0'>
         <ion-item *ngFor="let time of timesToShowInList">
-          {{time | date: 'dd/MM HH:mm'}} H
+          {{time | date: 'dd/MM HH:mm'}}
         </ion-item>
       </ion-list>
     </ion-row>
-    </div>
-  
+  </div>
+
 
 </ion-content>
