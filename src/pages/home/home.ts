@@ -22,8 +22,10 @@ import 'leaflet.featuregroup.subgroup'
 import 'leaflet-routing-machine'
 import 'leaflet-control-geocoder';
 import 'polyline-encoded';
+import 'moment';
 
 declare var L: any;
+declare var moment: any;
 
 @Component({
   selector: 'page-home',
@@ -45,6 +47,7 @@ export class HomePage {
 
   public planning: any = [];
   public route: any;
+  public shownGroup: any;
 
   private iconBus = L.icon({
     iconUrl: 'assets/img/busStop.png',
@@ -77,6 +80,7 @@ export class HomePage {
     this.planning.dest = [];
     this.routingControl = [];
     this.currentPosition = [];
+    this.shownGroup = null;
   }
 
 
@@ -466,67 +470,51 @@ export class HomePage {
       await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
         if (resp.error == undefined) {
           this.cancelRoute(false);
-          //this.route = resp;
-          let waypoints = [];
-          let legGeometry = [];
-          let i = 0;
-          resp.plan.itineraries.forEach(element => {
-            waypoints[i] = [];
-            legGeometry[i] = [];
-            console.dir(element);
-            element.legs.forEach(element2 => {
-              legGeometry[i].push(element2.legGeometry.points);
-              element2.steps.forEach(element3 => {
-                waypoints[i].push({ lat: element3.lat, lon: element3.lon });
+          console.log("PlanningData", resp);
+          this.routingControl.itenarary = [];
+          this.routingControl.itenarary.showDetails = false;
+          this.routingControl.icon = 'ios-add-circle-outline';
+          resp.plan.itineraries.forEach(itinerary => {
+            itinerary.duration = moment.unix(itinerary.duration).format("HH:mm:ss");
+            itinerary.walkDistance = this.getDistance(itinerary.walkDistance);
+            itinerary.legs.forEach(leg => {
+              leg.distance = this.getDistance(leg.distance);
+              leg.steps.forEach(step => {
+                step.distance = this.getDistance(step.distance);
+                step.direction = "Go " + step.absoluteDirection + " on " + step.streetName + " about " + step.distance;
+                step.showDetails = false;
+                step.icon = 'ios-add-circle-outline';
               });
             });
-            i++;
+            this.routingControl.itenarary.push(itinerary);
           });
-          //console.dir(waypoints);
+          console.log("Itenararies", this.routingControl.itenarary);
+
 
           //console.log("geometry", legGeometry[1]);
-          let j = 0;
-          let poly = [];
-          this.routingControl.route = [];
-          legGeometry.forEach(element => {
-            poly[j] = [];
-            element.forEach(element2 => {
-              //console.log("geometry->encoded", element);
-              //console.log("geometry->decoded", L.Polyline.fromEncoded(element));
-              //console.log("geometry->LatLng", L.Polyline.fromEncoded(element).getLatLngs());
-              //if (j != 1) {
-              //}
-              poly[j] = poly[j].concat(L.Polyline.fromEncoded(element2).getLatLngs());
-            });
-            console.log("PolyEach" + [j], poly[j]);
-            this.routingControl.route[j] = new L.Polyline(poly[j], {
-              color: (j == 0 ? 'red' : j == 1 ? 'green' : j == 2 ? 'blue' : 'black'),
-            }).addTo(this.map);
-            j++;
-          });
-
-          /*let alert = this.alertCtrl.create({
-             title: 'Filter Bus Lines',
-             inputs: [this.routingControl.route],
-             buttons: [{
-               text: 'Ok',
-               handler: data => {
- 
-                 alert.dismiss();
-                 return false;
-               }
-             },
-             {
-               text: 'Cancel',
-               role: 'cancel',
-               handler: data => {
-                 console.log('Cancel clicked');
-               }
-             }]
+          /* let j = 0;
+           let poly = [];
+           this.routingControl.route = [];
+           legGeometry.forEach(element => {
+             poly[j] = [];
+             element.forEach(element2 => {
+               //console.log("geometry->encoded", element);
+               //console.log("geometry->decoded", L.Polyline.fromEncoded(element));
+               //console.log("geometry->LatLng", L.Polyline.fromEncoded(element).getLatLngs());
+               //if (j != 1) {
+               //}
+               poly[j] = poly[j].concat(L.Polyline.fromEncoded(element2).getLatLngs());
+             });
+             console.log("PolyEach" + [j], poly[j]);
+             this.routingControl.route[j] = new L.Polyline(poly[j], {
+               color: (j == 0 ? 'red' : j == 1 ? 'green' : j == 2 ? 'blue' : 'black'),
+             }).addTo(this.map);
+             j++;
            });
-           alert.present();
- */
-          console.log("poly", this.routingControl.route);
+ 
+ 
+ 
+           console.log("poly", this.routingControl.route);*/
 
         } else {
           this.showToast(resp.error.msg, 5000);
@@ -560,5 +548,44 @@ export class HomePage {
       this.planning.orig = [];
       this.planning.dest = [];
     }
+  }
+
+  toggleDetails(data) {
+    if (data.showDetails) {
+      data.showDetails = false;
+      data.icon = 'ios-add-circle-outline';
+    } else {
+      this.routingControl.itenarary.forEach(element => {
+        if (element != data) {
+          element.showDetails = false;
+          element.icon = 'ios-add-circle-outline';
+        }
+      });
+      data.showDetails = true;
+      data.icon = 'ios-remove-circle-outline';
+
+    }
+  }
+  toggleSubDetails(data, array) {
+    if (data.showDetails) {
+      data.showDetails = false;
+      data.icon = 'ios-add-circle-outline';
+    } else {
+      array.forEach(element => {
+        /* console.log("data", data);
+         console.log("array", element);*/
+        if (element != data) {
+          element.showDetails = false;
+          element.icon = 'ios-add-circle-outline';
+        }
+      });
+      data.showDetails = true;
+      data.icon = 'ios-remove-circle-outline';
+
+    }
+  }
+
+  getDistance(meters: any) {
+    return ((meters > 1000) ? ((meters / 1000).toFixed(1) + ' Kms') : (meters.toFixed(0) + 'm'));
   }
 }
