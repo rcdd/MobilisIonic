@@ -14,9 +14,6 @@
         <ion-label>Date</ion-label>
         <ion-datetime displayFormat="YYYY-MM-DD" min="{{minDate | date:'yyyy-MM-dd'}}" max="{{maxDate | date:'yyyy-MM-dd'}}" [(ngModel)]="selectedDate">
         </ion-datetime>
-        <ion-row>
-          {{selectedDate}}
-        </ion-row>
       </ion-item>
       <ion-item *ngIf='isVisibleSearchbar'>
         <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
@@ -46,7 +43,7 @@
     </ion-row>
   </div>
   <div class="notTimeAvailable">
-    <ion-row  *ngIf='timesToShow.length==0 && isVisible'>
+    <ion-row *ngIf='timesToShow.length==0 && isVisible'>
       <h2> Not stops time available at this date: </h2><br>
       <h3> {{selectedDate | date: 'yyyy-MMMM-dd'}} </h3>
     </ion-row>
