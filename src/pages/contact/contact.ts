@@ -23,12 +23,14 @@ export class ContactPage {
   public isVisibleSearchbar: boolean = false;
   public isVisibleCkeckBox : boolean = true;
   public stopNameSelected : any;
+  public minDate : Date = new Date();
+  public maxDate : Date =  new Date();
+  public selectedDate : any = new Date().toISOString();
 
-  constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
-    public dataProvider: DataProvider,
-    public alertCtrl: AlertController) {
+  constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,public dataProvider: DataProvider,public alertCtrl: AlertController) {
     this.busLinesToPresent = dataProvider.CheckBoxRoutes;
     this.isVisibleSearchbar = false;
+    this.maxDate.setDate(this.minDate.getDate() + 5);
   }
 
   updateSelectedValue() {
@@ -51,7 +53,7 @@ export class ContactPage {
     this.isVisibleSearchbar = false;
     this.timesToShowInList = [];
     this.timesToShow = [];
-    this.dataProvider.getTimeFromStop(stop.id).then(a => {
+    this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(a => {
     let resp = a;
 
       resp.forEach(pat => {

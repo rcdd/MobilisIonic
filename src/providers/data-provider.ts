@@ -278,9 +278,9 @@ export class DataProvider {
         });
     }
 
-    async getTimeFromStop(stop: any) {
+    async getTimeFromStop(stop: any, time : any) {
         this.loading = true;
-        let date = moment().format("YYYYMMDD");
+        let date = moment(time).format("YYYYMMDD");
         let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/" + stop + "/stoptimes/" + date).toPromise();
         this.loading = false;
         return resp.json();
