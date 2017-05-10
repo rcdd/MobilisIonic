@@ -135,9 +135,9 @@ export class HomePage {
 
     var self = this;
     this.map.on('contextmenu', function (e) {
-      var container = L.DomUtil.create('div'),
-        startBtn = self.createButton('Start from here', container),
-        destBtn = self.createButton('Go to', container);
+      var container = L.DomUtil.create('div', 'container'),
+        startBtn = self.createButton('<img src="assets/img/originRoute.png" />&nbsp Get direction from here', container),
+        destBtn = self.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp Get direction to here', container);
 
       L.popup()
         .setContent(container)
@@ -464,13 +464,13 @@ export class HomePage {
   }
 
   // ####################    TO MUCH TO DO HERE!!!!!!!!!! ########################
-  async showRoute() {
+  async chooseRoute() {
     this.dataProvider.loading = true;
     if (this.planning.orig.latlng != undefined && this.planning.dest.latlng != undefined) {
       await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
         if (resp.error == undefined) {
           this.cancelRoute(false);
-          console.log("PlanningData", resp);
+          //console.log("PlanningData", resp);
           this.routingControl.itenarary = [];
           this.routingControl.itenarary.showDetails = false;
           this.routingControl.icon = 'ios-add-circle-outline';
@@ -488,33 +488,7 @@ export class HomePage {
             });
             this.routingControl.itenarary.push(itinerary);
           });
-          console.log("Itenararies", this.routingControl.itenarary);
-
-
-          //console.log("geometry", legGeometry[1]);
-          /* let j = 0;
-           let poly = [];
-           this.routingControl.route = [];
-           legGeometry.forEach(element => {
-             poly[j] = [];
-             element.forEach(element2 => {
-               //console.log("geometry->encoded", element);
-               //console.log("geometry->decoded", L.Polyline.fromEncoded(element));
-               //console.log("geometry->LatLng", L.Polyline.fromEncoded(element).getLatLngs());
-               //if (j != 1) {
-               //}
-               poly[j] = poly[j].concat(L.Polyline.fromEncoded(element2).getLatLngs());
-             });
-             console.log("PolyEach" + [j], poly[j]);
-             this.routingControl.route[j] = new L.Polyline(poly[j], {
-               color: (j == 0 ? 'red' : j == 1 ? 'green' : j == 2 ? 'blue' : 'black'),
-             }).addTo(this.map);
-             j++;
-           });
- 
- 
- 
-           console.log("poly", this.routingControl.route);*/
+          //console.log("Itenararies", this.routingControl.itenarary);
 
         } else {
           this.showToast(resp.error.msg, 5000);
@@ -526,19 +500,42 @@ export class HomePage {
     this.dataProvider.loading = false;
   }
 
+  showRoute(route) {
+    //console.log("Route", route);
+    if (this.map.hasLayer(this.routingControl.polyline)) {
+      this.map.removeControl(this.routingControl.polyline);
+    }
+    this.routingControl.polyline = [];
+    this.routingControl.polyline.coords = [];
+
+    route.legs.forEach(leg => {
+      /*console.log("geometry->encoded", leg.legGeometry.points);
+      console.log("geometry->decoded", L.Polyline.fromEncoded(leg.legGeometry.points));
+      console.log("geometry->LatLng", L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());*/
+
+      this.routingControl.polyline.coords = this.routingControl.polyline.coords.concat(L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());
+    });
+    console.log("PolyLine", this.routingControl.polyline.coords);
+    this.routingControl.polyline = new L.Polyline(this.routingControl.polyline.coords);
+    this.routingControl.polyline.addTo(this.map);
+    this.routingControl.itenarary = undefined;
+  }
+
   cancelRoute(all: boolean) {
     /*if (this.routingControl.route != undefined) {
       this.map.removeControl(this.routingControl.route);
       this.routingControl.route = undefined;
     }*/
-    console.log("routes:", this.routingControl.route)
+    //console.log("routes:", this.routingControl.route)
     if (this.routingControl.route != undefined) {
       for (var i = 0; i < Object.keys(this.routingControl.route).length; i++) {
         this.routingControl.route[i].remove();
       }
     }
-    this.routingControl = [];
     if (all) {
+      if (this.map.hasLayer(this.routingControl.polyline)) {
+        this.map.removeControl(this.routingControl.polyline);
+      }
       if (this.map.hasLayer(this.planning.orig)) {
         this.planning.orig.remove();
       }
@@ -548,6 +545,8 @@ export class HomePage {
       this.planning.orig = [];
       this.planning.dest = [];
     }
+
+    this.routingControl.itenarary = undefined;
   }
 
   toggleDetails(data) {

@@ -42,31 +42,34 @@
       <ion-item>
         <ion-label color="primary" stacked>Origin</ion-label>
         <ion-input [(ngModel)]="planning.orig.latlng" type="text" placeholder="Origin coordenates"></ion-input>
-        <button ion-button (click)="showRoute()">(My Location)</button>
+        <button ion-button (click)="chooseRoute()">(My Location)</button>
       </ion-item>
       <ion-item>
         <ion-label color="primary" stacked>Destination</ion-label>
         <ion-input [(ngModel)]="planning.dest.latlng" type="text" placeholder="Destination coordenates"></ion-input>
       </ion-item>
     </ion-list>
-    <button ion-button (click)="showRoute()"><ion-icon name="navigate"></ion-icon></button>
+    <button ion-button (click)="chooseRoute()"><ion-icon name="navigate"></ion-icon></button>
     <button ion-button (click)="cancelRoute(true)"><ion-icon name="close"></ion-icon></button>
 
   </div>
   <div id="routing" *ngIf='routingControl.itenarary'>
     <ion-list-header>
-      Your possibles itinerarys:
+      Your possibles itineraries:
     </ion-list-header>
     <ion-list>
       <ion-item *ngFor="let d of routingControl.itenarary; let i=index">
         <div (click)="toggleDetails(d)">
           <ion-row>
             <ion-col>
-              <h2>Route {{i+1}}</h2>
+              <h1>Route {{i+1}}</h1>
               <h6> Duration: {{d.duration}} <br /> Walking distance: {{d.walkDistance}}) </h6>
             </ion-col>
             <ion-col>
               <ion-icon color="primary" item-right [name]="d.icon"></ion-icon>
+            </ion-col>
+            <ion-col>
+              <button ion-button (click)="showRoute(d)">GO</button>
             </ion-col>
           </ion-row>
         </div>
@@ -75,9 +78,6 @@
             <ion-row (click)="toggleSubDetails(l, d.legs)">
               <ion-col>
                 On {{l.mode}}: {{l.distance}}
-              </ion-col>
-              <ion-col>
-                <!-- <ion-icon color="primary" item-right [name]="l.icon"></ion-icon> -->
               </ion-col>
             </ion-row>
             <div *ngIf="l.showDetails">
@@ -89,6 +89,8 @@
         </div>
       </ion-item>
     </ion-list>
-    <button ion-button (click)="cancelRoute(false)">Cancel</button>
+    <div class="cancelButton">
+      <button ion-button (click)="cancelRoute(false)">Cancel</button>
+    </div>
   </div>
 </ion-content>
