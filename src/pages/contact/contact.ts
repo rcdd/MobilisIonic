@@ -158,6 +158,7 @@ export class ContactPage {
   }
 
   hideTimes() {
+    this.resetNamesStops();
     this.isVisible = false;
     this.isVisibleSearchbar = true;
     this.isVisibleCkeckBox = true;
