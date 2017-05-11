@@ -172,7 +172,7 @@ export class HomePage {
             self.cancelRoute(false);
             self.planning.dest.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
           });
-        console.log("originData", self.planning.orig.latlng);
+        //console.log("originData", self.planning.orig.latlng);
         if (self.planning.orig.latlng == undefined) {
           self.planning.orig.latlng = self.currentPosition.marker.getLatLng().lat + ',' + self.currentPosition.marker.getLatLng().lng;
         }
@@ -287,6 +287,7 @@ export class HomePage {
           self.showToast(closestStop.options.message + " from you!", 3000);
         } else {
           self.showToast("You need select at least one line route", 3000);
+          self.showBusLines();
         }
       } else {
         self.showToast("We can't calculate your position", 3000);
@@ -489,7 +490,6 @@ export class HomePage {
             this.routingControl.itenarary.push(itinerary);
           });
           //console.log("Itenararies", this.routingControl.itenarary);
-
         } else {
           this.showToast(resp.error.msg, 5000);
         }
@@ -501,32 +501,55 @@ export class HomePage {
   }
 
   showRoute(route) {
-    //console.log("Route", route);
+    this.dataProvider.loading = true;
+    console.log("Route", route);
     if (this.map.hasLayer(this.routingControl.polyline)) {
       this.map.removeControl(this.routingControl.polyline);
     }
+    if (this.routingControl.markers != undefined) {
+      this.routingControl.markers.forEach(circle => {
+        if (this.map.hasLayer(circle)) {
+          this.map.removeControl(circle);
+        }
+      });
+    }
+
     this.routingControl.polyline = [];
     this.routingControl.polyline.coords = [];
+    this.routingControl.markers = [];
 
     route.legs.forEach(leg => {
-      /*console.log("geometry->encoded", leg.legGeometry.points);
-      console.log("geometry->decoded", L.Polyline.fromEncoded(leg.legGeometry.points));
-      console.log("geometry->LatLng", L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());*/
-
+      //console.log("geometry->encoded", leg.legGeometry.points);
+      //console.log("geometry->decoded", L.Polyline.fromEncoded(leg.legGeometry.points));
+      //console.log("geometry->LatLng", L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());
       this.routingControl.polyline.coords = this.routingControl.polyline.coords.concat(L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());
+      if (leg.mode == "BUS") {
+        this.routingControl.markers.push(L.circle([leg.from.lat, leg.from.lon], { radius: 2 }).bindPopup("Take bus on " + leg.from.name));
+        this.routingControl.markers.push(L.circle([leg.to.lat, leg.to.lon], { radius: 2 }).bindPopup("Exit on " + leg.to.name));
+      } else {
+        leg.steps.forEach(step => {
+          L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs().forEach(element => {
+            this.routingControl.markers.push(L.circle([step.lat, step.lon], { radius: 2 }).bindPopup(step.direction));
+          });
+        });
+      }
+
     });
-    console.log("PolyLine", this.routingControl.polyline.coords);
+    //console.log("polyMarkersAll", this.routingControl.markers);
+    this.routingControl.markers.forEach(circle => {
+      circle.addTo(this.map);
+    });
+    //console.log("PolyLine", this.routingControl.polyline.coords);
     this.routingControl.polyline = new L.Polyline(this.routingControl.polyline.coords);
     this.routingControl.polyline.addTo(this.map);
+
+
     this.routingControl.itenarary = undefined;
+
+    this.dataProvider.loading = false;
   }
 
   cancelRoute(all: boolean) {
-    /*if (this.routingControl.route != undefined) {
-      this.map.removeControl(this.routingControl.route);
-      this.routingControl.route = undefined;
-    }*/
-    //console.log("routes:", this.routingControl.route)
     if (this.routingControl.route != undefined) {
       for (var i = 0; i < Object.keys(this.routingControl.route).length; i++) {
         this.routingControl.route[i].remove();
@@ -535,6 +558,13 @@ export class HomePage {
     if (all) {
       if (this.map.hasLayer(this.routingControl.polyline)) {
         this.map.removeControl(this.routingControl.polyline);
+      }
+      if (this.routingControl.markers != undefined) {
+        this.routingControl.markers.forEach(circle => {
+          if (this.map.hasLayer(circle)) {
+            this.map.removeControl(circle);
+          }
+        });
       }
       if (this.map.hasLayer(this.planning.orig)) {
         this.planning.orig.remove();

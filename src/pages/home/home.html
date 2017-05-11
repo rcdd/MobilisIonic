@@ -43,21 +43,22 @@
 
   </div>
   <div id="routing" *ngIf='routingControl.itenarary'>
-    <ion-list-header>
+    <ion-list-header text-wrap>
       Your possibles itineraries:
+      <hr>
     </ion-list-header>
     <ion-list>
       <ion-item *ngFor="let d of routingControl.itenarary; let i=index">
         <div (click)="toggleDetails(d)">
-          <ion-row>
-            <ion-col>
+          <ion-row text-wrap>
+            <ion-col width-75>
               <h1>Route {{i+1}}</h1>
               <h6> Duration: {{d.duration}} <br /> Walking distance: {{d.walkDistance}}) </h6>
             </ion-col>
-            <ion-col>
+            <ion-col width-10>
               <ion-icon color="primary" item-right [name]="d.icon"></ion-icon>
             </ion-col>
-            <ion-col>
+            <ion-col width-12>
               <button ion-button (click)="showRoute(d)">GO</button>
             </ion-col>
           </ion-row>
@@ -65,12 +66,12 @@
         <div *ngIf="d.showDetails">
           <ion-item class="subItemLegs" *ngFor="let l of d.legs">
             <ion-row (click)="toggleSubDetails(l, d.legs)">
-              <ion-col>
+              <ion-col text-wrap>
                 On {{l.mode}}: {{l.distance}}
               </ion-col>
             </ion-row>
             <div *ngIf="l.showDetails">
-              <div class="subItemSteps" *ngFor="let s of l.steps" (click)="showToast(s.direction, 3000)">
+              <div text-wrap class="subItemSteps" *ngFor="let s of l.steps" (click)="showToast(s.direction, 3000)">
                 {{s.direction}}
               </div>
             </div>
