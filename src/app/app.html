@@ -1,1 +1,7 @@
+<div class="networkError" *ngIf="hasNetwork==false">
+    No internet connection!
+</div>
+<div id="loading" *ngIf="dataProvider.loading">
+    <img src="assets/img/loading.png" />
+</div>
 <ion-nav [root]="rootPage"></ion-nav>
