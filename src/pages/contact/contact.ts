@@ -53,9 +53,9 @@ export class ContactPage {
     this.isVisibleSearchbar = false;
     this.timesToShowInList = [];
     this.timesToShow = [];
+
     this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(a => {
     let resp = a;
-
       resp.forEach(pat => {
         let storeTimes: any = [];
         storeTimes.line = pat.pattern;
@@ -70,9 +70,9 @@ export class ContactPage {
           });
         }
       });
+      this.isVisible = true;
+      console.dir(this.timesToShow);
     });
-    this.isVisible = true;
-    console.dir(this.timesToShow);
   }
 
   selectedLine(time) {

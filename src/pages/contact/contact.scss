@@ -11,7 +11,7 @@ page-contact {
  .center {
     left:0%;
     top:70px;
-    position:absolute;
+    position:relative;
     width:100%;
     height:8%;
     text-align:center;
@@ -24,8 +24,8 @@ page-contact {
     z-index: 1;
 }
     .center ion-segment {
-        margin-top: 30px;
-        position: fixed;
+        top:40px;
+        position: relative;
         background-color: white;
         z-index: 1;
     }
@@ -34,7 +34,7 @@ page-contact {
       position: fixed;
       background: white;
       z-index: 1;
-      margin-bottom: 10%;
+      margin-bottom: 20%;
       margin-right: 0%;
       text-align: center;
       width:100%;
@@ -63,13 +63,13 @@ page-contact {
 
    .buttonHide button {
        position: absolute;
-       top: 6px;
-       right: 3px;
+       top: 0px;
+       left: 0px;
    }
 
    .buttonHide {
-       margin-top: 0%;
        background: transparent;
+       margin-bottom: 10px;
    }
 
    .listTimes ion-list {
