@@ -2,59 +2,68 @@
   <ion-navbar>
     <ion-title>
       <ion-item *ngIf='isVisible' class="buttonHide">
-        <button ion-button color="danger" (click)="hideTimes()">X</button>
+        <ion-row>
+          <ion-col item-left width-20>
+            <button ion-button color="secundary" (click)="hideTimes()"><ion-icon name="arrow-round-back"></ion-icon></button>
+          </ion-col>
+          <ion-col text-wrap>
+            <p text-left> {{stopNameSelected}} </p>
+          </ion-col>
+        </ion-row>
       </ion-item>
+
       <ion-item *ngIf='isVisibleCkeckBox'>
         <ion-label>Select Bus Line</ion-label>
         <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)" multiple="false">
-          <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}">{{busLine.label}} </ion-option>
+          <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}">  {{busLine.label}} </ion-option>
         </ion-select>
       </ion-item>
+
       <ion-item *ngIf='isVisibleCkeckBox'>
         <ion-label>Date</ion-label>
         <ion-datetime displayFormat="YYYY-MM-DD" min="{{minDate | date:'yyyy-MM-dd'}}" max="{{maxDate | date:'yyyy-MM-dd'}}" [(ngModel)]="selectedDate">
         </ion-datetime>
       </ion-item>
+
       <ion-item *ngIf='isVisibleSearchbar'>
         <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
       </ion-item>
+
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
 
-  <ion-list padding *ngIf='isVisibleSearchbar'>
+<ion-list *ngIf='isVisibleSearchbar' class="listStops">
     <button ion-button block color="light" (click)="showTimes(stop)" *ngFor="let stop of stopsToShow">
-        {{ stop.name }}
+       <div text-wrap> {{ stop.name }} </div>
       </button>
   </ion-list>
 
   <div *ngIf='isVisible' class="center">
     <ion-row>
-      <h3> {{stopNameSelected}} </h3>
-    </ion-row>
-    <ion-row>
-      <ion-segment color="danger">
-        <ion-segment-button *ngFor="let time of timesToShow" value="time" (ionSelect)="selectedLine(time.times)" (ionSelect)="showToast('Line '+time.line.desc)">
+      <ion-segment assertive>
+        <ion-segment-button *ngFor="let time of timesToShow ; let i = index" [value]="i" (ionSelect)="selectedLine(time.times)" (ionSelect)="showToast('Line '+time.line.desc)">
           Line {{time.line.desc}}
         </ion-segment-button>
       </ion-segment>
     </ion-row>
-  </div>
-  <div class="notTimeAvailable">
-    <ion-row *ngIf='timesToShow.length==0 && isVisible'>
-      <h2> Not stops time available at this date: </h2><br>
-      <h3> {{selectedDate | date: 'yyyy-MMMM-dd'}} </h3>
-    </ion-row>
-  </div>
-  <div class="listTimes" *ngIf='isVisible'>
+
+  <div class="listTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
     <ion-row>
-      <ion-list *ngIf='timesToShowInList.length !=0'>
+      <ion-list>
         <ion-item *ngFor="let time of timesToShowInList">
           {{time | date: 'dd/MM HH:mm'}}
         </ion-item>
       </ion-list>
+    </ion-row>
+  </div>
+</div>
+  <div class="notTimeAvailable">
+    <ion-row *ngIf='timesToShow.length==0 && isVisible'>
+      <h2> Not stops time available at this date: </h2><br>
+      <h3> {{selectedDate | date: 'yyyy-MMMM-dd'}} </h3>
     </ion-row>
   </div>
 

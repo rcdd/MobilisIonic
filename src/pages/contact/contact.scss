@@ -11,9 +11,9 @@ page-contact {
  .center {
     left:0%;
     top:70px;
-    position:absolute;
+    position:relative;
     width:100%;
-    height:8%;
+    height:100%;
     text-align:center;
     //max-width:800px;
     //max-height:500px;
@@ -24,20 +24,36 @@ page-contact {
     z-index: 1;
 }
     .center ion-segment {
-        margin-top: 30px;
-        position: fixed;
+        justify-content: space-between;
+        margin-top:35px;
         background-color: white;
-        z-index: 1;
+        z-index: 5;
+        position: fixed;
+        overflow: auto;
+
+        &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+        }
+
+        ion-segment-button.segment-button {
+            //display: inline-block;
+            min-width: 100px;
+            width: auto;
+        }
     }
 
    .center h3 {
       position: fixed;
       background: white;
       z-index: 1;
-      margin-bottom: 10%;
+      margin-bottom: 20%;
       margin-right: 0%;
       text-align: center;
       width:100%;
+      overflow-x: scroll;
+      white-space: nowrap;
    }
 
    .notTimeAvailable h2 {
@@ -58,22 +74,35 @@ page-contact {
    }
 
    .notTimeAvailable {
-       z-index: 4;
-   }
-
-   .buttonHide button {
-       position: absolute;
-       top: 6px;
-       right: 3px;
+       z-index: 1;
    }
 
    .buttonHide {
-       margin-top: 0%;
        background: transparent;
+       height: auto;
    }
 
    .listTimes ion-list {
-       margin-top: 35px;
+       position: relative;
+       margin-top: 70px;
        overflow:auto;
+       z-index: 2;
+       width: 100%;
+   }
+
+   .listTimes ion-list ion-item {
+       position: relative;
+       font-size: 15px;
+       text-align: center;
+   }
+
+   .listStops {
+       position: relative;
+       margin-top: 70px;
+       width: 100%;
+   }
+
+   .listStops ion-button {
+       width: auto;
    }
 }
