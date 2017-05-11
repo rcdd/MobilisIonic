@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Platform, AlertController } from 'ionic-angular';
-import { Network } from '@ionic-native/network';
 import 'rxjs/Rx';
 import { DatabaseProvider } from './database-provider';
 import { Http } from '@angular/http';
@@ -23,35 +22,10 @@ export class DataProvider {
 
 
     constructor(private http: Http, private db: DatabaseProvider,
-        private alertCtrl: AlertController, private network: Network, private platform: Platform) {
+        private alertCtrl: AlertController, private platform: Platform) {
         this.db.init();
         // watch network for a connection
         this.platform.ready().then(() => {
-            network.onDisconnect().subscribe(() => {
-                let alert = this.alertCtrl.create({
-                    title: "Internet Connection",
-                    subTitle: "Please Check Your Network connection",
-                    buttons: [{
-                        text: 'Ok',
-                        handler: () => {
-                            this.platform.exitApp();
-                        }
-                    }]
-                });
-                alert.present();
-            });
-
-            network.onConnect().subscribe(() => {
-                console.log('you are online');
-            });
-
-            if (navigator.onLine) {
-                console.log("NETwork On");
-            } else {
-                console.log("NETwork Off");
-
-            }
-            console.log("Network state:", this.network.type);
 
         });
     }
@@ -79,13 +53,13 @@ export class DataProvider {
             this.isUpdated().then((up) => {
                 //console.log("up", up);
                 if (!up) {
-                    console.log("DB Not updated!");
-                    console.log("Innit download...");
+                    /*console.log("DB Not updated!");
+                    console.log("Innit download...");*/
                     return this.getRoutes().then(() => {
                         this.innit = 10;
                         return this.getStationsFromBusLines().then(() => {
                             this.dataInfoToDB();
-                            console.log("Download DONE!", this.stops);
+                            //console.log("Download DONE!", this.stops);
                         })
                     });
                 }
@@ -94,7 +68,7 @@ export class DataProvider {
                 return this.getStopsFromDB().then((stops) => {
                     //this.innit = 100;
                     //console.log("Stops", Object.keys(stops).length);
-                    console.log("DB updated!");
+                    //console.log("DB updated!");
                     resolve(this.stops)
                 })
             });
@@ -125,7 +99,6 @@ export class DataProvider {
                     return false;
                 }
             })
-
             .catch(err => {
                 console.log("Error: ", err);
             });
@@ -278,7 +251,7 @@ export class DataProvider {
         });
     }
 
-    async getTimeFromStop(stop: any, time : any) {
+    async getTimeFromStop(stop: any, time: any) {
         this.loading = true;
         let date = moment(time).format("YYYYMMDD");
         let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/" + stop + "/stoptimes/" + date).toPromise();
