@@ -121,7 +121,7 @@ export class HomePage {
       cacheMaxAge: (24 * 3600000), // 24h
     });
 
-    this.map = L.map('mapid')
+    this.map = L.map('mapid', { zoomControl: false })
       .addLayer(tiles)
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });

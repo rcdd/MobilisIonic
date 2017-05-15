@@ -15,7 +15,7 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 .networkError{
-    position: relative;
+    position: absolute;
     top: 0;
     background-color: red;
     height: auto;
@@ -26,6 +26,8 @@
 
 ion-nav{
     position: relative;
+    display: flex;
+    height: 100%;
 }
 
 #loading {

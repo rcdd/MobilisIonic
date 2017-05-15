@@ -6,12 +6,12 @@ import { DataProvider } from '../../providers/data-provider';
 import { AlertController } from 'ionic-angular';
 
 @Component({
-  selector: 'page-contact',
-  templateUrl: 'contact.html'
+  selector: 'page-timetables',
+  templateUrl: 'timetables.html'
 })
 
 @Injectable()
-export class ContactPage {
+export class TimeTables {
 
   private stops: any[];
   public selectedBusLine: any = [];

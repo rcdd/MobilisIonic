@@ -26,26 +26,30 @@
     </ion-fab-list>
   </ion-fab>
 
-  <div id="planning" *ngIf='planning.orig.latlng || planning.dest.latlng'>
-    <ion-list>
-      <ion-item>
-        <ion-label color="primary" stacked>Origin</ion-label>
-        <ion-input [(ngModel)]="planning.orig.latlng" type="text" placeholder="Origin coordenates"></ion-input>
-        <button ion-button (click)="chooseRoute()">(My Location)</button>
-      </ion-item>
-      <ion-item>
-        <ion-label color="primary" stacked>Destination</ion-label>
-        <ion-input [(ngModel)]="planning.dest.latlng" type="text" placeholder="Destination coordenates"></ion-input>
-      </ion-item>
-    </ion-list>
-    <button ion-button (click)="chooseRoute()"><ion-icon name="navigate"></ion-icon></button>
-    <button ion-button (click)="cancelRoute(true)"><ion-icon name="close"></ion-icon></button>
-
+  <div id="planning" text-wrap *ngIf='planning.orig.latlng || planning.dest.latlng'>
+    <div class="left">
+      <div class="origin">
+        <label>Origin</label><br />
+        <input [(ngModel)]="planning.orig.latlng" type="text" readonly placeholder="Origin coordenates" />
+        <!-- <button ion-button (click)="chooseRoute()">(My Location)</button> -->
+      </div>
+      <div class="dest">
+        <label>Destination</label><br />
+        <input [(ngModel)]="planning.dest.latlng" type="text" readonly placeholder="Destination coordenates" />
+      </div>
+    </div>
+    <div class="right">
+      <button ion-button (click)="chooseRoute()"><ion-icon name="navigate"></ion-icon></button>
+      <button ion-button (click)="cancelRoute(true)"><ion-icon name="close"></ion-icon></button>
+    </div>
   </div>
+
   <div id="routing" *ngIf='routingControl.itenarary'>
+    <div class="cancelButton">
+      <button ion-button (click)="cancelRoute(false)"><ion-icon name="arrow-round-back"></ion-icon></button>
+    </div>
     <ion-list-header text-wrap>
       Your possibles itineraries:
-      <hr>
     </ion-list-header>
     <ion-list>
       <ion-item *ngFor="let d of routingControl.itenarary; let i=index">
@@ -58,7 +62,7 @@
             <ion-col width-10>
               <ion-icon color="primary" item-right [name]="d.icon"></ion-icon>
             </ion-col>
-            <ion-col width-12>
+            <ion-col width-10>
               <button ion-button (click)="showRoute(d)">GO</button>
             </ion-col>
           </ion-row>
@@ -79,8 +83,5 @@
         </div>
       </ion-item>
     </ion-list>
-    <div class="cancelButton">
-      <button ion-button (click)="cancelRoute(false)">Cancel</button>
-    </div>
   </div>
 </ion-content>

@@ -7,7 +7,7 @@ page-home {
 
 //long press container
     .leaflet-popup-content-wrapper {
-            background-color: lightskyblue;
+            background-color: #6497b1;
         .leaflet-popup-content {   
             margin: -10px;
             width: 220px !important;
@@ -18,8 +18,8 @@ page-home {
                 color: white;
                 text-align: center;
                 padding: 5px 10px;
-                background-color: lightseagreen;
-                border: 1px solid lightseagreen;
+                background-color: #005b96;
+                border: 1px solid #03396c;
                 border-radius: 15px;
                 margin: 3px;
             }
@@ -46,52 +46,71 @@ page-home {
 
     #planning {    
         position: fixed;
-        bottom: 45px;
-        left: 2%;
-        width: 70%;
+        bottom: 50px;
+        padding: 10px;
+        width: 100%;
         font-size: 10px; 
         z-index: 1000;
+        background-color:	#005b96;
         animation: fadeIn 0.3s;
+        box-shadow: 0px -5px 3px #03396c;
     }
 
 
 @-webkit-keyframes fadeIn {
     from { bottom: -100px; }
-      to { bottom: 45px; }
+      to { bottom: 55px; }
 }  
 @keyframes fadeIn {
     from { bottom: -100px; }
-      to { bottom: 45px; }
+      to { bottom: 55px; }
 }
 
-    #planning .label{
-        
-        font-size: 16px; 
-    }
-
-    #planning .item{
-        font-size: 14px; 
-        width: 120%;
-        background-color: gainsboro;
-    }
-
-
-    #planning .list{
-        float: left;
-        border: 2px solid white;
-        border-radius: 15px;
-        margin-right: 10px;
-        width: 70%;
-    }
-    #planning .input{
-        color: white;
-    }
-
-
-    #planning .button{
+    #planning .left{
         position: relative;
-        margin-top: 7%;
-        left: 15%;
+        display: grid;
+        float: left;
+        width: 60%;
+        left: 0px;
+        margin-right: 5px; 
+
+        .origin{
+            padding: 10px;
+
+        }
+        .dest {
+            padding: 10px;
+
+        }
+
+        label{
+                font-size: 16px; 
+                margin-bottom: 10px; 
+                color: #6497b1;
+        }
+
+        input{
+            position: relative;
+            margin-top: 10px; 
+            margin-left: 5px; 
+            color: grey;
+            width: 100%;
+        }
+    }
+
+    #planning .right{
+        position: relative;
+        height: 100%;
+        width: 30%;
+        top: 25px;
+        display: grid;
+        float: right;
+
+        .button{
+            position: relative;
+            max-width: 100px;
+        }
+
     }
 
     .leaflet-control-container .leaflet-routing-container-hide {
@@ -284,18 +303,25 @@ page-home {
     }
 
     #routing ion-list-header{
+        position: fixed;
         margin-bottom: 0px;
         background-color: white;
         z-index: 10;
         text-align: center;
+        color: white;
+        background-color: #005b96;
+        box-shadow: 0px 5px 2px #03396c;
     }
 
     #routing ion-list {
+        position: relative;
+        padding: 0;
+        top: 40px;
 
         ion-item {
             width: auto;
             position: relative;
-            padding: 0em 0;
+            padding: 0 0 0;
             white-space: normal;
             text-align: justify;
             text-transform: none;
@@ -336,9 +362,11 @@ page-home {
         position: fixed;
         width: 100%;
         height: 50px;
-        bottom: 50px;
+        top: 3px;
+        left: -40%;
         text-align: center;
-        background-color: white;
+        background-color: transparent;
+        z-index: 20;
     }
 
 }
