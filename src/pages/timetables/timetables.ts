@@ -21,13 +21,14 @@ export class TimeTables {
   public stopsToShow: any = [];
   public isVisible: boolean = false;
   public isVisibleSearchbar: boolean = false;
-  public isVisibleCkeckBox : boolean = true;
-  public stopNameSelected : any;
-  public minDate : Date = new Date();
-  public maxDate : Date =  new Date();
-  public selectedDate : any = new Date().toISOString();
+  public isVisibleCkeckBox: boolean = true;
+  public stopNameSelected: any;
+  public minDate: Date = new Date();
+  public maxDate: Date = new Date();
+  public selectedDate: any = new Date().toISOString();
+  public setFirst: any = 0;
 
-  constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,public dataProvider: DataProvider,public alertCtrl: AlertController) {
+  constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController, public dataProvider: DataProvider, public alertCtrl: AlertController) {
     this.busLinesToPresent = dataProvider.CheckBoxRoutes;
     this.isVisibleSearchbar = false;
     this.maxDate.setDate(this.minDate.getDate() + 5);
@@ -55,23 +56,29 @@ export class TimeTables {
     this.timesToShow = [];
 
     this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(a => {
-    let resp = a;
+      let resp = a;
       resp.forEach(pat => {
         let storeTimes: any = [];
         storeTimes.line = pat.pattern;
-
+        let first = true;
         let listTimes: any[] = [];
         if (pat.times.length != 0) {
           pat.times.forEach(time => {
+            //console.dir(time);
             listTimes.push(time);
             storeTimes.times = listTimes;
-            if(this.timesToShow.indexOf(storeTimes) == -1)
-            this.timesToShow.push(storeTimes);
+            if (this.timesToShow.indexOf(storeTimes) == -1)
+              this.timesToShow.push(storeTimes);
+            if (first) {
+              this.selectedLine(this.timesToShow[0].times);
+              first = false;
+            }
+
           });
         }
+        console.dir(storeTimes);
       });
       this.isVisible = true;
-      console.dir(this.timesToShow);
     });
   }
 

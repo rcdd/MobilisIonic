@@ -38,7 +38,7 @@
   </div>
 
   <div *ngIf='isVisible' class="showTimes">
-    <ion-segment assertive>
+    <ion-segment assertive [(ngModel)]="setFirst">
       <ion-segment-button *ngFor="let time of timesToShow ; let i = index" [value]="i" (ionSelect)="selectedLine(time.times)" (ionSelect)="showToast('Line '+time.line.desc)">
         Line {{time.line.desc}}
       </ion-segment-button>
