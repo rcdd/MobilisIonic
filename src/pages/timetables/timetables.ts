@@ -54,30 +54,36 @@ export class TimeTables {
     this.isVisibleSearchbar = false;
     this.timesToShowInList = [];
     this.timesToShow = [];
+    let listOfLines = [];
 
     this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(a => {
       let resp = a;
       resp.forEach(pat => {
         let storeTimes: any = [];
-        storeTimes.line = pat.pattern;
-        let first = true;
-        let listTimes: any[] = [];
-        if (pat.times.length != 0) {
-          pat.times.forEach(time => {
-            //console.dir(time);
-            listTimes.push(time);
-            storeTimes.times = listTimes;
-            if (this.timesToShow.indexOf(storeTimes) == -1)
-              this.timesToShow.push(storeTimes);
-            if (first) {
-              this.selectedLine(this.timesToShow[0].times);
-              first = false;
-            }
 
-          });
+        if (listOfLines.indexOf(pat.pattern.desc) == -1) {
+          console.dir(listOfLines);
+          listOfLines.push(pat.pattern.desc);
+          storeTimes.line = pat.pattern;
+          let first = true;
+          let listTimes: any[] = [];
+          if (pat.times.length != 0) {
+            pat.times.forEach(time => {
+              //console.dir(time);
+              listTimes.push(time);
+              storeTimes.times = listTimes;
+              if (this.timesToShow.indexOf(storeTimes) == -1)
+                this.timesToShow.push(storeTimes);
+              if (first) {
+                this.selectedLine(this.timesToShow[0].times);
+                first = false;
+              }
+            });
+          }
         }
-        console.dir(storeTimes);
       });
+      console.dir(this.timesToShow);
+      this.timesToShow.sort(this.compare);
       this.isVisible = true;
     });
   }
@@ -178,6 +184,14 @@ export class TimeTables {
     });
 
     toast.present(toast);
+  }
+
+  compare(a, b) {
+    if (a.line.desc < b.line.desc)
+      return -1;
+    if (a.line.desc > b.line.desc)
+      return 1;
+    return 0;
   }
 
 }
