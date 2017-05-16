@@ -46,6 +46,7 @@ export class HomePage {
 
 
   public planning: any = [];
+  public planningBox: any = [];
   public route: any;
   public shownGroup: any;
 
@@ -81,6 +82,8 @@ export class HomePage {
     this.routingControl = [];
     this.currentPosition = [];
     this.shownGroup = null;
+    this.planningBox.size = 50;
+    this.planningBox.button = "down";
   }
 
 
@@ -150,7 +153,9 @@ export class HomePage {
           .bindPopup("Origin")
           .addTo(self.map)
           .on('dragend', (e) => {
-            console.log("dragOrigin", e);
+            //console.log("dragOrigin", e);
+            self.planningBox.size = 50;
+            self.planningBox.button = "down";
             self.cancelRoute(false);
             self.planning.orig.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
           });
@@ -165,10 +170,12 @@ export class HomePage {
       L.DomEvent.on(destBtn, 'click', function () {
         self.map.removeLayer(self.planning.dest);
         self.planning.dest = L.marker(e.latlng, { draggable: true, icon: self.iconDest })
-          .bindPopup("Destino")
+          .bindPopup("Destination")
           .addTo(self.map)
           .on('dragend', (e) => {
-            console.log("dragDest", e);
+            //console.log("dragDest", e);
+            self.planningBox.size = 50;
+            self.planningBox.button = "down";
             self.cancelRoute(false);
             self.planning.dest.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
           });
@@ -283,11 +290,19 @@ export class HomePage {
                 .openOn(self.map);
             }
           });
-
           self.showToast(closestStop.options.message + " from you!", 3000);
         } else {
-          self.showToast("You need select at least one line route", 3000);
-          self.showBusLines();
+          let alert = self.alertCtrl.create({
+            title: "Atention",
+            subTitle: "Please select at least one busline",
+            buttons: [{
+              text: 'Ok',
+              handler: () => {
+                self.showBusLines();
+              }
+            }]
+          });
+          alert.present();
         }
       } else {
         self.showToast("We can't calculate your position", 3000);
@@ -305,6 +320,7 @@ export class HomePage {
       zoom: 20,
       marker: false
     });
+
     this.map.addControl(self.controlSearch);
 
   }
@@ -543,10 +559,14 @@ export class HomePage {
     this.routingControl.polyline = new L.Polyline(this.routingControl.polyline.coords);
     this.routingControl.polyline.addTo(this.map);
 
-
     this.routingControl.itenarary = undefined;
-
     this.dataProvider.loading = false;
+    console.log("routingMarkers", this.routingControl.markers);
+    console.log("routingPolyline", this.routingControl.polyline);
+
+    this.planningBox.size = -100;
+    this.planningBox.button = "up";
+    this.map.fitBounds(this.routingControl.polyline.getBounds(), { padding: L.point(5, 5) });
   }
 
   cancelRoute(all: boolean) {
@@ -611,6 +631,17 @@ export class HomePage {
       data.showDetails = true;
       data.icon = 'ios-remove-circle-outline';
 
+    }
+  }
+
+  tooglePlaning() {
+    //console.log("planningSize", this.planningBox);
+    if (this.planningBox.size == 50) {
+      this.planningBox.size = -100;
+      this.planningBox.button = "up";
+    } else {
+      this.planningBox.size = 50;
+      this.planningBox.button = "down";
     }
   }
 

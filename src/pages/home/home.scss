@@ -46,7 +46,7 @@ page-home {
 
     #planning {    
         position: fixed;
-        bottom: 50px;
+        //bottom: 50px;
         padding: 10px;
         width: 100%;
         font-size: 10px; 
@@ -57,14 +57,20 @@ page-home {
     }
 
 
-@-webkit-keyframes fadeIn {
-    from { bottom: -100px; }
-      to { bottom: 55px; }
-}  
-@keyframes fadeIn {
-    from { bottom: -100px; }
-      to { bottom: 55px; }
-}
+    @-webkit-keyframes fadeIn {
+        from { bottom: -100px; }
+        to { bottom: 55px; }
+    }  
+    @keyframes fadeIn {
+        from { bottom: -100px; }
+        to { bottom: 55px; }
+    }
+
+    #planning .buttonTop {
+        position: absolute;
+        top: -25px;
+        left: 45%;
+    }
 
     #planning .left{
         position: relative;
@@ -94,6 +100,7 @@ page-home {
             margin-top: 10px; 
             margin-left: 5px; 
             color: grey;
+            height: 25px;
             width: 100%;
         }
     }

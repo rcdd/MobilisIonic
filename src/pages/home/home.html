@@ -26,7 +26,17 @@
     </ion-fab-list>
   </ion-fab>
 
-  <div id="planning" text-wrap *ngIf='planning.orig.latlng || planning.dest.latlng'>
+  <div id="planning" [style.bottom.px]="planningBox.size" text-wrap *ngIf='planning.orig.latlng || planning.dest.latlng'>
+    <div class="buttonTop">
+      <button ion-button (click)="tooglePlaning()">
+        <div *ngIf='planningBox.button == "down"'>
+          <ion-icon name="arrow-dropdown"></ion-icon>
+        </div>
+        <div *ngIf='planningBox.button == "up"'>
+          <ion-icon name="arrow-dropup"></ion-icon>
+        </div>
+        </button>
+    </div>
     <div class="left">
       <div class="origin">
         <label>Origin</label><br />
