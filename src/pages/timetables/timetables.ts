@@ -26,11 +26,12 @@ export class TimeTables {
   public minDate: Date = new Date();
   public maxDate: Date = new Date();
   public selectedDate: any = new Date().toISOString();
-  public setFirst: any = 0;
+  public setFirst: any;
 
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform) {
-    this.busLinesToPresent = dataProvider.CheckBoxRoutes;
+    this.busLinesToPresent = this.dataProvider.CheckBoxRoutes;
+    console.dir( this.busLinesToPresent);
     this.isVisibleSearchbar = false;
     this.maxDate.setDate(this.minDate.getDate() + 5);
 
@@ -67,33 +68,39 @@ export class TimeTables {
     this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(a => {
       let resp = a;
       resp.forEach(pat => {
-        //console.log("allTimes", pat);
+        //console.dir(pat);
         let storeTimes: any = [];
 
         if (listOfLines.indexOf(pat.pattern.desc) == -1) {
           //console.log("listOfLines", listOfLines);
           listOfLines.push(pat.pattern.desc);
           storeTimes.line = pat.pattern;
+          storeTimes.color = pat.pattern.color;
           let first = true;
           let listTimes: any[] = [];
+
           if (pat.times.length != 0) {
             pat.times.forEach(time => {
-              //console.log("time", time);
               listTimes.push(time);
               storeTimes.times = listTimes;
               if (this.timesToShow.indexOf(storeTimes) == -1)
                 this.timesToShow.push(storeTimes);
-              if (first) {
-                this.selectedLine(this.timesToShow[0].times);
-                first = false;
+            });
+            this.timesToShow.sort(this.compare);
+            this.timesToShow.forEach((time, index) => {
+              if (time.line.id.split(':')[0] + time.line.id.split(':')[1] == this.selectedBusLine.split(':')[0] + this.selectedBusLine.split(':')[1]) {
+                if (first) {
+                  this.setFirst = index;
+                  this.selectedLine(time.times);
+                  first = false;
+                }
               }
             });
           }
         }
       });
-      console.dir(this.timesToShow);
-      this.timesToShow.sort(this.compare);
       this.isVisible = true;
+      console.dir(this.timesToShow);
     });
   }
 
@@ -163,7 +170,8 @@ export class TimeTables {
       .replace(/ó/g, 'o')
       .replace(/ú/g, 'u')
       .replace(/ç/g, 'c')
-      .replace(/ã/g, 'a');
+      .replace(/ã/g, 'a')
+      .replace(/â/g, 'a');
   }
 
   removeDuplicates(myArr) {

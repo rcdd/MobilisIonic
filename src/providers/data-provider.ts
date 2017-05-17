@@ -274,7 +274,19 @@ export class DataProvider {
         this.loading = true;
         let date = moment(time).format("YYYYMMDD");
         let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/" + stop + "/stoptimes/" + date).toPromise();
+        let respj = resp.json();
+        respj.forEach(pat => {
+            //console.log(pat.pattern.id);  
+                this.CheckBoxRoutes.forEach(line => {
+                    //console.log(line.id.color);
+                    if(line.id.id.split(':')[0] + line.id.id.split(':')[1] == pat.pattern.id.split(':')[0]+pat.pattern.id.split(':')[1]) {
+                        pat.pattern.color = "#"+line.id.color;
+                       // console.log(line.id,pat.color);
+                    }
+                });
+            
+        });
         this.loading = false;
-        return resp.json();
+        return respj;
     }
 }
