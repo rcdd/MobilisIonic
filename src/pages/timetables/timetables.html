@@ -33,14 +33,14 @@
 
   <div *ngIf='isVisibleSearchbar' class="listStops">
     <button ion-button block color="light" (click)="showTimes(stop)" *ngFor="let stop of stopsToShow">
-       <div text-wrap> {{ stop.name }} </div>
+       <div text-wrap > {{ stop.name }} </div>
       </button>
   </div>
 
   <div *ngIf='isVisible' class="showTimes">
     <ion-segment assertive [(ngModel)]="setFirst">
       <ion-segment-button *ngFor="let time of timesToShow ; let i = index" [value]="i" (ionSelect)="selectedLine(time.times)" (ionSelect)="showToast('Line '+time.line.desc)">
-        Line {{time.line.desc}}
+        <div [style.backgroundColor]="time.color"> Line {{time.line.desc}} </div> 
       </ion-segment-button>
     </ion-segment>
 
