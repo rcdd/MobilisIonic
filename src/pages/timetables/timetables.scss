@@ -137,13 +137,19 @@ page-timetables {
 
    .notTimeAvailable h3 {
        color: red;
-       margin-top: 75px;
+       text-align: center;
+       width:100%;
+   }
+    .notTimeAvailable h2 {
+       color: red;
        text-align: center;
        width:100%;
    }
 
    .notTimeAvailable {
-       z-index: 1;
+       position: absolute;
+       z-index: 10;
+       margin-top: -100px;
    }
 
    .buttonHide {
