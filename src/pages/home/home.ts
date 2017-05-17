@@ -79,7 +79,7 @@ export class HomePage {
     public toastCtrl: ToastController, public http: Http,
     public alertCtrl: AlertController, public db: DatabaseProvider,
     public dataProvider: DataProvider, public geolocation: Geolocation,
-    public platform, Platform
+    public platform: Platform
   ) {
     this.planning.orig = [];
     this.planning.dest = [];
