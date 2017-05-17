@@ -39,6 +39,8 @@ export class HomePage {
   private routingControl: any; //CONTROLER OF ROUTING
 
   private map: any;
+  private mapSatellite: any;
+  private mapStreet: any;
   private currentPosition: any;
   public debug: any;
   private controlSearch: any;
@@ -88,7 +90,7 @@ export class HomePage {
 
 
   async ngOnInit() {
-    console.log("Init cenas");
+    //console.log("Init cenas");
     this.dataProvider.getDataFromServer().then((resp) => {
       this.dataProvider.innit = 100;
       this.stops = resp;
@@ -105,27 +107,43 @@ export class HomePage {
         self.showToast('You denied localization. For better performance, please allow your location.', 3000);
       });
     });
-    console.log("Init Done!");
+    //console.log("Init Done!");
   }
 
 
   initMap(): void {
-    let tiles = L.tileLayer('https://api.mapbox.com/styles/v1/rcdd/cj0lffm3h006c2qjretw3henw/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+    //let tiles = L.tileLayer('https://api.mapbox.com/styles/v1/rcdd/cj0lffm3h006c2qjretw3henw/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+    this.mapStreet = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
       attribution: 'Application power by RD&RP :)',
       maxZoom: 20,
       minZoom: 8,
-      id: 'mapbox.mapbox-traffic-v1',
-      accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA',
+      id: 'streets-v10',
+      accessToken: 'pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A',
+      //accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA',
       // CACHE STUFF
       useCache: true,
       useOnlyCache: true,
       crossOrigin: true,
       saveToCache: true,
-      cacheMaxAge: (24 * 3600000), // 24h
+      cacheMaxAge: (7 * 24 * 3600000), // 7days
+    });
+    this.mapSatellite = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+      attribution: 'Application power by RD&RP :)',
+      maxZoom: 20,
+      minZoom: 8,
+      id: 'satellite-streets-v10',
+      accessToken: 'pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A',
+      //accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA',
+      // CACHE STUFF
+      useCache: true,
+      useOnlyCache: true,
+      crossOrigin: true,
+      saveToCache: true,
+      cacheMaxAge: (7 * 24 * 3600000), // 7days
     });
 
     this.map = L.map('mapid', { zoomControl: false })
-      .addLayer(tiles)
+      .addLayer(this.mapStreet)
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });
 
@@ -157,13 +175,16 @@ export class HomePage {
             self.planningBox.size = 50;
             self.planningBox.button = "down";
             self.cancelRoute(false);
-            self.planning.orig.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
+            self.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
+              self.planning.orig.text = resp;
+              self.planning.orig.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
+            });
           });
-        self.planning.orig.latlng = e.latlng.lat + ',' + e.latlng.lng;
-        //self.map.removeControl(self.routingControl);
-        //self.routingControl.addTo(self.map);
-        //self.routingControl.spliceWaypoints(0, 1, e.latlng);
 
+        self.dataProvider.getReverseGeoCoder(e.latlng.lat, e.latlng.lng).then((resp) => {
+          self.planning.orig.text = resp;
+          self.planning.orig.latlng = (e.latlng.lat + ',' + e.latlng.lng);
+        });
         self.map.closePopup();
       });
 
@@ -177,13 +198,24 @@ export class HomePage {
             self.planningBox.size = 50;
             self.planningBox.button = "down";
             self.cancelRoute(false);
-            self.planning.dest.latlng = e.target._latlng.lat + "," + e.target._latlng.lng;
+            self.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
+              self.planning.dest.text = resp;
+              self.planning.dest.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
+            });
           });
         //console.log("originData", self.planning.orig.latlng);
         if (self.planning.orig.latlng == undefined) {
-          self.planning.orig.latlng = self.currentPosition.marker.getLatLng().lat + ',' + self.currentPosition.marker.getLatLng().lng;
+          self.dataProvider.getReverseGeoCoder(self.currentPosition.marker.getLatLng().lat, self.currentPosition.marker.getLatLng().lng).then((resp) => {
+            self.planning.orig.text = resp;
+            self.planning.orig.latlng = (self.currentPosition.marker.getLatLng().lat + ',' + self.currentPosition.marker.getLatLng().lng);
+          });
         }
-        self.planning.dest.latlng = e.latlng.lat + ',' + e.latlng.lng;
+
+        self.dataProvider.getReverseGeoCoder(e.latlng.lat, e.latlng.lng).then((resp) => {
+          self.planning.dest.text = resp;
+          self.planning.dest.latlng = (e.latlng.lat + ',' + e.latlng.lng);
+        });
+
 
         self.map.closePopup();
       });
@@ -383,21 +415,13 @@ export class HomePage {
     //console.log("makers", this.markers);
     if (this.markers.length != 0) {
       this.markers.forEach(stop => {
-        let dist: any;
         if (this.allowLocation == true) {
           stop.meters = this.currentPosition.marker.getLatLng().distanceTo([stop.lat, stop.lon]);
-          dist = '';
-          if (stop.meters > 1000) {
-            dist += (stop.meters / 1000).toFixed(0) + ' Kms';
-          } else {
-            dist += stop.meters.toFixed(0) + ' meters';
-          }
-          stop.message = dist;
-          dist += ' from me<hr>';
+          stop.message = this.getDistance(stop.meters);
         } else {
-          dist = '';
+          stop.message = '';
         }
-        let popUp = '<h6>' + stop.name + '</h6><hr>' + dist + 'Lines:';
+        let popUp = '<h6>' + stop.name + '</h6><hr>' + stop.message + 'Lines:';
         stop.lines.forEach(line => {
           popUp += '<br>Line ' + line;
         });
@@ -435,6 +459,21 @@ export class HomePage {
       title: 'Filter Bus Lines',
       inputs: this.dataProvider.CheckBoxRoutes,
       buttons: [{
+        text: 'All/None',
+        handler: data => {
+          this.dataProvider.CheckBoxRoutes.forEach(element => {
+            (element.checked ? element.checked = false : element.checked = true);
+          });
+          this.showBusLines();
+        }
+      },
+      {
+        text: 'Cancel',
+        role: 'cancel',
+        handler: data => {
+          console.log('Cancel clicked');
+        }
+      }, {
         text: 'Ok',
         handler: data => {
           //console.dir(data);
@@ -468,13 +507,6 @@ export class HomePage {
           alert.dismiss();
           return false;
         }
-      },
-      {
-        text: 'Cancel',
-        role: 'cancel',
-        handler: data => {
-          console.log('Cancel clicked');
-        }
       }]
     });
     alert.present();
@@ -490,18 +522,29 @@ export class HomePage {
           //console.log("PlanningData", resp);
           this.routingControl.itenarary = [];
           this.routingControl.itenarary.showDetails = false;
-          this.routingControl.icon = 'ios-add-circle-outline';
+          //this.routingControl.icon = 'ios-add-circle-outline';
           resp.plan.itineraries.forEach(itinerary => {
+            itinerary.icon = 'ios-add-circle-outline';
             itinerary.duration = moment.unix(itinerary.duration).format("HH:mm:ss");
+            itinerary.startTime = moment.unix((itinerary.startTime) / 1000).format("DD/MM/YYYY HH:mm:ss");
+            itinerary.endTime = moment.unix((itinerary.endTime) / 1000).format("DD/MM/YYYY HH:mm:ss");
             itinerary.walkDistance = this.getDistance(itinerary.walkDistance);
             itinerary.legs.forEach(leg => {
               leg.distance = this.getDistance(leg.distance);
-              leg.steps.forEach(step => {
-                step.distance = this.getDistance(step.distance);
-                step.direction = "Go " + step.absoluteDirection + " on " + step.streetName + " about " + step.distance;
-                step.showDetails = false;
-                step.icon = 'ios-add-circle-outline';
-              });
+              if (leg.mode == "WALK") {
+                leg.steps.forEach(step => {
+                  step.distance = this.getDistance(step.distance);
+                  step.direction = "Go " + step.absoluteDirection + " on " + step.streetName + " about " + step.distance;
+                  step.showDetails = false;
+                  leg.icon = 'ios-add-circle-outline';
+                });
+              } else if (leg.mode == "BUS") {
+                leg.direction = ("Get busline " + leg.route + " (" + leg.routeLongName + ") at " + moment.unix((leg.startTime) / 1000).format("DD/MM/YYYY HH:mm:ss") + "h and exit on " + leg.to.name);
+                leg.showDetails = false;
+                leg.icon = 'ios-add-circle-outline';
+              } else {
+                leg.direction = "UNKNOWN"
+              }
             });
             this.routingControl.itenarary.push(itinerary);
           });
@@ -540,12 +583,12 @@ export class HomePage {
       //console.log("geometry->LatLng", L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());
       this.routingControl.polyline.coords = this.routingControl.polyline.coords.concat(L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());
       if (leg.mode == "BUS") {
-        this.routingControl.markers.push(L.circle([leg.from.lat, leg.from.lon], { radius: 2 }).bindPopup("Take bus on " + leg.from.name));
-        this.routingControl.markers.push(L.circle([leg.to.lat, leg.to.lon], { radius: 2 }).bindPopup("Exit on " + leg.to.name));
+        this.routingControl.markers.push(L.circle([leg.from.lat, leg.from.lon], { radius: 20 }).bindPopup("Take bus on " + leg.from.name));
+        this.routingControl.markers.push(L.circle([leg.to.lat, leg.to.lon], { radius: 20 }).bindPopup("Exit on " + leg.to.name));
       } else {
         leg.steps.forEach(step => {
           L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs().forEach(element => {
-            this.routingControl.markers.push(L.circle([step.lat, step.lon], { radius: 2 }).bindPopup(step.direction));
+            this.routingControl.markers.push(L.circle([step.lat, step.lon], { radius: 10 }).bindPopup(step.direction));
           });
         });
       }
@@ -561,12 +604,12 @@ export class HomePage {
 
     this.routingControl.itenarary = undefined;
     this.dataProvider.loading = false;
-    console.log("routingMarkers", this.routingControl.markers);
-    console.log("routingPolyline", this.routingControl.polyline);
+    //console.log("routingMarkers", this.routingControl.markers);
+    //console.log("routingPolyline", this.routingControl.polyline);
 
     this.planningBox.size = -100;
     this.planningBox.button = "up";
-    this.map.fitBounds(this.routingControl.polyline.getBounds(), { padding: L.point(5, 5) });
+    this.map.fitBounds(this.routingControl.polyline.getBounds(), { padding: L.point(10, 10) });
   }
 
   cancelRoute(all: boolean) {
@@ -575,10 +618,12 @@ export class HomePage {
         this.routingControl.route[i].remove();
       }
     }
+    if (this.map.hasLayer(this.routingControl.polyline)) {
+      this.map.removeControl(this.routingControl.polyline);
+    }
+
     if (all) {
-      if (this.map.hasLayer(this.routingControl.polyline)) {
-        this.map.removeControl(this.routingControl.polyline);
-      }
+
       if (this.routingControl.markers != undefined) {
         this.routingControl.markers.forEach(circle => {
           if (this.map.hasLayer(circle)) {
@@ -647,5 +692,15 @@ export class HomePage {
 
   getDistance(meters: any) {
     return ((meters > 1000) ? ((meters / 1000).toFixed(1) + ' Kms') : (meters.toFixed(0) + 'm'));
+  }
+
+  toogleMapTile() {
+    if (this.map.hasLayer(this.mapSatellite)) {
+      this.map.removeLayer(this.mapSatellite);
+      this.map.addLayer(this.mapStreet);
+    } else {
+      this.map.removeLayer(this.mapStreet);
+      this.map.addLayer(this.mapSatellite);
+    }
   }
 }

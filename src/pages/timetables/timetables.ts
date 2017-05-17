@@ -3,7 +3,7 @@ import { NavController, ToastController } from 'ionic-angular';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { DataProvider } from '../../providers/data-provider';
-import { AlertController } from 'ionic-angular';
+import { AlertController, Platform } from 'ionic-angular';
 
 @Component({
   selector: 'page-timetables',
@@ -28,10 +28,17 @@ export class TimeTables {
   public selectedDate: any = new Date().toISOString();
   public setFirst: any = 0;
 
-  constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController, public dataProvider: DataProvider, public alertCtrl: AlertController) {
+  constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
+    public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform) {
     this.busLinesToPresent = dataProvider.CheckBoxRoutes;
     this.isVisibleSearchbar = false;
     this.maxDate.setDate(this.minDate.getDate() + 5);
+
+    this.platform.registerBackButtonAction(() => {
+      if (this.isVisible) {
+        this.hideTimes();
+      }
+    });
   }
 
   updateSelectedValue() {
@@ -49,6 +56,7 @@ export class TimeTables {
   }
 
   showTimes(stop: any) {
+    //console.log("ShowTime:Stop", stop);
     this.stopNameSelected = stop.name;
     this.isVisibleCkeckBox = false;
     this.isVisibleSearchbar = false;
@@ -59,17 +67,18 @@ export class TimeTables {
     this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(a => {
       let resp = a;
       resp.forEach(pat => {
+        //console.log("allTimes", pat);
         let storeTimes: any = [];
 
         if (listOfLines.indexOf(pat.pattern.desc) == -1) {
-          console.dir(listOfLines);
+          //console.log("listOfLines", listOfLines);
           listOfLines.push(pat.pattern.desc);
           storeTimes.line = pat.pattern;
           let first = true;
           let listTimes: any[] = [];
           if (pat.times.length != 0) {
             pat.times.forEach(time => {
-              //console.dir(time);
+              //console.log("time", time);
               listTimes.push(time);
               storeTimes.times = listTimes;
               if (this.timesToShow.indexOf(storeTimes) == -1)

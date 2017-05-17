@@ -47,6 +47,24 @@ export class DataProvider {
         return resp.json();
     }
 
+    async getReverseGeoCoder(lat: any, lng: any) {
+        //if (this.app.hasNetwork) {
+        this.loading = true;
+        let resp = await this.http.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/` + lng + `,` + lat + `.json?access_token=pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A&types=address%2Cpoi%2Cpoi.landmark%2Clocality%2Cplace%2Cpostcode`).toPromise();
+        let place = resp.json();
+        //console.log("ReverseCoder", place);
+        this.loading = false;
+        if (place.features.length > 0) {
+            return (place.features[0].properties.address != undefined ? place.features[0].properties.address : (lat + "," + lng));
+        } else {
+            return (lat + "," + lng);
+        }
+        /* }
+         else {
+             return (lat + "," + lng);
+         }*/
+    }
+
     async getDataFromServer(): Promise<any> {
         this.innit = 0;
         return new Promise((resolve, reject) => {
@@ -153,7 +171,7 @@ export class DataProvider {
         for (let route of this.lines) { // http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops
             this.innit += 5; //http://194.210.216.191/otp/routers/default/index/patterns/1:1018:0:01
             let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + "::01").toPromise();
-            console.dir(stops);
+            //console.dir(stops);
             await this.createStorageStops(route, stops.json());
         }
     }
@@ -162,11 +180,12 @@ export class DataProvider {
     async createStorageLines() {
         await this.DBDropTable("BUSLINES");
 
-        await this.db.query("CREATE TABLE IF NOT EXISTS BUSLINES (AGENCYNAME TEXT, IDLINE TEXT, LONGNAME TEXT, MODE TEXT, SHORTNAME TEXT)")
+        await this.db.query("CREATE TABLE IF NOT EXISTS BUSLINES (AGENCYNAME TEXT, IDLINE TEXT, LONGNAME TEXT, MODE TEXT, SHORTNAME TEXT, COLOR TEXT)")
             .then(res => {
+                console.log("lines", this.lines);
                 this.lines.forEach(route => {
                     this.innit += 1;
-                    this.db.query("INSERT INTO BUSLINES (AGENCYNAME, IDLINE, LONGNAME, MODE, SHORTNAME) VALUES(?,?,?,?,?);", [route.agencyName, route.id, route.longName, route.mode, route.shortName]).then(res => {
+                    this.db.query("INSERT INTO BUSLINES (AGENCYNAME, IDLINE, LONGNAME, MODE, SHORTNAME, COLOR) VALUES(?,?,?,?,?,?);", [route.agencyName, route.id, route.longName, route.mode, route.shortName, route.color]).then(res => {
                         // console.dir(res);
                     })
                         .catch(err => {
@@ -231,6 +250,7 @@ export class DataProvider {
                                 this.stops[res.rows.item(i).IDLINE].id = res.rows.item(i).IDLINE;
                                 this.stops[res.rows.item(i).IDLINE].longName = res.rows.item(i).LONGNAME;
                                 this.stops[res.rows.item(i).IDLINE].shortName = res.rows.item(i).SHORTNAME;
+                                this.stops[res.rows.item(i).IDLINE].color = res.rows.item(i).COLOR;
                                 this.stops[res.rows.item(i).IDLINE].stops = stop;
                                 this.innit += 1;
                                 if (Object.keys(this.stops).length == res.rows.length) {

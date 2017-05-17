@@ -22,11 +22,11 @@
     <button ion-fab mini><ion-icon name="add"></ion-icon></button>
     <ion-fab-list>
       <button ion-fab id="filter" (click)="showBusLines()"> <ion-icon name="list"></ion-icon></button>
-      <!-- <button ion-fab id="plan" (click)="showPlanning()"> <ion-icon name="compass"></ion-icon></button> -->
+      <button ion-fab id="street" (click)="toogleMapTile()"> <ion-icon name="map"></ion-icon></button>
     </ion-fab-list>
   </ion-fab>
 
-  <div id="planning" [style.bottom.px]="planningBox.size" text-wrap *ngIf='planning.orig.latlng || planning.dest.latlng'>
+  <div id="planning" [style.bottom.px]="planningBox.size" text-wrap *ngIf='planning.orig.text || planning.dest.text'>
     <div class="buttonTop">
       <button ion-button (click)="tooglePlaning()">
         <div *ngIf='planningBox.button == "down"'>
@@ -40,12 +40,12 @@
     <div class="left">
       <div class="origin">
         <label>Origin</label><br />
-        <input [(ngModel)]="planning.orig.latlng" type="text" readonly placeholder="Origin coordenates" />
+        <input [(ngModel)]="planning.orig.text" type="text" readonly placeholder="Origin coordenates" />
         <!-- <button ion-button (click)="chooseRoute()">(My Location)</button> -->
       </div>
       <div class="dest">
         <label>Destination</label><br />
-        <input [(ngModel)]="planning.dest.latlng" type="text" readonly placeholder="Destination coordenates" />
+        <input [(ngModel)]="planning.dest.text" type="text" readonly placeholder="Destination coordenates" />
       </div>
     </div>
     <div class="right">
@@ -67,7 +67,8 @@
           <ion-row text-wrap>
             <ion-col width-75>
               <h1>Route {{i+1}}</h1>
-              <h6> Duration: {{d.duration}} <br /> Walking distance: {{d.walkDistance}}) </h6>
+              <h6> Duration: {{d.duration}} / Walking distance: {{d.walkDistance}} </h6>
+              <h6> Start time: {{d.startTime}} <br /> End Time: {{d.endTime}} </h6>
             </ion-col>
             <ion-col width-10>
               <ion-icon color="primary" item-right [name]="d.icon"></ion-icon>
@@ -80,13 +81,23 @@
         <div *ngIf="d.showDetails">
           <ion-item class="subItemLegs" *ngFor="let l of d.legs">
             <ion-row (click)="toggleSubDetails(l, d.legs)">
-              <ion-col text-wrap>
+              <ion-col width-75 text-wrap>
                 On {{l.mode}}: {{l.distance}}
+              </ion-col>
+              <ion-col width-10>
+                <ion-icon color="primary" item-right [name]="l.icon"></ion-icon>
               </ion-col>
             </ion-row>
             <div *ngIf="l.showDetails">
-              <div text-wrap class="subItemSteps" *ngFor="let s of l.steps" (click)="showToast(s.direction, 3000)">
-                {{s.direction}}
+              <div *ngIf='l.mode == "WALK"'>
+                <div text-wrap class="subItemSteps" *ngFor="let s of l.steps" (click)="showToast(s.direction, 3000)">
+                  {{s.direction}}
+                </div>
+              </div>
+              <div *ngIf='l.mode == "BUS"'>
+                <div text-wrap class="subItemSteps" (click)="showToast(s.direction, 3000)">
+                  {{l.direction}}
+                </div>
               </div>
             </div>
           </ion-item>
