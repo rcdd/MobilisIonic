@@ -79,7 +79,7 @@ export class HomePage {
     public toastCtrl: ToastController, public http: Http,
     public alertCtrl: AlertController, public db: DatabaseProvider,
     public dataProvider: DataProvider, public geolocation: Geolocation,
-    public platform, Platform
+    public platform: Platform
   ) {
     this.planning.orig = [];
     this.planning.dest = [];
@@ -170,6 +170,7 @@ export class HomePage {
 
       L.DomEvent.on(startBtn, 'click', function () {      // ROUTING OF THE MAP
         self.map.removeLayer(self.planning.orig);
+        self.cancelRoute(false);
         self.planning.orig = L.marker(e.latlng, { draggable: true, icon: self.iconStart })
           .bindPopup("Origin")
           .addTo(self.map)
@@ -193,6 +194,7 @@ export class HomePage {
 
       L.DomEvent.on(destBtn, 'click', function () {
         self.map.removeLayer(self.planning.dest);
+        self.cancelRoute(false);
         self.planning.dest = L.marker(e.latlng, { draggable: true, icon: self.iconDest })
           .bindPopup("Destination")
           .addTo(self.map)
@@ -458,15 +460,24 @@ export class HomePage {
   }
 
   async showBusLines() {
-    this.busLineBox = true;
-    /*let alert = this.alertCtrl.create({
+    //this.busLineBox = true;
+
+    let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
       inputs: this.dataProvider.CheckBoxRoutes,
       buttons: [{
-        text: 'All/None',
+        text: 'Select All',
         handler: data => {
-          this.dataProvider.CheckBoxRoutes.forEach(element => {
-            (element.checked ? element.checked = false : element.checked = true);
+          this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
+            checkBox.checked = true;
+          });
+          this.showBusLines();
+        }
+      }, {
+        text: 'Select None',
+        handler: data => {
+          this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
+            checkBox.checked = false;
           });
           this.showBusLines();
         }
@@ -513,49 +524,53 @@ export class HomePage {
         }
       }]
     });
-    alert.present();*/
+    alert.present();
 
   }
 
-  // ####################    TO MUCH TO DO HERE!!!!!!!!!! ########################
+  // ####################    BEAUTIFUL THINGS  ########################
   async chooseRoute() {
     this.dataProvider.loading = true;
     if (this.planning.orig.latlng != undefined && this.planning.dest.latlng != undefined) {
       await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
-        if (resp.error == undefined) {
-          this.cancelRoute(false);
-          //console.log("PlanningData", resp);
-          this.routingControl.itenarary = [];
-          this.routingControl.itenarary.showDetails = false;
-          //this.routingControl.icon = 'ios-add-circle-outline';
-          resp.plan.itineraries.forEach(itinerary => {
-            itinerary.icon = 'ios-add-circle-outline';
-            itinerary.duration = moment.unix(itinerary.duration).format("HH:mm:ss");
-            itinerary.startTime = moment.unix((itinerary.startTime) / 1000).format("DD/MM/YYYY HH:mm:ss");
-            itinerary.endTime = moment.unix((itinerary.endTime) / 1000).format("DD/MM/YYYY HH:mm:ss");
-            itinerary.walkDistance = this.getDistance(itinerary.walkDistance);
-            itinerary.legs.forEach(leg => {
-              leg.distance = this.getDistance(leg.distance);
-              if (leg.mode == "WALK") {
-                leg.steps.forEach(step => {
-                  step.distance = this.getDistance(step.distance);
-                  step.direction = "Go " + step.absoluteDirection + " on " + step.streetName + " about " + step.distance;
-                  step.showDetails = false;
+        if (resp != null) {
+          if (resp.error == undefined) {
+            this.cancelRoute(false);
+            //console.log("PlanningData", resp);
+            this.routingControl.itenarary = [];
+            this.routingControl.itenarary.showDetails = false;
+            //this.routingControl.icon = 'ios-add-circle-outline';
+            resp.plan.itineraries.forEach(itinerary => {
+              itinerary.icon = 'ios-add-circle-outline';
+              itinerary.duration = moment.unix(itinerary.duration).format("HH:mm:ss");
+              itinerary.startTime = moment.unix((itinerary.startTime) / 1000).format("DD/MM HH:mm");
+              itinerary.endTime = moment.unix((itinerary.endTime) / 1000).format("DD/MM HH:mm");
+              itinerary.walkDistance = this.getDistance(itinerary.walkDistance);
+              itinerary.legs.forEach(leg => {
+                leg.distance = this.getDistance(leg.distance);
+                if (leg.mode == "WALK") {
+                  leg.steps.forEach(step => {
+                    step.distance = this.getDistance(step.distance);
+                    step.direction = "Go " + step.absoluteDirection + " on " + step.streetName + " about " + step.distance;
+                    step.showDetails = false;
+                    leg.icon = 'ios-add-circle-outline';
+                  });
+                } else if (leg.mode == "BUS") {
+                  leg.direction = ("Get bus on " + leg.routeLongName + " at " + moment.unix((leg.startTime) / 1000).format("HH:mm") + "h and exit on " + leg.to.name);
+                  leg.showDetails = false;
                   leg.icon = 'ios-add-circle-outline';
-                });
-              } else if (leg.mode == "BUS") {
-                leg.direction = ("Get busline " + leg.route + " (" + leg.routeLongName + ") at " + moment.unix((leg.startTime) / 1000).format("DD/MM/YYYY HH:mm:ss") + "h and exit on " + leg.to.name);
-                leg.showDetails = false;
-                leg.icon = 'ios-add-circle-outline';
-              } else {
-                leg.direction = "UNKNOWN"
-              }
+                } else {
+                  leg.direction = "UNKNOWN"
+                }
+              });
+              this.routingControl.itenarary.push(itinerary);
             });
-            this.routingControl.itenarary.push(itinerary);
-          });
-          //console.log("Itenararies", this.routingControl.itenarary);
+            //console.log("Itenararies", this.routingControl.itenarary);
+          } else {
+            this.showToast(resp.error.msg, 5000);
+          }
         } else {
-          this.showToast(resp.error.msg, 5000);
+          this.showToast("No network!", 5000);
         }
       });
     } else {
@@ -625,6 +640,14 @@ export class HomePage {
     }
     if (this.map.hasLayer(this.routingControl.polyline)) {
       this.map.removeControl(this.routingControl.polyline);
+    }
+
+    if (this.routingControl.markers != undefined) {
+      this.routingControl.markers.forEach(circle => {
+        if (this.map.hasLayer(circle)) {
+          this.map.removeControl(circle);
+        }
+      });
     }
 
     if (all) {

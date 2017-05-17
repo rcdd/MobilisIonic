@@ -18,15 +18,16 @@
   <div id="mapid">
   </div>
 
-  <div class="busLine" *ngIf="busLineBox">
-    <ion-list>
-      <ion-item *ngFor="let line of dataProvider.CheckBoxRoutes">
-        <input type="checkbox" id="line.id" name="line.shortName" value="line">
-        <label for="line">{{line.shortName}}</label>
-      </ion-item>
-
-    </ion-list>
-  </div>
+  <!-- <div class="busLineWindow" *ngIf="busLineBox" (click)="busLineBox=false">
+    <div class="busLine">
+      <div class="lines">
+        <ion-item *ngFor="let line of dataProvider.CheckBoxRoutes">
+          <ion-label text-wrap>{{line.label}}</ion-label>
+            <ion-checkbox type="checkbox" id="line.id" name="line.shortName" value="line"> </ion-checkbox>
+        </ion-item>
+      </div>
+    </div>
+  </div> -->
 
   <ion-fab top right *ngIf="dataProvider.innit == 100 && routingControl.itenarary == undefined">
     <button ion-fab mini><ion-icon name="add"></ion-icon></button>
@@ -77,8 +78,8 @@
           <ion-row text-wrap>
             <ion-col width-75>
               <h1>Route {{i+1}}</h1>
-              <h6> Duration: {{d.duration}} / Walking distance: {{d.walkDistance}} </h6>
-              <h6> Start time: {{d.startTime}} <br /> End Time: {{d.endTime}} </h6>
+              <h6> Duration: <b>{{d.duration}}</b> <br /> Walking distance: <b>{{d.walkDistance}}</b> </h6>
+              <h6> Start: <b>{{d.startTime}}</b> <br /> End: <b>{{d.endTime}}</b> </h6>
             </ion-col>
             <ion-col width-10>
               <ion-icon color="primary" item-right [name]="d.icon"></ion-icon>
@@ -92,7 +93,7 @@
           <ion-item class="subItemLegs" *ngFor="let l of d.legs">
             <ion-row (click)="toggleSubDetails(l, d.legs)">
               <ion-col width-75 text-wrap>
-                On {{l.mode}}: {{l.distance}}
+                On <b>{{l.mode}}</b>: {{l.distance}}
               </ion-col>
               <ion-col width-10>
                 <ion-icon color="primary" item-right [name]="l.icon"></ion-icon>
@@ -105,7 +106,7 @@
                 </div>
               </div>
               <div *ngIf='l.mode == "BUS"'>
-                <div text-wrap class="subItemSteps" (click)="showToast(s.direction, 3000)">
+                <div text-wrap class="subItemSteps" (click)="showToast(l.direction, 3000)">
                   {{l.direction}}
                 </div>
               </div>

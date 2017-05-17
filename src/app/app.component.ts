@@ -14,7 +14,6 @@ import { Network } from '@ionic-native/network';
 })
 export class MyApp {
   rootPage = TabsPage;
-  public hasNetwork: boolean = true;
 
   constructor(platform: Platform,
     public db: DatabaseProvider,
@@ -34,7 +33,7 @@ export class MyApp {
       }, 100);
 
       network.onDisconnect().subscribe(() => {
-        this.hasNetwork = false;
+        this.dataProvider.hasNetwork = false;
         let alert = this.alertCtrl.create({
           title: "Internet Connection",
           subTitle: "Please Check Your Network connection",
@@ -49,7 +48,7 @@ export class MyApp {
       });
 
       network.onConnect().subscribe(() => {
-        this.hasNetwork = true;
+        this.dataProvider.hasNetwork = true;
         console.log('you are online');
       });
 

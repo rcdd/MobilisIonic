@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
 declare var window: any;
 
@@ -17,11 +17,11 @@ export class DatabaseProvider {
 		return new Promise(resolve => {
 			if (typeof window.sqlitePlugin !== 'undefined') {
 				this.db = window.sqlitePlugin.openDatabase({ name: this.dbname, location: 'default' });
-				 console.log("--> running on device: ", this.db);
+				console.log("--> running on device: ", this.db);
 				resolve();
 			} else {
 				this.db = window.openDatabase(this.dbname, '1.0', 'Test DB', -1);
-				 console.log("--> running in browser: ", this.db);
+				console.log("--> running in browser: ", this.db);
 				resolve();
 			};
 		});
