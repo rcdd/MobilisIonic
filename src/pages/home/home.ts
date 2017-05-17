@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { AlertController, NavController, NavParams, ToastController } from 'ionic-angular';
+import { Platform, AlertController, NavController, NavParams, ToastController } from 'ionic-angular';
 
 import { Http } from '@angular/http';
 
@@ -37,6 +37,8 @@ export class HomePage {
   public markersCluster: any; // CLUSTER
   private markers: any = []; // CLUSTER ON MAP
   private routingControl: any; //CONTROLER OF ROUTING
+  private busLineBox: boolean = false; //CONTROLER OF ROUTING
+
 
   private map: any;
   private mapSatellite: any;
@@ -50,7 +52,6 @@ export class HomePage {
   public planning: any = [];
   public planningBox: any = [];
   public route: any;
-  public shownGroup: any;
 
   private iconBus = L.icon({
     iconUrl: 'assets/img/busStop.png',
@@ -77,13 +78,13 @@ export class HomePage {
   constructor(public navCtrl: NavController, private navParams: NavParams,
     public toastCtrl: ToastController, public http: Http,
     public alertCtrl: AlertController, public db: DatabaseProvider,
-    public dataProvider: DataProvider, public geolocation: Geolocation
+    public dataProvider: DataProvider, public geolocation: Geolocation,
+    public platform, Platform
   ) {
     this.planning.orig = [];
     this.planning.dest = [];
     this.routingControl = [];
     this.currentPosition = [];
-    this.shownGroup = null;
     this.planningBox.size = 50;
     this.planningBox.button = "down";
   }
@@ -91,23 +92,25 @@ export class HomePage {
 
   async ngOnInit() {
     //console.log("Init cenas");
-    this.dataProvider.getDataFromServer().then((resp) => {
-      this.dataProvider.innit = 100;
-      this.stops = resp;
-      //console.log("imported stops:", Object.keys(this.stops).length);
-      //console.log("imported stops:", this.stops);
-      this.initMap();
-      this.dataProvider.populateCheckBoxs();
-      this.getCurrentLocation();
+    this.platform.ready().then(() => {
+      this.dataProvider.getDataFromServer().then((resp) => {
+        this.dataProvider.innit = 100;
+        this.stops = resp;
+        //console.log("imported stops:", Object.keys(this.stops).length);
+        //console.log("imported stops:", this.stops);
+        this.initMap();
+        this.dataProvider.populateCheckBoxs();
+        this.getCurrentLocation();
 
-      //Cenas de Localização
-      let self = this;
-      this.map.on('locationerror', function (e) {
-        self.allowLocation = false;
-        self.showToast('You denied localization. For better performance, please allow your location.', 3000);
+        //Cenas de Localização
+        let self = this;
+        this.map.on('locationerror', function (e) {
+          self.allowLocation = false;
+          self.showToast('You denied localization. For better performance, please allow your location.', 3000);
+        });
       });
+      //console.log("Init Done!");
     });
-    //console.log("Init Done!");
   }
 
 
@@ -455,7 +458,8 @@ export class HomePage {
   }
 
   async showBusLines() {
-    let alert = this.alertCtrl.create({
+    this.busLineBox = true;
+    /*let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
       inputs: this.dataProvider.CheckBoxRoutes,
       buttons: [{
@@ -509,7 +513,8 @@ export class HomePage {
         }
       }]
     });
-    alert.present();
+    alert.present();*/
+
   }
 
   // ####################    TO MUCH TO DO HERE!!!!!!!!!! ########################
