@@ -18,6 +18,16 @@
   <div id="mapid">
   </div>
 
+  <div class="busLine" *ngIf="busLineBox">
+    <ion-list>
+      <ion-item *ngFor="let line of dataProvider.CheckBoxRoutes">
+        <input type="checkbox" id="line.id" name="line.shortName" value="line">
+        <label for="line">{{line.shortName}}</label>
+      </ion-item>
+
+    </ion-list>
+  </div>
+
   <ion-fab top right *ngIf="dataProvider.innit == 100 && routingControl.itenarary == undefined">
     <button ion-fab mini><ion-icon name="add"></ion-icon></button>
     <ion-fab-list>

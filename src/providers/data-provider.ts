@@ -23,10 +23,9 @@ export class DataProvider {
 
     constructor(private http: Http, private db: DatabaseProvider,
         private alertCtrl: AlertController, private platform: Platform) {
-        this.db.init();
         // watch network for a connection
         this.platform.ready().then(() => {
-
+            this.db.init();
         });
     }
 

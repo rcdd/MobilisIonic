@@ -5,6 +5,14 @@ page-home {
         height: 100%;
     }
 
+    .busLine {
+        position: relative;
+        top: 50%;
+        left: 50%;
+        max-width: 300px;
+        z-index: 1000;
+    }
+
 //long press container
     .leaflet-popup-content-wrapper {
             background-color: #6497b1;
