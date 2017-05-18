@@ -27,11 +27,14 @@ export class TimeTables {
   public maxDate: Date = new Date();
   public selectedDate: any = new Date().toISOString();
   public setFirst: any;
+  public hasNetwork: boolean;
 
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform) {
     this.busLinesToPresent = this.dataProvider.CheckBoxRoutes;
-    console.dir( this.busLinesToPresent);
+    this.hasNetwork = this.dataProvider.hasNetwork;
+    console.log(this.hasNetwork);
+    console.dir(this.busLinesToPresent);
     this.isVisibleSearchbar = false;
     this.maxDate.setDate(this.minDate.getDate() + 5);
 
@@ -43,65 +46,71 @@ export class TimeTables {
   }
 
   updateSelectedValue() {
-    this.isVisibleSearchbar = true;
-    //console.dir(this.selectedBusLine);
-    this.timesToShowInList = [];
-    this.timesToShow = [];
-    this.dataProvider.CheckBoxRoutes.forEach(line => {
-      if (line.id.id == this.selectedBusLine) {
-        // this.stopsToShow = line.id.stops;
-        // this.stops = line.id.stops;
-        this.removeDuplicates(line.id.stops)
-      }
-    });
+      this.isVisibleSearchbar = true;
+      //console.dir(this.selectedBusLine);
+      this.timesToShowInList = [];
+      this.timesToShow = [];
+      this.dataProvider.CheckBoxRoutes.forEach(line => {
+        if (line.id.id == this.selectedBusLine) {
+          // this.stopsToShow = line.id.stops;
+          // this.stops = line.id.stops;
+          this.removeDuplicates(line.id.stops)
+        }
+      });
   }
 
   showTimes(stop: any) {
     //console.log("ShowTime:Stop", stop);
-    this.stopNameSelected = stop.name;
-    this.isVisibleCkeckBox = false;
-    this.isVisibleSearchbar = false;
-    this.timesToShowInList = [];
-    this.timesToShow = [];
-    let listOfLines = [];
+    if (this.dataProvider.getNetworkState()) {
+      this.stopNameSelected = stop.name;
+      this.isVisibleCkeckBox = false;
+      this.isVisibleSearchbar = false;
+      this.timesToShowInList = [];
+      this.timesToShow = [];
+      let listOfLines = [];
+      console.log(this.dataProvider.getNetworkState());
 
-    this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(a => {
-      let resp = a;
-      resp.forEach(pat => {
-        //console.dir(pat);
-        let storeTimes: any = [];
+      this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(resp => {
 
-        if (listOfLines.indexOf(pat.pattern.desc) == -1) {
-          //console.log("listOfLines", listOfLines);
-          listOfLines.push(pat.pattern.desc);
-          storeTimes.line = pat.pattern;
-          storeTimes.color = pat.pattern.color;
-          let first = true;
-          let listTimes: any[] = [];
 
-          if (pat.times.length != 0) {
-            pat.times.forEach(time => {
-              listTimes.push(time);
-              storeTimes.times = listTimes;
-              if (this.timesToShow.indexOf(storeTimes) == -1)
-                this.timesToShow.push(storeTimes);
-            });
-            this.timesToShow.sort(this.compare);
-            this.timesToShow.forEach((time, index) => {
-              if (time.line.id.split(':')[0] + time.line.id.split(':')[1] == this.selectedBusLine.split(':')[0] + this.selectedBusLine.split(':')[1]) {
-                if (first) {
-                  this.setFirst = index;
-                  this.selectedLine(time.times);
-                  first = false;
+        resp.forEach(pat => {
+          //console.dir(pat);
+          let storeTimes: any = [];
+
+          if (listOfLines.indexOf(pat.pattern.desc) == -1) {
+            //console.log("listOfLines", listOfLines);
+            listOfLines.push(pat.pattern.desc);
+            storeTimes.line = pat.pattern;
+            storeTimes.color = pat.pattern.color;
+            let first = true;
+            let listTimes: any[] = [];
+
+            if (pat.times.length != 0) {
+              pat.times.forEach(time => {
+                listTimes.push(time);
+                storeTimes.times = listTimes;
+                if (this.timesToShow.indexOf(storeTimes) == -1)
+                  this.timesToShow.push(storeTimes);
+              });
+              this.timesToShow.sort(this.compare);
+              this.timesToShow.forEach((time, index) => {
+                if (time.line.id.split(':')[0] + time.line.id.split(':')[1] == this.selectedBusLine.split(':')[0] + this.selectedBusLine.split(':')[1]) {
+                  if (first) {
+                    this.setFirst = index;
+                    this.selectedLine(time.times);
+                    first = false;
+                  }
                 }
-              }
-            });
+              });
+            }
           }
-        }
+        });
+        this.isVisible = true;
+        console.dir(this.timesToShow);
       });
-      this.isVisible = true;
-      console.dir(this.timesToShow);
-    });
+    } else {
+      this.showToast("NO NETWORK CONNECTION!");
+    }
   }
 
   selectedLine(time) {

@@ -292,6 +292,10 @@ export class DataProvider {
 
         });
         this.loading = false;
-        return respj;
+        return respj;     
+    }
+
+    getNetworkState() {
+        return this.hasNetwork;
     }
 }
