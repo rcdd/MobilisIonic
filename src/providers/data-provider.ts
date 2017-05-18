@@ -16,7 +16,7 @@ export class DataProvider {
     public innit: number = 0;
     public loading: boolean = false;
     public CheckBoxRoutes: any = [];
-    public hasNetwork: boolean = true;
+    public hasNetwork: boolean = null;
 
     public test: any;
 
@@ -30,48 +30,9 @@ export class DataProvider {
         });
     }
 
-
-    async getStops() {
-        return this.stops;
-    }
-
-    async planningRoute(origin: any, destination: any) {
-        if (this.hasNetwork) {
-            this.loading = true;
-            let date = moment().format("YYYYMMDD");
-            let time = moment().format("HH:mm");
-
-            //http://194.210.216.191/otp/routers/default/plan?fromPlace=39.73983136620544%2C-8.804597854614258&toPlace=39.74448420653371%2C-8.798589706420898&time=5%3A27pm&date=05-01-2017&mode=TRANSIT%2CWALK&maxWalkDistance=750
-            let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=TRANSIT%2CWALK&maxWalkDistance=750`).toPromise();
-            //console.log("planningRoute", resp.json());
-            this.loading = false;
-            return resp.json();
-        } else {
-            return null;
-        }
-    }
-
-    async getReverseGeoCoder(lat: any, lng: any) {
-        if (this.hasNetwork) {
-            this.loading = true;
-            let resp = await this.http.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/` + lng + `,` + lat + `.json?access_token=pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A&types=address%2Cpoi%2Cpoi.landmark%2Clocality%2Cplace%2Cpostcode`).toPromise();
-            let place = resp.json();
-            //console.log("ReverseCoder", place);
-            this.loading = false;
-            if (place.features.length > 0) {
-                return (place.features[0].properties.address != undefined ? place.features[0].properties.address : (lat + "," + lng));
-            } else {
-                return (lat + "," + lng);
-            }
-        }
-        else {
-            return (lat + "," + lng);
-        }
-    }
-
     async getDataFromServer(): Promise<any> {
-        this.innit = 0;
         return new Promise((resolve, reject) => {
+            this.innit = 0;
             this.isUpdated().then((up) => {
                 //console.log("up", up);
                 if (!up) {
@@ -115,14 +76,12 @@ export class DataProvider {
             .then(res => {
                 let diff = (moment(new Date(), "YYYYMMDD").diff(res.rows.item(0).value, 'days'));
                 //console.log("Diff time: ", diff);
-                if (diff == 0) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return (diff < 30 ? true : false);
             })
             .catch(err => {
+                //alert("Cenas pah!");
                 console.log("Error: ", err);
+                return false;
             });
     }
 
@@ -163,21 +122,30 @@ export class DataProvider {
     ////////////////////////////////////// CENAS FIXES  //////////////////////////////////////////////////////////
 
     async getRoutes() {
-        let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`).toPromise();
-        for (let route of resp.json()) {
-            this.lines.push(route);
-            this.innit += 5;
+        if (this.hasNetwork) {
+            let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`).toPromise();
+            for (let route of resp.json()) {
+                this.lines.push(route);
+                this.innit += 5;
+            }
+            await this.createStorageLines();
+        } else {
+            return this.noNetworkOnInit();
         }
-        await this.createStorageLines();
     }
 
     async getStationsFromBusLines() {
         for (let route of this.lines) { // http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops
             this.innit += 5; //http://194.210.216.191/otp/routers/default/index/patterns/1:1018:0:01
-            let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + "::01").toPromise();
-            //console.dir(stops);
-            await this.createStorageStops(route, stops.json());
+            if (this.hasNetwork) {
+                let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + "::01").toPromise();
+                //console.dir(stops);
+                await this.createStorageStops(route, stops.json());
+            } else {
+                return this.noNetworkOnInit();
+            }
         }
+
     }
 
 
@@ -292,14 +260,73 @@ export class DataProvider {
 
         });
         this.loading = false;
-        return respj;     
+        return respj;
+    }
+
+    async getStops() {
+        return this.stops;
+    }
+
+    async planningRoute(origin: any, destination: any) {
+        if (this.hasNetwork) {
+            this.loading = true;
+            let date = moment().format("YYYYMMDD");
+            let time = moment().format("HH:mm");
+
+            let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=TRANSIT%2CWALK&maxWalkDistance=750`).toPromise();
+            //console.log("planningRoute", resp.json());
+            this.loading = false;
+            return resp.json();
+        } else {
+            return null;
+        }
+    }
+
+    async getReverseGeoCoder(lat: any, lng: any) {
+        if (this.hasNetwork) {
+            this.loading = true;
+            let resp = await this.http.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/` + lng + `,` + lat + `.json?access_token=pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A&types=address%2Cpoi%2Cpoi.landmark%2Clocality%2Cplace%2Cpostcode`).toPromise();
+            let place = resp.json();
+            //console.log("ReverseCoder", place);
+            this.loading = false;
+            if (place.features.length > 0) {
+                return (place.features[0].properties.address != undefined ? place.features[0].properties.address : (lat + "," + lng));
+            } else {
+                return (lat + "," + lng);
+            }
+        }
+        else {
+            return (lat + "," + lng);
+        }
     }
 
     getNetworkState() {
         return this.hasNetwork;
     }
 
+    setNetworkState(val: boolean) {
+        this.hasNetwork = val;
+    }
+
     getCheckBoxRoutes() {
         return this.CheckBoxRoutes;
+    }
+
+    async noNetworkOnInit() {
+        let alert = this.alertCtrl.create({
+            title: "No Internet Connection",
+            subTitle: "You app is out of date! Please turn on your network and run app again!",
+            buttons: [{
+                text: 'Ok',
+                handler: () => {
+                    this.DBDropTable("SETTINGS").then(() => {
+                        this.hasNetwork = null;
+                        this.platform.exitApp();
+                    });
+                }
+            }]
+        });
+        alert.present();
+        return;
     }
 }

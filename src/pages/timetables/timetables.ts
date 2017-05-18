@@ -30,7 +30,7 @@ export class TimeTables {
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform) {
     this.isVisibleSearchbar = false;
-    this.maxDate.setDate(this.minDate.getDate() + 5);
+    this.maxDate.setDate(this.minDate.getDate() + 7);
 
     this.platform.registerBackButtonAction(() => {
       if (this.isVisible) {
@@ -40,17 +40,17 @@ export class TimeTables {
   }
 
   updateSelectedValue() {
-      this.isVisibleSearchbar = true;
-      //console.dir(this.selectedBusLine);
-      this.timesToShowInList = [];
-      this.timesToShow = [];
-      this.dataProvider.getCheckBoxRoutes().forEach(line => {
-        if (line.id.id == this.selectedBusLine) {
-          // this.stopsToShow = line.id.stops;
-          // this.stops = line.id.stops;
-          this.removeDuplicates(line.id.stops)
-        }
-      });
+    this.isVisibleSearchbar = true;
+    //console.dir(this.selectedBusLine);
+    this.timesToShowInList = [];
+    this.timesToShow = [];
+    this.dataProvider.getCheckBoxRoutes().forEach(line => {
+      if (line.id.id == this.selectedBusLine) {
+        // this.stopsToShow = line.id.stops;
+        // this.stops = line.id.stops;
+        this.removeDuplicates(line.id.stops)
+      }
+    });
   }
 
   showTimes(stop: any) {

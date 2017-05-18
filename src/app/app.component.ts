@@ -32,15 +32,17 @@ export class MyApp {
         Splashscreen.hide();
       }, 100);
 
+      (network.type != "none" ? dataProvider.setNetworkState(true) : dataProvider.setNetworkState(false));
+
       network.onDisconnect().subscribe(() => {
-        this.dataProvider.hasNetwork = false;
+        dataProvider.setNetworkState(false);
         let alert = this.alertCtrl.create({
           title: "Internet Connection",
           subTitle: "Please Check Your Network connection",
           buttons: [{
             text: 'Ok',
             handler: () => {
-              //this.platform.exitApp();
+              //platform.exitApp();
             }
           }]
         });
@@ -48,7 +50,7 @@ export class MyApp {
       });
 
       network.onConnect().subscribe(() => {
-        this.dataProvider.hasNetwork = true;
+        dataProvider.setNetworkState(true);
         console.log('you are online');
       });
 
