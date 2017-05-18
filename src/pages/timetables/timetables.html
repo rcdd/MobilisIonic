@@ -3,7 +3,7 @@
   <div class="selectBusLine" *ngIf='isVisibleCkeckBox'>
     <ion-label>Select Bus Line</ion-label>
     <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)" multiple="false">
-      <ion-option *ngFor="let busLine of busLinesToPresent" value="{{busLine.id.id}}"> {{busLine.label}} </ion-option>
+      <ion-option *ngFor="let busLine of dataProvider.getCheckBoxRoutes()" value="{{busLine.id.id}}"> {{busLine.label}} </ion-option>
     </ion-select>
   </div>
 

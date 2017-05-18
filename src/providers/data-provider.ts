@@ -298,4 +298,8 @@ export class DataProvider {
     getNetworkState() {
         return this.hasNetwork;
     }
+
+    getCheckBoxRoutes() {
+        return this.CheckBoxRoutes;
+    }
 }

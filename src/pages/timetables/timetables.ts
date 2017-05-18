@@ -15,7 +15,6 @@ export class TimeTables {
 
   private stops: any[];
   public selectedBusLine: any = [];
-  public busLinesToPresent: any;
   public timesToShow: any = [];
   public timesToShowInList: any = [];
   public stopsToShow: any = [];
@@ -27,14 +26,9 @@ export class TimeTables {
   public maxDate: Date = new Date();
   public selectedDate: any = new Date().toISOString();
   public setFirst: any;
-  public hasNetwork: boolean;
 
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform) {
-    this.busLinesToPresent = this.dataProvider.CheckBoxRoutes;
-    this.hasNetwork = this.dataProvider.hasNetwork;
-    console.log(this.hasNetwork);
-    console.dir(this.busLinesToPresent);
     this.isVisibleSearchbar = false;
     this.maxDate.setDate(this.minDate.getDate() + 5);
 
@@ -50,7 +44,7 @@ export class TimeTables {
       //console.dir(this.selectedBusLine);
       this.timesToShowInList = [];
       this.timesToShow = [];
-      this.dataProvider.CheckBoxRoutes.forEach(line => {
+      this.dataProvider.getCheckBoxRoutes().forEach(line => {
         if (line.id.id == this.selectedBusLine) {
           // this.stopsToShow = line.id.stops;
           // this.stops = line.id.stops;
