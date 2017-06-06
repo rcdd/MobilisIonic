@@ -46,8 +46,12 @@
 
     <div class="listTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
       <ion-list>
-        <ion-item *ngFor="let time of timesToShowInList">
+        <ion-item *ngFor="let time of passedTimes">
           {{time | date: 'dd/MM HH:mm'}}
+        </ion-item>
+
+        <ion-item *ngFor="let time of possibleTimes">
+          <b>{{time | date: 'dd/MM HH:mm'}}</b>
         </ion-item>
       </ion-list>
     </div>

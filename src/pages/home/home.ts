@@ -43,6 +43,7 @@ export class HomePage {
   private map: any;
   private mapSatellite: any;
   private mapStreet: any;
+  private chooseMap: string = "Satellite";
   private currentPosition: any;
   public debug: any;
   private controlSearch: any;
@@ -52,6 +53,10 @@ export class HomePage {
   public planning: any = [];
   public planningBox: any = [];
   public route: any;
+  public container: any;
+  public startBtn: any;
+  public destBtn: any;
+
 
   private iconBus = L.icon({
     iconUrl: 'assets/img/busStop.png',
@@ -125,10 +130,10 @@ export class HomePage {
       //accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA',
       // CACHE STUFF
       useCache: true,
-      useOnlyCache: true,
+      //useOnlyCache: true,
       crossOrigin: true,
       saveToCache: true,
-      cacheMaxAge: (7 * 24 * 3600000), // 7days
+      //cacheMaxAge: (7 * 24 * 3600000), // 7days
     });
     this.mapSatellite = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
       attribution: 'Application power by RD&RP :)',
@@ -139,10 +144,10 @@ export class HomePage {
       //accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA',
       // CACHE STUFF
       useCache: true,
-      useOnlyCache: true,
+      //useOnlyCache: true,
       crossOrigin: true,
       saveToCache: true,
-      cacheMaxAge: (7 * 24 * 3600000), // 7days
+      //cacheMaxAge: (7 * 24 * 3600000), // 7days
     });
 
     this.map = L.map('mapid', { zoomControl: false })
@@ -157,18 +162,18 @@ export class HomePage {
     this.currentPosition.circle = L.circle(this.map.getCenter()).addTo(this.map);
 
 
-    var self = this;
-    this.map.on('contextmenu', function (e) {
-      var container = L.DomUtil.create('div', 'container'),
-        startBtn = self.createButton('<img src="assets/img/originRoute.png" />&nbsp Get direction from here', container),
-        destBtn = self.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp Get direction to here', container);
+    this.container = L.DomUtil.create('div', 'container');
+    this.startBtn = this.createButton('<img src="assets/img/originRoute.png" />&nbsp Get direction from here', this.container);
+    this.destBtn = this.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp Get direction to here', this.container);
+    let self = this;
 
+    this.map.on('contextmenu', function (e) {
       L.popup()
-        .setContent(container)
+        .setContent(self.container)
         .setLatLng(e.latlng)
         .openOn(self.map);
 
-      L.DomEvent.on(startBtn, 'click', function () {      // ROUTING OF THE MAP
+      L.DomEvent.on(self.startBtn, 'click', function () {      // ROUTING OF THE MAP
         self.map.removeLayer(self.planning.orig);
         self.cancelRoute(false);
         self.planning.orig = L.marker(e.latlng, { draggable: true, icon: self.iconStart })
@@ -192,7 +197,7 @@ export class HomePage {
         self.map.closePopup();
       });
 
-      L.DomEvent.on(destBtn, 'click', function () {
+      L.DomEvent.on(self.destBtn, 'click', function () {
         self.map.removeLayer(self.planning.dest);
         self.cancelRoute(false);
         self.planning.dest = L.marker(e.latlng, { draggable: true, icon: self.iconDest })
@@ -237,6 +242,7 @@ export class HomePage {
           title: 'load image',
           onClick: function (control) {
             control.state("loading");
+            self.getCurrentLocation();
             control._map.on('locationfound', function (e) {
               //console.log("ButtonLocation", e);
               this.setView(e.latlng, 17);
@@ -257,6 +263,7 @@ export class HomePage {
           icon: 'fa-location-arrow',
           onClick: function (control) {
             control.state("loading");
+            self.getCurrentLocation();
             control._map.on('locationfound', function (e) {
               this.setView(e.latlng, 17);
               let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accuracy };
@@ -274,6 +281,7 @@ export class HomePage {
           title: 'location not found',
           onClick: function (control) {
             control.state("loading");
+            self.getCurrentLocation();
             control._map.on('locationfound', function (e) {
               this.setView(e.latlng, 17);
               let data = { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: e.accuracy };
@@ -290,64 +298,6 @@ export class HomePage {
     }).addTo(this.map);
 
 
-
-    // FIT MARKERS
-    L.easyButton('fa fa-map', function () {
-
-      if (self.markers.length != 0) {
-        self.map.fitBounds(self.markersCluster.getBounds());
-      } else {
-        self.map.setView(new L.LatLng(39.7481437, -8.810919), 13);
-      }
-    }).addTo(this.map);
-
-    // GET CLOSEST STOPS
-    L.easyButton('fa fa-bus', function () {
-      let closestStop: any;
-      let minMetrs: number = Number.MAX_SAFE_INTEGER;
-      if (self.allowLocation == true) {
-        if (self.markers.length != 0) {
-          self.markersCluster.eachLayer(stop => {
-            //console.log("stop on layer", stop);
-            if (stop.options.meters <= minMetrs) {
-              minMetrs = stop.options.meters;
-              closestStop = stop;
-            }
-          });
-          self.map.setView(closestStop.getLatLng(), 19);
-          self.markersCluster.eachLayer(function (layer) {
-            if (layer.options.id == closestStop.options.id) {
-              let popUpOptions =
-                {
-                  'className': 'custom'
-                }
-              L.popup(popUpOptions)
-                .setLatLng(layer.getLatLng())
-                .setContent(layer._popup._content)
-                .openOn(self.map);
-            }
-          });
-          self.showToast(closestStop.options.message + " from you!", 3000);
-        } else {
-          let alert = self.alertCtrl.create({
-            title: "Atention",
-            subTitle: "Please select at least one busline",
-            buttons: [{
-              text: 'Ok',
-              handler: () => {
-                self.showBusLines();
-              }
-            }]
-          });
-          alert.present();
-        }
-      } else {
-        self.showToast("We can't calculate your position", 3000);
-      }
-
-    }).addTo(this.map);
-
-
     self.controlSearch = new L.Control.Search({
       container: 'findbox',
       position: 'topleft',
@@ -359,6 +309,62 @@ export class HomePage {
     });
 
     this.map.addControl(self.controlSearch);
+
+  }
+
+  // FIT MARKERS
+  fitMarkers() {
+    if (this.markers.length != 0) {
+      this.map.fitBounds(this.markersCluster.getBounds());
+    } else {
+      this.map.setView(new L.LatLng(39.7481437, -8.810919), 13);
+    }
+  }
+
+  // GET CLOSEST STOPS
+  closedStop() {
+    let closestStop: any;
+    let minMetrs: number = Number.MAX_SAFE_INTEGER;
+    if (this.allowLocation == true) {
+      if (this.markers.length != 0) {
+        this.markersCluster.eachLayer(stop => {
+          //console.log("stop on layer", stop);
+          if (stop.options.meters <= minMetrs) {
+            minMetrs = stop.options.meters;
+            closestStop = stop;
+          }
+        });
+        this.map.setView(closestStop.getLatLng(), 19);
+        let self = this;
+        this.markersCluster.eachLayer(function (layer) {
+          if (layer.options.id == closestStop.options.id) {
+            let popUpOptions =
+              {
+                'className': 'custom'
+              }
+            L.popup(popUpOptions)
+              .setLatLng(layer.getLatLng())
+              .setContent(layer._popup._content)
+              .openOn(self.map);
+          }
+        });
+        this.showToast(closestStop.options.message + " from you!", 3000);
+      } else {
+        let alert = this.alertCtrl.create({
+          title: "Atention",
+          subTitle: "Please select at least one busline",
+          buttons: [{
+            text: 'Ok',
+            handler: () => {
+              this.showBusLines();
+            }
+          }]
+        });
+        alert.present();
+      }
+    } else {
+      this.showToast("We can't calculate your position", 3000);
+    }
 
   }
 
@@ -400,7 +406,7 @@ export class HomePage {
       //console.dir(data);
     }).catch((error) => {
       console.log('Error getting location', error);
-      self.showToast(error.message, 3000);
+      //self.showToast(error.message, 3000);
       self.allowLocation = false;
     });
   }
@@ -422,18 +428,20 @@ export class HomePage {
       this.markers.forEach(stop => {
         if (this.allowLocation == true) {
           stop.meters = this.currentPosition.marker.getLatLng().distanceTo([stop.lat, stop.lon]);
-          stop.message = this.getDistance(stop.meters);
+          stop.message = "Distance: " + this.getDistance(stop.meters);
         } else {
           stop.message = '';
         }
-        let popUp = '<h6>' + stop.name + '</h6><hr>' + stop.message + 'Lines:';
+        let popUp = '<h6>' + stop.name + '</h6><hr>' + stop.message + '<br>Lines:';
         stop.lines.forEach(line => {
           popUp += '<br>Line ' + line;
         });
+        //popUp += "<br>" + this.container;
         let popUpOptions =
           {
             'className': 'custom'
           }
+          
         new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, meters: stop.meters, message: stop.message, title: stop.name })
           .bindPopup(popUp, popUpOptions)
           .on('click', function (e) {
@@ -726,9 +734,11 @@ export class HomePage {
     if (this.map.hasLayer(this.mapSatellite)) {
       this.map.removeLayer(this.mapSatellite);
       this.map.addLayer(this.mapStreet);
+      this.chooseMap = "Satellite";
     } else {
       this.map.removeLayer(this.mapStreet);
       this.map.addLayer(this.mapSatellite);
+      this.chooseMap = "Street";
     }
   }
 }

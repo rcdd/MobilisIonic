@@ -40,6 +40,7 @@ export class DataProvider {
             this.loading = true;
             let date = moment().format("YYYYMMDD");
             let time = moment().format("HH:mm");
+        
 
             //http://194.210.216.191/otp/routers/default/plan?fromPlace=39.73983136620544%2C-8.804597854614258&toPlace=39.74448420653371%2C-8.798589706420898&time=5%3A27pm&date=05-01-2017&mode=TRANSIT%2CWALK&maxWalkDistance=750
             let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=TRANSIT%2CWALK&maxWalkDistance=750`).toPromise();

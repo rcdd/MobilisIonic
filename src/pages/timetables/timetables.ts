@@ -4,6 +4,9 @@ import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { DataProvider } from '../../providers/data-provider';
 import { AlertController, Platform } from 'ionic-angular';
+import 'moment';
+
+declare var moment: any;
 
 @Component({
   selector: 'page-timetables',
@@ -17,6 +20,8 @@ export class TimeTables {
   public selectedBusLine: any = [];
   public timesToShow: any = [];
   public timesToShowInList: any = [];
+  public possibleTimes: any = [];
+  public passedTimes: any = [];
   public stopsToShow: any = [];
   public isVisible: boolean = false;
   public isVisibleSearchbar: boolean = false;
@@ -30,7 +35,7 @@ export class TimeTables {
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform) {
     this.isVisibleSearchbar = false;
-    this.maxDate.setDate(this.minDate.getDate() + 5);
+    this.maxDate.setDate(this.minDate.getDate() + 8);
 
     this.platform.registerBackButtonAction(() => {
       if (this.isVisible) {
@@ -40,17 +45,17 @@ export class TimeTables {
   }
 
   updateSelectedValue() {
-      this.isVisibleSearchbar = true;
-      //console.dir(this.selectedBusLine);
-      this.timesToShowInList = [];
-      this.timesToShow = [];
-      this.dataProvider.getCheckBoxRoutes().forEach(line => {
-        if (line.id.id == this.selectedBusLine) {
-          // this.stopsToShow = line.id.stops;
-          // this.stops = line.id.stops;
-          this.removeDuplicates(line.id.stops)
-        }
-      });
+    this.isVisibleSearchbar = true;
+    //console.dir(this.selectedBusLine);
+    this.timesToShowInList = [];
+    this.timesToShow = [];
+    this.dataProvider.getCheckBoxRoutes().forEach(line => {
+      if (line.id.id == this.selectedBusLine) {
+        // this.stopsToShow = line.id.stops;timesToShowInList
+        // this.stops = line.id.stops;
+        this.removeDuplicates(line.id.stops)
+      }
+    });
   }
 
   showTimes(stop: any) {
@@ -110,19 +115,37 @@ export class TimeTables {
   selectedLine(time) {
 
     this.timesToShowInList = [];
+    this.passedTimes = [];
+    this.possibleTimes = [];
     time.forEach(timeToShow => {
       if (this.timesToShowInList.indexOf((timeToShow.realtimeArrival + timeToShow.serviceDay) * 1000) == -1) {
         this.timesToShowInList.push((timeToShow.realtimeArrival + timeToShow.serviceDay) * 1000);
       }
     });
 
-    // console.dir(this.timesToShowInList);
-    this.timesToShowInList.sort(function (b, a) {
+    this.timesToShowInList.forEach((time, key, index) => {
+      console.log((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')));
+      if ((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')) < 0) {
+        this.possibleTimes.push(time);
+      } else {
+        if (this.passedTimes.indexOf(time) == -1) {
+          this.passedTimes.push(time)
+        }
+      }
+    });
+
+    this.passedTimes.sort(function (b, a) {
       a = new Date(a);
       b = new Date(b);
       return a > b ? -1 : a < b ? 1 : 0;
     });
-    //console.dir(this.timesToShowInList);
+
+    this.possibleTimes.sort(function (b, a) {
+      a = new Date(a);
+      b = new Date(b);
+      return a > b ? -1 : a < b ? 1 : 0;
+    });
+
   }
 
   showAlert(title: any, msg: any) {
