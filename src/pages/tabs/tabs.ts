@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 
 import { HomePage } from '../home/home';
-import { AboutPage } from '../about/about';
 import { TimeTables } from '../timetables/timetables';
 
 @Component({
@@ -14,6 +13,5 @@ export class TabsPage {
   tab2Root: any = TimeTables;
 
   constructor() {
-
   }
 }
