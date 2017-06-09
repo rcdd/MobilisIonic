@@ -30,8 +30,6 @@ export class DataProvider {
         });
     }
 
-<<<<<<< HEAD
-
     async getStops() {
         return this.stops;
     }
@@ -41,7 +39,7 @@ export class DataProvider {
             this.loading = true;
             let date = moment().format("YYYYMMDD");
             let time = moment().format("HH:mm");
-        
+
 
             //http://194.210.216.191/otp/routers/default/plan?fromPlace=39.73983136620544%2C-8.804597854614258&toPlace=39.74448420653371%2C-8.798589706420898&time=5%3A27pm&date=05-01-2017&mode=TRANSIT%2CWALK&maxWalkDistance=750
             let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=TRANSIT%2CWALK&maxWalkDistance=750`).toPromise();
@@ -71,8 +69,6 @@ export class DataProvider {
         }
     }
 
-=======
->>>>>>> 113602ad3c4e29a63fe2bf38640b0ecf2b77f5f3
     async getDataFromServer(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.innit = 0;
@@ -292,7 +288,7 @@ export class DataProvider {
         let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/" + stop + "/stoptimes/" + date).toPromise();
         let respj = resp.json();
         respj.forEach(pat => {
-            //console.log(pat.pattern.id);  
+            //console.log(pat.pattern.id);
             this.CheckBoxRoutes.forEach(line => {
                 //console.log(line.id.color);
                 if (line.id.id.split(':')[0] + line.id.id.split(':')[1] == pat.pattern.id.split(':')[0] + pat.pattern.id.split(':')[1]) {
@@ -304,43 +300,6 @@ export class DataProvider {
         });
         this.loading = false;
         return respj;
-    }
-
-    async getStops() {
-        return this.stops;
-    }
-
-    async planningRoute(origin: any, destination: any) {
-        if (this.hasNetwork) {
-            this.loading = true;
-            let date = moment().format("YYYYMMDD");
-            let time = moment().format("HH:mm");
-
-            let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=TRANSIT%2CWALK&maxWalkDistance=750`).toPromise();
-            //console.log("planningRoute", resp.json());
-            this.loading = false;
-            return resp.json();
-        } else {
-            return null;
-        }
-    }
-
-    async getReverseGeoCoder(lat: any, lng: any) {
-        if (this.hasNetwork) {
-            this.loading = true;
-            let resp = await this.http.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/` + lng + `,` + lat + `.json?access_token=pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A&types=address%2Cpoi%2Cpoi.landmark%2Clocality%2Cplace%2Cpostcode`).toPromise();
-            let place = resp.json();
-            //console.log("ReverseCoder", place);
-            this.loading = false;
-            if (place.features.length > 0) {
-                return (place.features[0].properties.address != undefined ? place.features[0].properties.address : (lat + "," + lng));
-            } else {
-                return (lat + "," + lng);
-            }
-        }
-        else {
-            return (lat + "," + lng);
-        }
     }
 
     getNetworkState() {

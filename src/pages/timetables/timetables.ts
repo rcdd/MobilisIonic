@@ -35,11 +35,7 @@ export class TimeTables {
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform) {
     this.isVisibleSearchbar = false;
-<<<<<<< HEAD
     this.maxDate.setDate(this.minDate.getDate() + 8);
-=======
-    this.maxDate.setDate(this.minDate.getDate() + 7);
->>>>>>> 113602ad3c4e29a63fe2bf38640b0ecf2b77f5f3
 
     this.platform.registerBackButtonAction(() => {
       if (this.isVisible) {
@@ -55,11 +51,7 @@ export class TimeTables {
     this.timesToShow = [];
     this.dataProvider.getCheckBoxRoutes().forEach(line => {
       if (line.id.id == this.selectedBusLine) {
-<<<<<<< HEAD
-        // this.stopsToShow = line.id.stops;timesToShowInList
-=======
         // this.stopsToShow = line.id.stops;
->>>>>>> 113602ad3c4e29a63fe2bf38640b0ecf2b77f5f3
         // this.stops = line.id.stops;
         this.removeDuplicates(line.id.stops)
       }

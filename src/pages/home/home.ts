@@ -37,7 +37,7 @@ export class HomePage {
   public markersCluster: any; // CLUSTER
   private markers: any = []; // CLUSTER ON MAP
   private routingControl: any; //CONTROLER OF ROUTING
-  private busLineBox: boolean = false; //CONTROLER OF ROUTING
+  //private busLineBox: boolean = false; //CONTROLER OF ROUTING
 
 
   private map: any;
@@ -441,7 +441,7 @@ export class HomePage {
           {
             'className': 'custom'
           }
-          
+
         new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, meters: stop.meters, message: stop.message, title: stop.name })
           .bindPopup(popUp, popUpOptions)
           .on('click', function (e) {
