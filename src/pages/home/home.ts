@@ -6,6 +6,7 @@ import { Http } from '@angular/http';
 
 import { Geolocation } from '@ionic-native/geolocation';
 
+import { FabContainer } from 'ionic-angular';
 
 // import { busLines } from './busLines';
 import { DatabaseProvider } from '../../providers/database-provider';
@@ -21,6 +22,7 @@ import 'leaflet-knn';
 import 'leaflet.featuregroup.subgroup'
 import 'leaflet-routing-machine'
 import 'leaflet-control-geocoder';
+import 'leaflet-google-places-autocomplete';
 import 'polyline-encoded';
 import 'moment';
 
@@ -308,12 +310,24 @@ export class HomePage {
       marker: false
     });
 
+
+    new L.Control.GPlaceAutocomplete({
+      container: 'findbox',
+      position: "topleft",
+      callback: function (location) {
+        // object of google place is given
+        self.map.panTo(location);
+
+      }
+    }).addTo(this.map);
+
     this.map.addControl(self.controlSearch);
 
   }
 
   // FIT MARKERS
-  fitMarkers() {
+  fitMarkers(fab: FabContainer = null) {
+    fab != null ? fab.close() : '';
     if (this.markers.length != 0) {
       this.map.fitBounds(this.markersCluster.getBounds());
     } else {
@@ -322,7 +336,8 @@ export class HomePage {
   }
 
   // GET CLOSEST STOPS
-  closedStop() {
+  closedStop(fab: FabContainer = null) {
+    fab != null ? fab.close() : '';
     let closestStop: any;
     let minMetrs: number = Number.MAX_SAFE_INTEGER;
     if (this.allowLocation == true) {
@@ -467,9 +482,8 @@ export class HomePage {
     this.map.addControl(this.controlSearch);
   }
 
-  async showBusLines() {
-    //this.busLineBox = true;
-
+  async showBusLines(fab: FabContainer = null) {
+    fab != null ? fab.close() : '';
     let alert = this.alertCtrl.create({
       title: 'Filter Bus Lines',
       inputs: this.dataProvider.CheckBoxRoutes,
