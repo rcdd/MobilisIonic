@@ -1,11 +1,13 @@
 <ion-header>
-  <!--<ion-buttons end>
-        <button ion-button (click)="dataProvider.loading = 1"><ion-icon name="debug"></ion-icon>Debug</button> 
-      </ion-buttons> -->
+  <ion-row text-wrap>
+    <div class="logo">
+      <img src="assets/img/LogoMobilis_white.png" />
+      <img src="assets/img/NomeMobilis_white.png" />
+    </div>
+    <div id="findbox"></div>
+  </ion-row>
 </ion-header>
 <ion-content>
-
-  <div id="findbox"></div>
   <div id="debug" *ngIf="debug">{{debug}}</div>
 
   <div class="progress" *ngIf="dataProvider.innit != 100">
@@ -29,23 +31,26 @@
     </div>
   </div> -->
 
-  <ion-fab top right *ngIf="dataProvider.innit == 100 && routingControl.itenarary == undefined">
+  <ion-fab bottom right #fab *ngIf="dataProvider.innit == 100 && routingControl.itenarary == undefined">
     <button ion-fab mini><ion-icon name="add"></ion-icon></button>
-    <ion-fab-list>
-      <button ion-fab id="filter" (click)="showBusLines()">
-          <ion-icon name="list"></ion-icon>
+    <ion-fab-list side="top">
+      <button ion-fab id="filter" (click)="showBusLines(fab)">
           <div class="label">&nbsp; Lines </div>
+          <ion-icon name="list"></ion-icon>
       </button>
-      <button ion-fab id="street" (click)="toogleMapTile()"> <ion-icon name="map"></ion-icon>
+      <button ion-fab id="street" (click)="toogleMapTile(fab)"> 
           <div class="label">&nbsp; {{chooseMap}} </div>
+          <ion-icon name="map"></ion-icon>
       </button>
-      <button ion-fab id="markers" (click)="fitMarkers()"> <ion-icon name="barcode"></ion-icon>
+      <button ion-fab id="markers" (click)="fitMarkers(fab)">
           <div class="label">&nbsp; Fit Markers </div>
+           <ion-icon name="barcode"></ion-icon>
       </button>
-      <button ion-fab id="stops" (click)="closedStop()"> <ion-icon name="bus"></ion-icon>
+      <button ion-fab id="stops" (click)="closedStop(fab)"> 
           <div class="label">&nbsp; Closest Stop </div>
+          <ion-icon name="bus"></ion-icon>
       </button>
-    </ion-fab-list> 
+    </ion-fab-list>
   </ion-fab>
 
   <div id="planning" [style.bottom.px]="planningBox.size" text-wrap *ngIf='planning.orig.text || planning.dest.text'>

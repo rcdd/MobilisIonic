@@ -1,4 +1,32 @@
+$darkBlue: #03396c;
+$lightBlue: #005b96;
+
 page-home {
+    ion-header {
+        position: absolute;
+        color: white;
+        background-color: $lightBlue;
+        top: 0;
+        height: 50px;
+        font-size: 30px;
+        padding-left: 10px;
+        padding-top: 10px;
+
+        .row {
+            flex: wrap;
+            height: 50px;
+        }
+
+        .logo img {
+            height: 30px;
+        }
+    }
+
+    ion-content{
+        position: absolute;
+        //top: 25px;
+    }
+
     #mapid {   
         position: absolute;   
         width: 100%;
@@ -156,31 +184,37 @@ page-home {
 
     // Search CSS
     #findbox {
-        position: absolute;
-        top: 8px;
-        z-index: 500;
-        border-radius:.125em;	
-        margin-bottom: 20px;
-        margin-left: 55px; 
-        padding: 2px 0;
-        height: 10px;
-        float: left;
-        font-size: 12px;
+        position: fixed !important;
+        font-size: 16px;
+        width: 85%;
+    }
+    
+    .leaflet-control-search .search-button {
+        position: fixed;
+        left: 90%;
     }
 
     .leaflet-control-search .search-input {
-        display:block;
-        float:left;
-        //background: #fff;
-        border: 2px solid rgba(0,0,0,0.3);
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        height: 34px;
-        line-height: 34px;
-        padding:0 18px 0 2px;
+        position: relative;
+        height: 50px;
+        width: 100%;
+        color: white;
         margin: 0px 3px;
-    }
-    
+        left: -10px;
+        top: -10px;
+        background-color: $darkBlue;
+        animation: fadeLeft 0.2s;
+        
+        @-webkit-keyframes fadeLeft {
+            from { left: 100%; }
+            to { left: 0%; }
+        }  
+        @keyframes fadeLeft {
+            from { left: 100%; }
+            to { left: 0%; }
+        }
+    } 
+
     .leaflet-control-search.search-load .search-input {
         background: url('assets/images/loader.gif') no-repeat center right #fff;
     }
@@ -189,29 +223,20 @@ page-home {
     }
 
     .leaflet-control-search .search-cancel {
-        position: static;
-        float: left;
-        margin-left: -23px;
-    }   
+        position: fixed;
+        left: 75%;
+    }  
 
     .leaflet-control-search .search-tooltip {
         font-size: 14px;
-        position:absolute;
-        top:100%;
-        left:0px;
-        float:left;
+        position: fixed;
+        top: 35px;
+        float: left;
         list-style: none;
         padding: 0px;
-        //width: 400px;
-        min-width:20px;
-        max-height:122px;
-        border: 1px solid rgba(0,0,0,0.3);
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        overflow-y:auto;
-        overflow-x:hidden;
-        cursor: pointer;
-        margin-top: 26px;
+        width: 100%;
+        max-height: 122px;
+        z-index: 80000;
     }
 
     .leaflet-control-search .search-tip {
@@ -346,7 +371,7 @@ page-home {
         z-index: 10;
         text-align: center;
         color: white;
-        background-color: #005b96;
+        background-color: $lightBlue;
         box-shadow: 0px 5px 2px #03396c;
     }
 
@@ -412,43 +437,59 @@ page-home {
         z-index: 20;
     }
 
-.fab {
-    position: relative;
-    z-index: 0;
-    display: block;
-    overflow: hidden;
-    width: 56px;
-    height: 56px;
-    border-radius: 15px; 
-    font-size: 10px;
-    line-height: 56px;
-    text-align: center;
-    text-overflow: ellipsis;
-    text-transform: none;
-    white-space: nowrap;
-}
-.fab-in-list {
-    margin: 8px 0;
-    width: auto;
-    height: 40px;
-    opacity: 0;
-    visibility: hidden;
-    -webkit-transform: scale(0);
-    transform: scale(0);
-    margin-left: -100%;
-}
+    .fab {
+        position: relative;
+        //display: block;
+        overflow: hidden;
+        width: 56px;
+        height: 56px;
+        border-radius: 15px; 
+        font-size: 10px;
+        line-height: 56px;
+        text-align: center;
+        text-overflow: ellipsis;
+        text-transform: none;
+        white-space: nowrap;
+    }
 
-.fab ion-icon {
-    -webkit-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
-    font-size: 20px;
-}
-.fab .label {
-    -webkit-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
-    font-size: 14px;
-}
+    .fab-in-list {
+        width: 120px;
+        height: 40px;
+        opacity: 0;
+        visibility: hidden;
+        -webkit-transform: scale(0);
+        transform: scale(0);
+        margin-left: -100%;
+    }
+
+
+    .fab ion-icon {
+        position: absolute;
+        left: 75%;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+    }
+
+    .fab .label {
+        position: absolute;
+        float: right;
+        right: 40px;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        font-size: 14px;
+    }
+
+    .ion-md-add:before {
+        content: "\f273";
+        position: relative;
+        left: -15px;
+    }
+    .ion-md-close:before {
+        content: "\f2c0";
+        position: relative;
+        left: -15px;
+    }
 
 }
