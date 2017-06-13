@@ -4,10 +4,37 @@
       <img src="assets/img/LogoMobilis_white.png" />
       <img src="assets/img/NomeMobilis_white.png" />
     </div>
-    <div id="findbox"></div>
+    <div class="searchBar">
+      <div class="searchInput" *ngIf="searchControl">
+        <input type="text" [(ngModel)]="searchInput" (ngModelChange)="searchPlace()" placeholder="Search..." autofocus>
+      </div>
+      <div class="searchButton">
+        <button (click)="toogleSearchBox()">
+          <img src="assets/images/search.png" *ngIf="searchControl==false"/>
+          <img src="assets/images/cancel.png" *ngIf="searchControl"/>
+          </button>
+      </div>
+    </div>
   </ion-row>
 </ion-header>
 <ion-content>
+  <div class="searchResultList" *ngIf="searchResults?.length > 0">
+    <ion-list>
+      <ion-item *ngFor="let res of searchResults" (click)="showPlace(res)">
+        <ion-row>
+          <ion-col width-25>
+            <img src="{{res.icon}}" *ngIf="res.icon" />
+            <img src="assets/img/android-bus.png" *ngIf="res.icon == undefined" />
+          </ion-col>
+          <ion-col text-wrap width-75>
+            {{res.name}}
+          </ion-col>
+        </ion-row>
+      </ion-item>
+    </ion-list>
+
+  </div>
+
   <div id="debug" *ngIf="debug">{{debug}}</div>
 
   <div class="progress" *ngIf="dataProvider.innit != 100">

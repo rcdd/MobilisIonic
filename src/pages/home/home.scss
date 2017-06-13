@@ -180,107 +180,84 @@ page-home {
 
     .leaflet-control-container .leaflet-routing-container-hide {
     display: none;
-}
+    }
 
     // Search CSS
-    #findbox {
-        position: fixed !important;
-        font-size: 16px;
-        width: 85%;
-    }
-    
-    .leaflet-control-search .search-button {
+    .searchBar {
         position: fixed;
-        left: 90%;
-    }
+        top:5px;
 
-    .leaflet-control-search .search-input {
-        position: relative;
-        height: 50px;
-        width: 100%;
-        color: white;
-        margin: 0px 3px;
-        left: -10px;
-        top: -10px;
-        background-color: $darkBlue;
-        animation: fadeLeft 0.2s;
-        
-        @-webkit-keyframes fadeLeft {
-            from { left: 100%; }
-            to { left: 0%; }
-        }  
-        @keyframes fadeLeft {
-            from { left: 100%; }
-            to { left: 0%; }
+        button{
+            background-color: transparent;
         }
-    } 
 
-    .leaflet-control-search.search-load .search-input {
-        background: url('assets/images/loader.gif') no-repeat center right #fff;
+        .searchButton{
+            position: fixed;
+            overflow: hidden;
+            top: 0;
+            left: 88%;
+            width: 40px;
+            height: 35px;
+            margin: 10px 0 0 10px;
+
+            .img {
+                width: 40px;
+                height: 35px;
+            }
+
+        }
+
+        .searchInput {
+            position: fixed;
+            height: 50px;
+            width: 100%;
+            color: white;
+            margin: 0px 3px;
+            left: -3px;
+            top: 0px;
+            background-color: $darkBlue;
+            font-size: 18px;
+            animation: fadeLeft 0.3s;
+            
+            @-webkit-keyframes fadeLeft {
+                from { left: 100%; }
+                to { left: 0%; }
+            }  
+            @keyframes fadeLeft {
+                from { left: 100%; }
+                to { left: 0%; }
+            }
+
+            input{
+                height: 100%;
+                width: 100%;
+                padding: 10px;
+                border: 0px;
+                background-color: transparent;
+            }
+        }
     }
-    .leaflet-control-search.search-load .search-cancel {
-        visibility:hidden;
-    }
 
-    .leaflet-control-search .search-cancel {
-        position: fixed;
-        left: 75%;
-    }  
 
-    .leaflet-control-search .search-tooltip {
-        font-size: 14px;
+    .searchResultList{
         position: fixed;
-        top: 35px;
-        float: left;
-        list-style: none;
-        padding: 0px;
         width: 100%;
-        max-height: 122px;
-        z-index: 80000;
-    }
+        max-height: 33%;
+        overflow: auto;
+        z-index: 1001;
+        box-shadow: 0px 3px 10px 3px #03396c;
+        background-color: white;
+        
+        .item-md {
+            font-size: 14px;
+        }
 
-    .leaflet-control-search .search-tip {
-        margin:2px;
-        padding:2px 4px;
-        display:block;
-        color:black;
-        background: #eee;
-        text-decoration:none;	
-        white-space:nowrap;
-        vertical-align:center;
-        height: 34px;
+        img {
+            width: 35px;
+            height: 35px;
+        }
+        
     }
-
-    .leaflet-control-search.search-exp {/*expanded*/
-        box-shadow: 0 0px 0px #999;
-        background: transparent;
-    }
-
-    .leaflet-control-search .search-alert {
-        cursor:pointer;
-        clear:both;
-        font-size: 12px;
-        margin-left:5px;
-        padding:5px .25em;
-        color:#e00;
-        font-weight:bold;
-        border-radius:.25em;
-        width: 120px;
-        border: 2px solid rgba(0,0,0,0.3);
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        background: white;
-        opacity: 0.1px;
-    }
-
-    // css to customize Leaflet pop-up styles
-    .custom .leaflet-popup-tip,
-    .custom .leaflet-popup-content-wrapper {
-        font-size: 12px;
-        background: darkgrey;
-        color: #ffffff;
-    }
-
 
     // LOADING BAR
 

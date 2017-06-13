@@ -48,7 +48,11 @@ export class HomePage {
   private chooseMap: string = "Satellite";
   private currentPosition: any;
   public debug: any;
-  private controlSearch: any;
+  private searchControl: boolean = false;
+  private searchInput: string = "";
+  private searchResults: any = [];
+  private searchMarker: any;
+
   private allowLocation = false;
 
 
@@ -65,6 +69,13 @@ export class HomePage {
     iconSize: [50, 50],
     //iconAnchor: [-50, 45],
     popupAnchor: [0, -35]
+  });
+
+  private iconPlace = L.icon({
+    iconUrl: 'assets/img/iconPlace.png',
+    iconSize: [40, 55],
+    //iconAnchor: [-50, 45],
+    popupAnchor: [-3, -25]
   });
 
   private iconStart = L.icon({
@@ -108,6 +119,7 @@ export class HomePage {
         this.initMap();
         this.dataProvider.populateCheckBoxs();
         this.getCurrentLocation();
+
 
         //Cenas de Localização
         let self = this;
@@ -300,7 +312,7 @@ export class HomePage {
     }).addTo(this.map);
 
 
-    self.controlSearch = new L.Control.Search({
+    /*self.controlSearch = new L.Control.Search({
       container: 'findbox',
       position: 'topleft',
       placeholder: 'Search...:)',
@@ -309,19 +321,7 @@ export class HomePage {
       zoom: 20,
       marker: false
     });
-
-
-    new L.Control.GPlaceAutocomplete({
-      container: 'findbox',
-      position: "topleft",
-      callback: function (location) {
-        // object of google place is given
-        self.map.panTo(location);
-
-      }
-    }).addTo(this.map);
-
-    this.map.addControl(self.controlSearch);
+    this.map.addControl(self.controlSearch);*/
 
   }
 
@@ -467,19 +467,6 @@ export class HomePage {
     }
     this.map.addLayer(this.markersCluster);
     this.map.closePopup();
-    //console.log("Populate Search Box");
-    this.map.removeControl(this.controlSearch);
-    this.controlSearch = new L.Control.Search({
-      container: 'findbox',
-      position: 'topleft',
-      placeholder: 'Search...',
-      layer: this.markersCluster,
-      initial: false,
-      zoom: 20,
-      marker: false
-    });
-
-    this.map.addControl(this.controlSearch);
   }
 
   async showBusLines(fab: FabContainer = null) {
@@ -754,5 +741,45 @@ export class HomePage {
       this.map.addLayer(this.mapSatellite);
       this.chooseMap = "Street";
     }
+  }
+
+  toogleSearchBox() {
+    if (this.searchControl == true) {
+      this.searchControl = false; this.searchInput = ""; this.searchResults = []
+    } else {
+      this.searchControl = true;
+    }
+  }
+
+
+  searchPlace() {
+    if (this.searchInput.length > 2) {
+      this.dataProvider.getSearchPlace(this.searchInput).then(res => {
+        console.log("res", res);
+        if (res.length > 0) {
+          this.searchResults = res;
+        } else {
+          this.searchResults = [];
+          this.searchResults.push({ "name": "NO RESULTS" });
+        }
+        console.log("listPlaces", this.searchResults);
+      });
+    } else {
+      this.searchResults = [];
+    }
+  }
+ 
+  showPlace(res: any) {
+    if (this.map.hasLayer(this.searchMarker)) {
+      this.map.removeLayer(this.searchMarker);
+    }
+    this.searchMarker = L.marker(res.geometry.location, { draggable: false, icon: this.iconPlace })
+      .bindPopup(res.name)
+      .addTo(this.map)
+      .openPopup();
+
+    this.map.panTo([res.geometry.location.lat, res.geometry.location.lng]);
+
+    this.toogleSearchBox();
   }
 }

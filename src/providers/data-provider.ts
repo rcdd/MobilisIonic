@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Platform, AlertController } from 'ionic-angular';
 import 'rxjs/Rx';
 import { DatabaseProvider } from './database-provider';
-import { Http } from '@angular/http';
+import { Http, Headers, RequestOptions } from '@angular/http';
 
 import 'moment';
 
@@ -51,6 +51,51 @@ export class DataProvider {
         }
     }
 
+    async getSearchPlace(keyword: string) {
+        if (this.hasNetwork) {
+            this.loading = true;
+            //GET PLACES
+            let headers = new Headers({ 'Access-Control-Allow-Origin': 'http://localhost:8100' });
+            let options = new RequestOptions({ headers: headers });
+            let resp = await this.http.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=39.7417679,-8.8090963&radius=5000&keyword=` + keyword + `&key=AIzaSyD1i1kgXFRinKusaftvainJ6lqVvIgIfSU`, options).toPromise();
+            console.log("searchPlaces", resp.json());
+            let res = resp.json().results;
+            //console.log("searchAll", res);
+            //GET MARKERS
+            for (var index = 0; index < Object.keys(this.stops).length; index++) {
+                let line = this.stops[Object.keys(this.stops)[index]];
+                line.stops.forEach(stop => {
+                    if (stop.name.toLowerCase().indexOf(keyword.toLowerCase()) > -1 || this.removeAccents(stop.name).toLowerCase().indexOf(keyword.toLowerCase()) > -1) {
+                        let duplicate: boolean = false;
+                        res.forEach(place => {
+                            if (place.name == stop.name) {
+                                duplicate = true;
+                            }
+                        });
+                        if (!duplicate) {
+                            res.push({ "id": stop.id, "name": stop.name, "geometry": { "location": { "lat": stop.lat, "lng": stop.lon } } });
+                        }
+                    }
+                });
+            }
+            this.loading = false;
+            return res.reverse();
+        } else {
+            return null;
+        }
+    }
+
+    removeAccents(value) {
+        return value
+            .replace(/á/g, 'a')
+            .replace(/é/g, 'e')
+            .replace(/í/g, 'i')
+            .replace(/ó/g, 'o')
+            .replace(/ú/g, 'u')
+            .replace(/ç/g, 'c')
+            .replace(/ã/g, 'a')
+            .replace(/â/g, 'a');
+    }
     async getReverseGeoCoder(lat: any, lng: any) {
         if (this.hasNetwork) {
             this.loading = true;
