@@ -48,7 +48,7 @@
 
     <ion-list no-lines>
       <ion-item style="background-color: darkred; color: #E3F2FD"> Next trips </ion-item>
-      <ion-item style="color: red" *ngIf='timesToShowInList.length ==0'> No timetables available </ion-item>
+      <ion-item style="color: red" *ngIf='possibleTimes == [] || possibleTimes.length == 0'> No timetables available </ion-item>
       <ion-item *ngFor="let time of possibleTimes">
         <b>{{time | date: 'dd/MM HH:mm'}}</b>
       </ion-item>
