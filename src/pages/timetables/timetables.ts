@@ -134,7 +134,7 @@ export class TimeTables {
     this.timesToShowInList.forEach((time, key, index) => {
       //console.log((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')));
       if ((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')) < 0) {
-        this.possibleTimes.push(time);
+       this.possibleTimes.push(time);
       } else {
         if (this.passedTimes.indexOf(time) == -1) {
           this.passedTimes.push(time)
@@ -155,6 +155,7 @@ export class TimeTables {
     });
     //this.scrollToTop();
     //this.scrollElement();
+    //console.log(this.possibleTimes)
   }
 
   /*scrollToTop() {
