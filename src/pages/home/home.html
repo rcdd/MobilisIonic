@@ -50,6 +50,10 @@
           <div class="label">&nbsp; Closest Stop </div>
           <ion-icon name="bus"></ion-icon>
       </button>
+       <button ion-fab id="stops" (click)="showFavorites(fab)"> 
+          <div class="label">&nbsp; Favorites </div>
+          <ion-icon name="star"></ion-icon>
+      </button>
     </ion-fab-list>
   </ion-fab>
 
@@ -78,6 +82,7 @@
     <div class="right">
       <button ion-button (click)="chooseRoute()"><ion-icon name="navigate"></ion-icon></button>
       <button ion-button (click)="cancelRoute(true)"><ion-icon name="close"></ion-icon></button>
+      <button ion-button (click)="addToFavoriteRoute()"><ion-icon name="star"></ion-icon></button>
     </div>
   </div>
 

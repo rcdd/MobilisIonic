@@ -17,6 +17,7 @@ export class DataProvider {
     public loading: boolean = false;
     public CheckBoxRoutes: any = [];
     public hasNetwork: boolean = null;
+    public favoritesRoutes : any = [];
 
     public test: any;
 
@@ -75,15 +76,18 @@ export class DataProvider {
             this.isUpdated().then((up) => {
                 //console.log("up", up);
                 if (!up) {
-                    /*console.log("DB Not updated!");
-                    console.log("Innit download...");*/
                     return this.getRoutes().then(() => {
                         this.innit = 10;
                         return this.getStationsFromBusLines().then(() => {
                             this.dataInfoToDB();
                             //console.log("Download DONE!", this.stops);
+                            return this.createStorageFavoritesRoutes().then(() => {
+                                /*console.log("DB Not updated!");
+                                console.log("Innit download...");*/
+                            })
                         })
                     });
+
                 }
             }).then(() => {
                 this.innit = 80;
@@ -99,6 +103,8 @@ export class DataProvider {
             return this.stops;
         });
     }
+
+
 
     async populateCheckBoxs() {
         //console.log("populate", Object.keys(this.stops).length);
@@ -187,7 +193,6 @@ export class DataProvider {
 
     }
 
-
     async createStorageLines() {
         await this.DBDropTable("BUSLINES");
 
@@ -228,6 +233,43 @@ export class DataProvider {
                 console.log("Error: ", err);
             });
     }
+
+    async createStorageFavoritesRoutes() {
+        await this.DBDropTable("FAVORITES_ROUTES");
+
+        await this.db.query("CREATE TABLE IF NOT EXISTS FAVORITES_ROUTES (DESCRIPTION TEXT, ORIGIN TEXT, DESTINATION TEXT)")
+            .then(res => {
+                console.log("CREATED FAVORITES_ROUTES IN BD");
+            })
+            .catch(err => {
+                console.log("Error: ", err);
+            });
+    }
+
+    async getFavoritesFromDb() {
+     return new Promise((resolve, reject) => {
+     this.db.query("SELECT * FROM FAVORITES_ROUTES")
+                .then(res => {
+                    this.favoritesRoutes = res;
+                    resolve(this.favoritesRoutes);
+                });
+     }).then(() => {
+            //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
+            return this.favoritesRoutes;
+        });
+    }
+
+
+    async createFavoriteRoute(desc: string, origin: string, destination: string) {
+        console.log(origin + "     " + destination);
+        this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination]).then(() => {
+            console.log("FAVORITO ADDED");
+        }).catch(err => {
+            console.log("Error: ", err);
+        });
+
+    }
+
 
     async dataInfoToDB() {
         await this.DBDropTable("SETTINGS");

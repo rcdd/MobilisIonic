@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      About
+      Favorites
     </ion-title>
   </ion-navbar>
 </ion-header>
@@ -9,10 +9,8 @@
   <ion-content padding>
   <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
   <ion-list >
-    <button ion-button block (click)="showToast(stop)" *ngFor="let stop of stopsNames">
-      {{ stop }}
+    <button ion-button block *ngFor="let fav of favorites">
+      {{ fav.description }}
     </button>
   </ion-list>
 </ion-content>
-
-

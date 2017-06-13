@@ -5,6 +5,7 @@ import { MyApp } from './app.component';
 //import { AboutPage } from '../pages/about/about';
 import { TimeTables } from '../pages/timetables/timetables';
 import { HomePage } from '../pages/home/home';
+import { Favorites } from '../pages/favorites/favorites'
 import { TabsPage } from '../pages/tabs/tabs';
 import { DatabaseProvider } from '../providers/database-provider';
 import { NavController } from 'ionic-angular';
@@ -17,7 +18,8 @@ import { Network } from '@ionic-native/network';
     MyApp,
     TimeTables,
     HomePage,
-    TabsPage
+    TabsPage,
+    Favorites
   ],
   imports: [
     IonicModule.forRoot(MyApp)
@@ -27,7 +29,8 @@ import { Network } from '@ionic-native/network';
     MyApp,
     TimeTables,
     HomePage,
-    TabsPage
+    TabsPage,
+    Favorites,
   ],
   providers:
   [{ provide: ErrorHandler, useClass: IonicErrorHandler },

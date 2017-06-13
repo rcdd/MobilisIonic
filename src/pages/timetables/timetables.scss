@@ -60,6 +60,7 @@ page-timetables {
     z-index: 58;
     button {
         background-color: transparent;
+        height: 38px;
     }
 
    div{ 
@@ -72,7 +73,7 @@ page-timetables {
     position: absolute;
     left:0%;
     width:100%;
-    height: 8%;
+    //height: 7%;
     text-align:center;
     //max-width:800px;
     //max-height:500px;
@@ -90,6 +91,8 @@ page-timetables {
         width: 100%;
         height: 50px;
         color: white;
+        background-color: #03396c;
+        box-shadow: 0px 5px #005b96;
 
         &::-webkit-scrollbar {
         width: 0;
@@ -104,7 +107,6 @@ page-timetables {
            width: 100%;
            color: white;
            margin-left: 2px;
-           background-color: white;
            z-index: 20;
         }
 
@@ -118,7 +120,7 @@ page-timetables {
 .listTimes {
        position: relative;
        overflow:auto;
-       top: 7%;
+       top: 6.44%;
        width: 100%;
        margin-bottom: 65px;
    }

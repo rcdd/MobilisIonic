@@ -755,4 +755,59 @@ export class HomePage {
       this.chooseMap = "Street";
     }
   }
+
+  addToFavoriteRoute() {
+    let alerte = this.alertCtrl.create({
+      title: "Make a description for your favorite route.",
+      inputs: [
+        {
+          name: "desc",
+          placeholder: "Type a description."
+
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: data => {
+            console.log('Cancel clicked');
+            alerte.dismiss();
+          }
+        },
+        {
+          text: 'Ok',
+          handler: data => {
+            console.log(this.planning.orig.latlng + "  " + this.planning.dest.latlng);
+            console.dir(data.desc);
+            if (data.desc == "" || data == undefined || data == null) {
+              this.showAlert("You have to type a description", "ERROR");
+              
+            } else {
+              this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng);
+              this.showToast("Your favorite route was saved.", 3000)
+            }
+          }
+        }
+      ]
+    });
+    alerte.present();
+  }
+
+  showAlert(msg: string, title: string) {
+    let alert = this.alertCtrl.create({
+      title: title,
+      subTitle: msg,
+      buttons: [{
+          text: 'OK',
+          role: 'ok',
+          handler: data => {
+            alert.dismiss();
+            //this.addToFavoriteRoute();
+          }
+        }]
+    });
+    alert.present();
+  }
+
 }
