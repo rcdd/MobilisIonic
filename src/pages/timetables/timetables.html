@@ -29,38 +29,41 @@
   </div>
 </div>
 
-<ion-content content>
+<ion-content>
 
   <div *ngIf='isVisibleSearchbar' class="listStops">
     <button ion-button block color="light" (click)="showTimes(stop)" *ngFor="let stop of stopsToShow">
-       <div text-wrap > {{ stop.name }} </div>
+       <div text-wrap> {{ stop.name }} </div>
       </button>
   </div>
 
   <div class="showTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
     <ion-segment assertive [(ngModel)]="setFirst">
       <ion-segment-button *ngFor="let time of timesToShow ; let i = index" [value]="i" (ionSelect)="selectedLine(time.times)" (ionSelect)="showToast('Line '+time.line.desc)">
-        <div [style.backgroundColor]="time.color"> Line {{time.line.desc}} </div> 
+        <div [style.backgroundColor]="time.color"> Line {{time.line.desc}} </div>
       </ion-segment-button>
     </ion-segment>
+  </div>
+  <div class="listTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
 
-    <div class="listTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
-      <ion-list>
-        <ion-item *ngFor="let time of passedTimes">
-          {{time | date: 'dd/MM HH:mm'}}
-        </ion-item>
+    <ion-list no-lines>
+      <ion-item style="background-color: darkred; color: #E3F2FD"> Next trips </ion-item>
+      <ion-item style="color: red" *ngIf='timesToShowInList.length ==0'> No timetables available </ion-item>
+      <ion-item *ngFor="let time of possibleTimes">
+        <b>{{time | date: 'dd/MM HH:mm'}}</b>
+      </ion-item>
 
-        <ion-item *ngFor="let time of possibleTimes">
-          <b>{{time | date: 'dd/MM HH:mm'}}</b>
-        </ion-item>
-      </ion-list>
-    </div>
+      <ion-item style="background-color: lightseagreen; color: #E3F2FD"> Other times </ion-item>
+      <ion-item *ngFor="let time of passedTimes">
+        {{time | date: 'dd/MM HH:mm'}}
+      </ion-item>
+
+    </ion-list>
   </div>
 
-  <div class="notTimeAvailable">
-    <ion-row *ngIf='timesToShow.length==0 && isVisible'>
-      <h2> Not stops time available at this date: <br>
-      {{selectedDate | date: 'yyyy-MMMM-dd'}} </h2> 
+  <div class="notTimeAvailable" *ngIf='timesToShowInList.length==0 && isVisible'>
+    <ion-row>
+      <h2> Not stops time available at this date: <br> {{selectedDate | date: 'yyyy-MMMM-dd'}} </h2>
     </ion-row>
   </div>
 
