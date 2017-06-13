@@ -769,7 +769,7 @@ export class HomePage {
             console.dir(data.desc);
             if (data.desc == "" || data == undefined || data == null) {
               this.showAlert("You have to type a description", "ERROR");
-              
+
             } else {
               this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng);
               this.showToast("Your favorite route was saved.", 3000)
@@ -786,13 +786,13 @@ export class HomePage {
       title: title,
       subTitle: msg,
       buttons: [{
-          text: 'OK',
-          role: 'ok',
-          handler: data => {
-            alert.dismiss();
-            //this.addToFavoriteRoute();
-          }
-        }]
+        text: 'OK',
+        role: 'ok',
+        handler: data => {
+          alert.dismiss();
+          //this.addToFavoriteRoute();
+        }
+      }]
     });
     alert.present();
   }
@@ -822,7 +822,7 @@ export class HomePage {
       this.searchResults = [];
     }
   }
- 
+
   showPlace(res: any) {
     if (this.map.hasLayer(this.searchMarker)) {
       this.map.removeLayer(this.searchMarker);

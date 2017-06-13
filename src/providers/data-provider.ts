@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Platform, AlertController } from 'ionic-angular';
+import { Platform, AlertController, ToastController } from 'ionic-angular';
 import 'rxjs/Rx';
 import { DatabaseProvider } from './database-provider';
 import { Http, Headers, RequestOptions } from '@angular/http';
@@ -17,13 +17,13 @@ export class DataProvider {
     public loading: boolean = false;
     public CheckBoxRoutes: any = [];
     public hasNetwork: boolean = null;
-    public favoritesRoutes : any = [];
+    public favoritesRoutes: any = [];
 
     public test: any;
 
 
 
-    constructor(private http: Http, private db: DatabaseProvider,
+    constructor(private http: Http, private db: DatabaseProvider, public toastCtrl: ToastController,
         private alertCtrl: AlertController, private platform: Platform) {
         // watch network for a connection
         this.platform.ready().then(() => {
@@ -58,8 +58,23 @@ export class DataProvider {
             //GET PLACES
             let headers = new Headers({ 'Access-Control-Allow-Origin': 'http://localhost:8100' });
             let options = new RequestOptions({ headers: headers });
-            let resp = await this.http.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=39.7417679,-8.8090963&radius=5000&keyword=` + keyword + `&key=AIzaSyD1i1kgXFRinKusaftvainJ6lqVvIgIfSU`, options).toPromise();
+            //let key = 'AIzaSyD1i1kgXFRinKusaftvainJ6lqVvIgIfSU';
+            let key = 'AIzaSyCIAsIQk7fTx3KomXq0fE6klhA8mP5jKtY';
+            let resp = await this.http.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=39.7417679,-8.8090963&radius=5000&keyword=` + keyword + `&key=` + key, options).toPromise();
             console.log("searchPlaces", resp.json());
+            if (resp.json().status != "OK" && resp.json().error_message) {
+                let toast = this.toastCtrl.create({
+                    message: resp.json().error_message,
+                    duration: 3000,
+                    position: 'top',
+                    showCloseButton: true
+                });
+                toast.onDidDismiss(() => {
+                    console.log('Dismissed toast');
+                });
+
+                toast.present();
+            }
             let res = resp.json().results;
             //console.log("searchAll", res);
             //GET MARKERS
@@ -292,13 +307,13 @@ export class DataProvider {
     }
 
     async getFavoritesFromDb() {
-     return new Promise((resolve, reject) => {
-     this.db.query("SELECT * FROM FAVORITES_ROUTES")
+        return new Promise((resolve, reject) => {
+            this.db.query("SELECT * FROM FAVORITES_ROUTES")
                 .then(res => {
                     this.favoritesRoutes = res;
                     resolve(this.favoritesRoutes);
                 });
-     }).then(() => {
+        }).then(() => {
             //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
             return this.favoritesRoutes;
         });
