@@ -57,13 +57,22 @@ page-timetables {
     margin-bottom: 165px;
     overflow-y: scroll;
     justify-content:flex-start;
+    z-index: 58;
+    button {
+        background-color: transparent;
+    }
+
+   div{ 
+        text-align: left;
+        width: 100%;
+    }
 }
 
 .content .showTimes {
-    position: relative;
+    position: absolute;
     left:0%;
     width:100%;
-    height: 100%;
+    height: 8%;
     text-align:center;
     //max-width:800px;
     //max-height:500px;
@@ -104,12 +113,12 @@ page-timetables {
             color: white;
         }*/
     }
+}
 
-   .listTimes {
-       position: absolute;
+.listTimes {
+       position: relative;
        overflow:auto;
-       z-index: 0;
-       top: 45px;
+       top: 7%;
        width: 100%;
        margin-bottom: 65px;
    }
@@ -119,7 +128,6 @@ page-timetables {
        font-size: 15px;
        text-align: center;
    }
-}
 
    .notTimeAvailable h2 {
       position: fixed;

@@ -1,16 +1,16 @@
-import { Component, Injectable } from '@angular/core';
+import { Component, Injectable, ViewChild, ElementRef } from '@angular/core';
 import { NavController, ToastController } from 'ionic-angular';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { DataProvider } from '../../providers/data-provider';
-import { AlertController, Platform } from 'ionic-angular';
+import { AlertController, Platform, Content } from 'ionic-angular';
 import 'moment';
 
 declare var moment: any;
 
 @Component({
   selector: 'page-timetables',
-  templateUrl: 'timetables.html'
+  templateUrl: 'timetables.html',
 })
 
 @Injectable()
@@ -31,6 +31,10 @@ export class TimeTables {
   public maxDate: Date = new Date();
   public selectedDate: any = new Date().toISOString();
   public setFirst: any;
+  @ViewChild(Content)
+  content: Content;
+ // @ViewChild('listTimesAutoScroll')
+  listTimesAutoScroll: any;
 
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
     public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform) {
@@ -41,6 +45,10 @@ export class TimeTables {
       if (this.isVisible) {
         this.hideTimes();
       }
+    });
+    this.platform.ready().then(() => {
+      this.listTimesAutoScroll = document.getElementById("listTimesAutoScroll");
+      console.log(this.listTimesAutoScroll);
     });
   }
 
@@ -67,7 +75,7 @@ export class TimeTables {
       this.timesToShowInList = [];
       this.timesToShow = [];
       let listOfLines = [];
-      console.log(this.dataProvider.getNetworkState());
+      //console.log(this.dataProvider.getNetworkState());
 
       this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(resp => {
 
@@ -105,7 +113,7 @@ export class TimeTables {
           }
         });
         this.isVisible = true;
-        console.dir(this.timesToShow);
+        // console.dir(this.timesToShow);
       });
     } else {
       this.showToast("NO NETWORK CONNECTION!");
@@ -124,7 +132,7 @@ export class TimeTables {
     });
 
     this.timesToShowInList.forEach((time, key, index) => {
-      console.log((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')));
+      //console.log((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')));
       if ((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')) < 0) {
         this.possibleTimes.push(time);
       } else {
@@ -145,8 +153,26 @@ export class TimeTables {
       b = new Date(b);
       return a > b ? -1 : a < b ? 1 : 0;
     });
-
+    //this.scrollToTop();
+    //this.scrollElement();
   }
+
+  /*scrollToTop() {
+    setTimeout(function () {
+      var itemList = document.getElementById("listTimesAutoScroll");
+      itemList.scrollTop = itemList.scrollHeight;
+    }, 10);
+  }
+  scrollElement() {
+    //this.content.scrollTo(0, this.listTimesAutoScroll.offsetTop, 500);
+    console.log(this.content.getContentDimensions());
+    this.content.scrollToBottom();
+    if (this.listTimesAutoScroll != undefined) {
+      let yOffset =  this.listTimesAutoScroll.offsetTop;
+      this.listTimesAutoScroll.nativeElement.scrollTo(0, yOffset, 4000);
+    }
+
+  }*/
 
   showAlert(title: any, msg: any) {
     let alert = this.alertCtrl.create({
