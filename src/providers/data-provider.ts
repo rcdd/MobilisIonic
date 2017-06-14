@@ -17,7 +17,7 @@ export class DataProvider {
     public loading: boolean = false;
     public CheckBoxRoutes: any = [];
     public hasNetwork: boolean = null;
-    public favoritesRoutes : any = [];
+    public favoritesRoutes: any = [];
 
     public test: any;
 
@@ -292,13 +292,17 @@ export class DataProvider {
     }
 
     async getFavoritesFromDb() {
-     return new Promise((resolve, reject) => {
-     this.db.query("SELECT * FROM FAVORITES_ROUTES")
+        return new Promise((resolve, reject) => {
+            this.db.query("SELECT * FROM FAVORITES_ROUTES")
                 .then(res => {
-                    this.favoritesRoutes = res;
+                    for (var i = 0; i < Object.keys(res.rows).length; i++) {
+                        console.log(res.rows[i].DESCRIPTION);
+                        this.favoritesRoutes.push({ description: res.rows[i].DESCRIPTION, origin: res.rows[i].ORIGIN, destination: res.rows[i].DESTINATION })
+                    }
+                    //this.favoritesRoutes = res;
                     resolve(this.favoritesRoutes);
                 });
-     }).then(() => {
+        }).then(() => {
             //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
             return this.favoritesRoutes;
         });
@@ -309,6 +313,7 @@ export class DataProvider {
         console.log(origin + "     " + destination);
         this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination]).then(() => {
             console.log("FAVORITO ADDED");
+            this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
         }).catch(err => {
             console.log("Error: ", err);
         });

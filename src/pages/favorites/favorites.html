@@ -8,8 +8,8 @@
 
   <ion-content padding>
   <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
-  <ion-list >
-    <button ion-button block *ngFor="let fav of favorites">
+  <ion-list>
+    <button ion-button block color="light" (click)="travelTo(fav)" *ngFor="let fav of favorites">
       {{ fav.description }}
     </button>
   </ion-list>

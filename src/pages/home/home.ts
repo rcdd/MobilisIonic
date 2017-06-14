@@ -63,6 +63,12 @@ export class HomePage {
   public startBtn: any;
   public destBtn: any;
 
+  private travelFromFavoriteRoute: any = [];
+  private travelFromFavoriteDescription: any;
+  private travelFromFavoriteDestination: any;
+  private travelFromFavoriteOrigin: any;
+  private first: boolean;
+
 
   private iconBus = L.icon({
     iconUrl: 'assets/img/busStop.png',
@@ -105,31 +111,39 @@ export class HomePage {
     this.currentPosition = [];
     this.planningBox.size = 50;
     this.planningBox.button = "down";
+    this.travelFromFavoriteDescription = navParams.get("description");
+    this.travelFromFavoriteDestination = navParams.get("destination");
+    this.travelFromFavoriteOrigin = navParams.get("origin");
+    this.first = true;
   }
 
 
   async ngOnInit() {
-    //console.log("Init cenas");
-    this.platform.ready().then(() => {
-      this.dataProvider.getDataFromServer().then((resp) => {
-        this.dataProvider.innit = 100;
-        this.stops = resp;
-        //console.log("imported stops:", Object.keys(this.stops).length);
-        //console.log("imported stops:", this.stops);
-        this.initMap();
-        this.dataProvider.populateCheckBoxs();
-        this.getCurrentLocation();
+    if (this.first) {
+      //console.log("Init cenas");
+      this.platform.ready().then(() => {
+        this.dataProvider.getDataFromServer().then((resp) => {
+          this.dataProvider.innit = 100;
+          this.stops = resp;
+          //console.log("imported stops:", Object.keys(this.stops).length);
+          //console.log("imported stops:", this.stops);
+          this.initMap();
+          this.dataProvider.populateCheckBoxs();
+          this.getCurrentLocation();
 
 
-        //Cenas de Localização
-        let self = this;
-        this.map.on('locationerror', function (e) {
-          self.allowLocation = false;
-          self.showToast('You denied localization. For better performance, please allow your location.', 3000);
+          //Cenas de Localização
+          let self = this;
+          this.map.on('locationerror', function (e) {
+            self.allowLocation = false;
+            self.showToast('You denied localization. For better performance, please allow your location.', 3000);
+          });
         });
+        //console.log("Init Done!");
       });
-      //console.log("Init Done!");
-    });
+      this.first = false;
+    }
+
   }
 
 
@@ -769,7 +783,7 @@ export class HomePage {
             console.dir(data.desc);
             if (data.desc == "" || data == undefined || data == null) {
               this.showAlert("You have to type a description", "ERROR");
-              
+
             } else {
               this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng);
               this.showToast("Your favorite route was saved.", 3000)
@@ -786,13 +800,13 @@ export class HomePage {
       title: title,
       subTitle: msg,
       buttons: [{
-          text: 'OK',
-          role: 'ok',
-          handler: data => {
-            alert.dismiss();
-            //this.addToFavoriteRoute();
-          }
-        }]
+        text: 'OK',
+        role: 'ok',
+        handler: data => {
+          alert.dismiss();
+          //this.addToFavoriteRoute();
+        }
+      }]
     });
     alert.present();
   }
@@ -822,7 +836,7 @@ export class HomePage {
       this.searchResults = [];
     }
   }
- 
+
   showPlace(res: any) {
     if (this.map.hasLayer(this.searchMarker)) {
       this.map.removeLayer(this.searchMarker);
