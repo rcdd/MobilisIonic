@@ -4,21 +4,21 @@
       <img src="assets/img/LogoMobilis_white.png" />
       <img src="assets/img/NomeMobilis_white.png" />
     </div>
-    <div class="searchBar">
+    <div class="searchBar" *ngIf="routingControl.itenarary == undefined">
       <div class="searchInput" *ngIf="searchControl">
-        <input type="text" [(ngModel)]="searchInput" (ngModelChange)="searchPlace()" placeholder="Search..." autofocus>
+        <input type="text " [(ngModel)]="searchInput " (ngModelChange)="searchPlace() " placeholder="Search... " autofocus>
       </div>
-      <div class="searchButton">
-        <button (click)="toogleSearchBox()">
-          <img src="assets/images/search.png" *ngIf="searchControl==false"/>
-          <img src="assets/images/cancel.png" *ngIf="searchControl"/>
+      <div class="searchButton ">
+        <button (click)="toogleSearchBox() ">
+          <img src="assets/images/search.png " *ngIf="searchControl==false "/>
+          <img src="assets/images/cancel.png " *ngIf="searchControl "/>
           </button>
       </div>
     </div>
   </ion-row>
 </ion-header>
 <ion-content>
-  <div class="searchResultList" *ngIf="searchResults?.length > 0">
+  <div class="searchResultList " *ngIf="searchResults?.length> 0">
     <ion-list>
       <ion-item *ngFor="let res of searchResults" (click)="showPlace(res)">
         <ion-row>
@@ -58,7 +58,7 @@
     </div>
   </div> -->
 
-  <ion-fab bottom right #fab *ngIf="dataProvider.innit == 100 && routingControl.itenarary == undefined">
+  <ion-fab bottom right #fab *ngIf="dataProvider.innit == 100 && routingControl.itenarary == undefined && (planning.orig.text == undefined || planning.orig.text != undefined && planningBox.size != 50) && (planning.dest.text == undefined || planning.dest.text != undefined && planningBox.size != 50)">
     <button ion-fab mini><ion-icon name="add"></ion-icon></button>
     <ion-fab-list side="top">
       <button ion-fab id="filter" (click)="showBusLines(fab)">
@@ -77,7 +77,7 @@
           <div class="label">&nbsp; Closest Stop </div>
           <ion-icon name="bus"></ion-icon>
       </button>
-       <button ion-fab id="stops" (click)="showFavorites(fab)"> 
+      <button ion-fab id="stops" (click)="showFavorites(fab)"> 
           <div class="label">&nbsp; Favorites </div>
           <ion-icon name="star"></ion-icon>
       </button>

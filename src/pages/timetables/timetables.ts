@@ -1,9 +1,9 @@
-import { Component, Injectable, ViewChild, ElementRef } from '@angular/core';
+import { Component, Injectable } from '@angular/core';
 import { NavController, ToastController } from 'ionic-angular';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { DataProvider } from '../../providers/data-provider';
-import { AlertController, Platform, Content } from 'ionic-angular';
+import { AlertController, Platform } from 'ionic-angular';
 import 'moment';
 
 declare var moment: any;
@@ -31,9 +31,9 @@ export class TimeTables {
   public maxDate: Date = new Date();
   public selectedDate: any = new Date().toISOString();
   public setFirst: any;
-  @ViewChild(Content)
-  content: Content;
- // @ViewChild('listTimesAutoScroll')
+  //@ViewChild(Content)
+  //content: Content;
+  // @ViewChild('listTimesAutoScroll')
   listTimesAutoScroll: any;
 
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
@@ -134,7 +134,7 @@ export class TimeTables {
     this.timesToShowInList.forEach((time, key, index) => {
       //console.log((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')));
       if ((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')) < 0) {
-       this.possibleTimes.push(time);
+        this.possibleTimes.push(time);
       } else {
         if (this.passedTimes.indexOf(time) == -1) {
           this.passedTimes.push(time)

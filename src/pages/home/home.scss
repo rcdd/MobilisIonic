@@ -407,7 +407,7 @@ page-home {
         position: fixed;
         width: 100%;
         height: 50px;
-        top: 3px;
+        top: 50px;
         left: -40%;
         text-align: center;
         background-color: transparent;
@@ -458,12 +458,12 @@ page-home {
         font-size: 14px;
     }
 
-    .ion-md-add:before {
+    .fab .ion-md-add:before {
         content: "\f273";
         position: relative;
         left: -15px;
     }
-    .ion-md-close:before {
+    .fab .ion-md-close:before {
         content: "\f2c0";
         position: relative;
         left: -15px;

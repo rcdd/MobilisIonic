@@ -104,6 +104,7 @@ export class HomePage {
     this.routingControl = [];
     this.currentPosition = [];
     this.planningBox.size = 50;
+    this.debug = this.planning.orig;
     this.planningBox.button = "down";
   }
 
@@ -311,18 +312,6 @@ export class HomePage {
       ]
     }).addTo(this.map);
 
-
-    /*self.controlSearch = new L.Control.Search({
-      container: 'findbox',
-      position: 'topleft',
-      placeholder: 'Search...:)',
-      layer: this.markersCluster,
-      initial: false,
-      zoom: 20,
-      marker: false
-    });
-    this.map.addControl(self.controlSearch);*/
-
   }
 
   // FIT MARKERS
@@ -336,7 +325,7 @@ export class HomePage {
   }
 
   // GET CLOSEST STOPS
-  closedStop(fab: FabContainer = null) {
+  async closedStop(fab: FabContainer = null) {
     fab != null ? fab.close() : '';
     let closestStop: any;
     let minMetrs: number = Number.MAX_SAFE_INTEGER;
@@ -365,13 +354,15 @@ export class HomePage {
         });
         this.showToast(closestStop.options.message + " from you!", 3000);
       } else {
-        let alert = this.alertCtrl.create({
+        let alert = await this.alertCtrl.create({
           title: "Atention",
           subTitle: "Please select at least one busline",
           buttons: [{
             text: 'Ok',
             handler: () => {
-              this.showBusLines();
+              this.showBusLines().then(a => {
+                this.closedStop();
+              });
             }
           }]
         });
@@ -471,70 +462,93 @@ export class HomePage {
 
   async showBusLines(fab: FabContainer = null) {
     fab != null ? fab.close() : '';
-    let alert = this.alertCtrl.create({
-      title: 'Filter Bus Lines',
-      inputs: this.dataProvider.CheckBoxRoutes,
-      buttons: [{
-        text: 'Select All',
-        handler: data => {
-          this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
-            checkBox.checked = true;
-          });
-          this.showBusLines();
-        }
-      }, {
-        text: 'Select None',
-        handler: data => {
-          this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
-            checkBox.checked = false;
-          });
-          this.showBusLines();
-        }
-      },
-      {
-        text: 'Cancel',
-        role: 'cancel',
-        handler: data => {
-          console.log('Cancel clicked');
-        }
-      }, {
-        text: 'Ok',
-        handler: data => {
-          //console.dir(data);
-          this.markers = [];
-          data.forEach(line => {
-            //console.log("data from checkbox:", line);
-            line.stops.forEach(stop => {
-              //console.log(stop.id);
-              let existMarker: boolean = false;
-              this.markers.forEach(marker => {
-                if (marker.id == stop.id) {
-                  //console.log('Im old', marker);
-                  marker.lines.push(line.shortName);
-                  existMarker = true;
+    return new Promise((resolve, reject) => {
+      let alert = this.alertCtrl.create({
+        title: 'Filter Bus Lines',
+        inputs: this.dataProvider.CheckBoxRoutes,
+        buttons: [{
+          text: 'Select All',
+          handler: data => {
+            console.dir(data);
+            this.markers = [];
+            this.dataProvider.CheckBoxRoutes.forEach(line => {
+              console.log("data from checkbox:", line);
+              line.checked = true;
+              line.value.stops.forEach(stop => {
+                //console.log(stop.id);
+                let existMarker: boolean = false;
+                this.markers.forEach(marker => {
+                  if (marker.id == stop.id) {
+                    //console.log('Im old', marker);
+                    marker.lines.push(line.shortName);
+                    existMarker = true;
+                  }
+                });
+                if (existMarker == false) {
+                  // console.log('Im new', stop);
+                  stop.lines = [line.shortName];
+                  this.markers.push(stop);
                 }
               });
-              if (existMarker == false) {
-                // console.log('Im new', stop);
-                stop.lines = [line.shortName];
-                this.markers.push(stop);
-              }
             });
-          });
-          //console.dir(this.markers);
-          this.updateClusterGroup();
+            //console.dir(this.markers);
+            this.updateClusterGroup();
 
-          this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
-            data.includes(checkBox.id) ? checkBox.checked = true : checkBox.checked = false;
-          });
+            alert.dismiss().then(a => { resolve(); });
+          }
+        }, {
+          text: 'Select None',
+          handler: data => {
+            this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
+              checkBox.checked = false;
+            });
+            this.showBusLines();
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: data => {
+            console.log('Cancel clicked');
+          }
+        }, {
+          text: 'Ok',
+          handler: data => {
+            //console.dir(data);
+            this.markers = [];
+            data.forEach(line => {
+              //console.log("data from checkbox:", line);
+              line.stops.forEach(stop => {
+                //console.log(stop.id);
+                let existMarker: boolean = false;
+                this.markers.forEach(marker => {
+                  if (marker.id == stop.id) {
+                    //console.log('Im old', marker);
+                    marker.lines.push(line.shortName);
+                    existMarker = true;
+                  }
+                });
+                if (existMarker == false) {
+                  // console.log('Im new', stop);
+                  stop.lines = [line.shortName];
+                  this.markers.push(stop);
+                }
+              });
+            });
+            //console.dir(this.markers);
+            this.updateClusterGroup();
 
-          alert.dismiss();
-          return false;
-        }
-      }]
+            this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
+              data.includes(checkBox.id) ? checkBox.checked = true : checkBox.checked = false;
+            });
+
+            alert.dismiss().then(a => { resolve(); });
+          }
+        }]
+      });
+      alert.present();
+      return true;
     });
-    alert.present();
-
   }
 
   // ####################    BEAUTIFUL THINGS  ########################

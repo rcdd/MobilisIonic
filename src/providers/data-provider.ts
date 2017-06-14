@@ -58,8 +58,8 @@ export class DataProvider {
             //GET PLACES
             let headers = new Headers({ 'Access-Control-Allow-Origin': 'http://localhost:8100' });
             let options = new RequestOptions({ headers: headers });
-            //let key = 'AIzaSyD1i1kgXFRinKusaftvainJ6lqVvIgIfSU';
-            let key = 'AIzaSyCIAsIQk7fTx3KomXq0fE6klhA8mP5jKtY';
+            //let key = 'AIzaSyD1i1kgXFRinKusaftvainJ6lqVvIgIfSU'; //PEREIRA
+            let key = 'AIzaSyCIAsIQk7fTx3KomXq0fE6klhA8mP5jKtY'; //DOMINGUES
             let resp = await this.http.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=39.7417679,-8.8090963&radius=5000&keyword=` + keyword + `&key=` + key, options).toPromise();
             console.log("searchPlaces", resp.json());
             if (resp.json().status != "OK" && resp.json().error_message) {
@@ -230,6 +230,7 @@ export class DataProvider {
         if (this.hasNetwork) {
             let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`).toPromise();
             for (let route of resp.json()) {
+                //console.log("sdfsdf", route);
                 this.lines.push(route);
                 this.innit += 5;
             }
@@ -244,7 +245,7 @@ export class DataProvider {
             this.innit += 5; //http://194.210.216.191/otp/routers/default/index/patterns/1:1018:0:01
             if (this.hasNetwork) {
                 let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + "::01").toPromise();
-                //console.dir(stops);
+                console.dir(stops);
                 await this.createStorageStops(route, stops.json());
             } else {
                 return this.noNetworkOnInit();
