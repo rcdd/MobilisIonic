@@ -63,6 +63,12 @@ export class HomePage {
   public startBtn: any;
   public destBtn: any;
 
+  private travelFromFavoriteRoute: any = [];
+  private travelFromFavoriteDescription: any;
+  private travelFromFavoriteDestination: any;
+  private travelFromFavoriteOrigin: any;
+  private first: boolean;
+
 
   private iconBus = L.icon({
     iconUrl: 'assets/img/busStop.png',
@@ -106,31 +112,39 @@ export class HomePage {
     this.planningBox.size = 50;
     this.debug = this.planning.orig;
     this.planningBox.button = "down";
+    this.travelFromFavoriteDescription = navParams.get("description");
+    this.travelFromFavoriteDestination = navParams.get("destination");
+    this.travelFromFavoriteOrigin = navParams.get("origin");
+    this.first = true;
   }
 
 
   async ngOnInit() {
-    //console.log("Init cenas");
-    this.platform.ready().then(() => {
-      this.dataProvider.getDataFromServer().then((resp) => {
-        this.dataProvider.innit = 100;
-        this.stops = resp;
-        //console.log("imported stops:", Object.keys(this.stops).length);
-        //console.log("imported stops:", this.stops);
-        this.initMap();
-        this.dataProvider.populateCheckBoxs();
-        this.getCurrentLocation();
+    if (this.first) {
+      //console.log("Init cenas");
+      this.platform.ready().then(() => {
+        this.dataProvider.getDataFromServer().then((resp) => {
+          this.dataProvider.innit = 100;
+          this.stops = resp;
+          //console.log("imported stops:", Object.keys(this.stops).length);
+          //console.log("imported stops:", this.stops);
+          this.initMap();
+          this.dataProvider.populateCheckBoxs();
+          this.getCurrentLocation();
 
 
-        //Cenas de Localização
-        let self = this;
-        this.map.on('locationerror', function (e) {
-          self.allowLocation = false;
-          self.showToast('You denied localization. For better performance, please allow your location.', 3000);
+          //Cenas de Localização
+          let self = this;
+          this.map.on('locationerror', function (e) {
+            self.allowLocation = false;
+            self.showToast('You denied localization. For better performance, please allow your location.', 3000);
+          });
         });
+        //console.log("Init Done!");
       });
-      //console.log("Init Done!");
-    });
+      this.first = false;
+    }
+
   }
 
 
