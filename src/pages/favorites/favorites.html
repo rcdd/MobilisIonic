@@ -8,8 +8,8 @@
 
 <ion-content padding>
 
-  <ion-list>
-    <ion-item *ngFor="let fav of favoritesToShow">
+  <ion-list class="listFavorites">
+    <ion-item id="item" *ngFor="let fav of favoritesToShow" >
       <button ion-button block color="light" (click)="travelTo(fav)">
       {{ fav.description }} 
     </button>
