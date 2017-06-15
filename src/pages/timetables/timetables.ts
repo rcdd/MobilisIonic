@@ -153,27 +153,7 @@ export class TimeTables {
       b = new Date(b);
       return a > b ? -1 : a < b ? 1 : 0;
     });
-    //this.scrollToTop();
-    //this.scrollElement();
-    //console.log(this.possibleTimes)
   }
-
-  /*scrollToTop() {
-    setTimeout(function () {
-      var itemList = document.getElementById("listTimesAutoScroll");
-      itemList.scrollTop = itemList.scrollHeight;
-    }, 10);
-  }
-  scrollElement() {
-    //this.content.scrollTo(0, this.listTimesAutoScroll.offsetTop, 500);
-    console.log(this.content.getContentDimensions());
-    this.content.scrollToBottom();
-    if (this.listTimesAutoScroll != undefined) {
-      let yOffset =  this.listTimesAutoScroll.offsetTop;
-      this.listTimesAutoScroll.nativeElement.scrollTo(0, yOffset, 4000);
-    }
-
-  }*/
 
   showAlert(title: any, msg: any) {
     let alert = this.alertCtrl.create({

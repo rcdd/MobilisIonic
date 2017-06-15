@@ -1,10 +1,8 @@
 import { Component, Injectable } from '@angular/core';
-import { NavController, ToastController } from 'ionic-angular';
+import { NavController, ToastController, AlertController } from 'ionic-angular';
 import { Http, Response } from '@angular/http';
 import { DataProvider } from '../../providers/data-provider';
 import 'rxjs/add/operator/map';
-import { HomePage } from '../home/home'
-import { TabsPage } from '../tabs/tabs'
 
 @Component({
     selector: 'page-favorites',
@@ -14,29 +12,86 @@ import { TabsPage } from '../tabs/tabs'
 @Injectable()
 export class Favorites {
     private favorites: any = [];
+    private favoritesToShow: any = [];
     private home: any;
-    constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController, public dataProvider: DataProvider, ) {
-        this.home = HomePage;
+    constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
         this.dataProvider.getFavoritesFromDb().then(res => {
-            //console.dir(res);
             this.favorites = res;
+            this.favoritesToShow = this.favorites;
         });
     }
 
-    initFavorites() {
+    /*initFavorites() {
         for (var i = 0; i < Object.keys(this.favorites).length; i++) {
             console.log(this.favorites[i].description);
         }
-    }
+    }*/
 
     travelTo(fav: any) {
         console.dir(fav);
-        //this.navCtrl.push(HomePage, {description: fav.description, destination: fav.destination, origin: fav.origin});
-        //this.navCtrl.push(HomePage);
-        //this.navCtrl.setRoot(this.home);
-        // this.navCtrl.popToRoot();
-        this.dataProvider.favoriteRoute = fav;
+        this.dataProvider.setFavorite(fav);
         this.navCtrl.parent.select(0);
+    }
 
+    deleteFav(fav: any) {
+            let alert = this.alertCtrl.create({
+                title: "Delete Favorite",
+                subTitle: "Are you sure you want to delete "+fav.description,
+                buttons: [{
+                    text: 'Yes',
+                    role: 'ok',
+                    handler: data => {
+                        this.dataProvider.deleteFavorite(fav);
+                        alert.dismiss();
+                    }
+                },{
+                    text: 'Cancel',
+                    role: 'cancel',
+                    handler: data => {
+                        alert.dismiss();
+                    }
+                }]
+            });
+            alert.present();
+        
+    }
+
+    getItems(ev) {
+        // set val to the value of the ev target
+        var val = ev.target.value;
+        console.log(val);
+
+        this.resetNamesFavorites();
+
+        if (val && val.trim() != '') {
+            this.favoritesToShow = this.favorites.filter((item) => {
+                let favAccents = this.removeAccents(item.description).toLowerCase().indexOf(val.toLowerCase()) > -1;
+                let favNoAccents = item.description.toLowerCase().indexOf(val.toLowerCase()) > -1;
+                if (favAccents) {
+                    return favAccents;
+                } else {
+                    return favNoAccents;
+                }
+            })
+        }
+    }
+
+    resetNamesFavorites() {
+        this.favoritesToShow = [];
+        for (var i = 0; i < Object.keys(this.favorites).length; i++) {
+            this.favoritesToShow.push(this.favorites[i]);
+        }
+    }
+
+    removeAccents(value) {
+        return value
+            .replace(/á/g, 'a')
+            .replace(/é/g, 'e')
+            .replace(/í/g, 'i')
+            .replace(/ó/g, 'o')
+            .replace(/ú/g, 'u')
+            .replace(/ç/g, 'c')
+            .replace(/ã/g, 'a')
+            .replace(/â/g, 'a');
     }
 }

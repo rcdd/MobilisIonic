@@ -313,7 +313,7 @@ export class DataProvider {
             this.db.query("SELECT * FROM FAVORITES_ROUTES")
                 .then(res => {
                     for (var i = 0; i < Object.keys(res.rows).length; i++) {
-                        console.log(res.rows[i].DESCRIPTION);
+                        //console.log(res.rows[i].DESCRIPTION);
                         this.favoritesRoutes.push({ description: res.rows[i].DESCRIPTION, origin: res.rows[i].ORIGIN, destination: res.rows[i].DESTINATION })
                     }
                     //this.favoritesRoutes = res;
@@ -439,5 +439,29 @@ export class DataProvider {
         });
         alert.present();
         return;
+    }
+
+    public setFavorite(fav: any) {
+        this.favoriteRoute = fav;
+    }
+
+    public getFavorite() {
+        return this.favoriteRoute;
+    }
+
+    public deleteFavorite(fav: any) {
+        let index: number = this.favoritesRoutes.indexOf(fav);
+        if (index !== -1) {
+            this.favoritesRoutes.splice(index, 1);
+            this.deleteFavFromBd(fav);
+        }
+    }
+
+    private deleteFavFromBd(fav) {
+        this.db.query("DELETE FROM FAVORITES_ROUTES WHERE DESCRIPTION = '" + fav.description+"';").then(res => {
+            console.log(fav.description + " Deleted");
+        }).catch(err => {
+            console.log(err);
+        });
     }
 }
