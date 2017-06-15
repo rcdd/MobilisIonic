@@ -47,17 +47,28 @@
   <div class="listTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
 
     <ion-list no-lines>
-      <ion-item style="background-color: darkred; color: #E3F2FD"> Next trips </ion-item>
+      <button id="buttonHideShowPossible"  (click)="changeVilibilityPossibleTimes()"> Next trips  
+        <div *ngIf="!possibleTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropdown"></ion-icon> </div>
+        <div *ngIf="possibleTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropup"></ion-icon> </div>
+        </button>
       <ion-item style="color: red" *ngIf='possibleTimes == [] || possibleTimes.length == 0'> No timetables available </ion-item>
-      <ion-item *ngFor="let time of possibleTimes">
-        <b>{{time | date: 'dd/MM HH:mm'}}</b>
-      </ion-item>
+      <div *ngIf="possibleTimesVisible">
+        <ion-item *ngFor="let time of possibleTimes" >
+          <b>{{time | date: 'dd/MM HH:mm'}}</b>
+        </ion-item>
+      </div>
 
-      <ion-item style="background-color: lightseagreen; color: #E3F2FD"> Other times </ion-item>
+
+      <button id="buttonHideShowPassed" (click)="changeVilibilityPassedTimes()"> Other times 
+      <div *ngIf="!passedTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropdown"></ion-icon> </div>
+      <div *ngIf="passedTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropup"></ion-icon> </div>
+      </button>
+      <div *ngIf="passedTimesVisible">
       <ion-item style="color: green" *ngIf='passedTimes == [] || passedTimes.length == 0'> All timetables are available </ion-item>
       <ion-item *ngFor="let time of passedTimes">
         {{time | date: 'dd/MM HH:mm'}}
       </ion-item>
+      </div>
 
     </ion-list>
   </div>
