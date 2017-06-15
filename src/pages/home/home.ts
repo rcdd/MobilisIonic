@@ -63,12 +63,6 @@ export class HomePage {
   public startBtn: any;
   public destBtn: any;
 
-  private travelFromFavoriteRoute: any = [];
-  private travelFromFavoriteDescription: any;
-  private travelFromFavoriteDestination: any;
-  private travelFromFavoriteOrigin: any;
-  private first: boolean;
-
 
   private iconBus = L.icon({
     iconUrl: 'assets/img/busStop.png',
@@ -110,41 +104,43 @@ export class HomePage {
     this.routingControl = [];
     this.currentPosition = [];
     this.planningBox.size = 50;
-    this.debug = this.planning.orig;
     this.planningBox.button = "down";
-    this.travelFromFavoriteDescription = navParams.get("description");
-    this.travelFromFavoriteDestination = navParams.get("destination");
-    this.travelFromFavoriteOrigin = navParams.get("origin");
-    this.first = true;
+  }
+
+  ionViewWillEnter() {
+    //console.log("fav", this.dataProvider.favoriteToGo);
+    if (this.dataProvider.favoriteRoute != undefined) {
+      let origin = this.dataProvider.favoriteRoute.origin.split(',');
+      let destination = this.dataProvider.favoriteRoute.destination.split(',');
+      this.planningOrigin(origin[0], origin[1]);
+      this.planningDestination(destination[0], destination[1]);
+
+      // TODO: fitBound of both points
+      //this.map.fitBounds({ "_northEast": { "lat": origin[0], "lng": origin[1] }, "_southWest": { "lat": destination[0], "lng": destination[1] } });
+      this.dataProvider.favoriteRoute = undefined;
+    }
   }
 
 
   async ngOnInit() {
-    if (this.first) {
-      //console.log("Init cenas");
-      this.platform.ready().then(() => {
-        this.dataProvider.getDataFromServer().then((resp) => {
-          this.dataProvider.innit = 100;
-          this.stops = resp;
-          //console.log("imported stops:", Object.keys(this.stops).length);
-          //console.log("imported stops:", this.stops);
-          this.initMap();
-          this.dataProvider.populateCheckBoxs();
-          this.getCurrentLocation();
+    this.platform.ready().then(() => {
+      this.dataProvider.getDataFromServer().then((resp) => {
+        this.dataProvider.innit = 100;
+        this.stops = resp;
+        //console.log("imported stops:", Object.keys(this.stops).length);
+        //console.log("imported stops:", this.stops);
+        this.initMap();
+        this.dataProvider.populateCheckBoxs();
+        this.getCurrentLocation();
 
-
-          //Cenas de Localização
-          let self = this;
-          this.map.on('locationerror', function (e) {
-            self.allowLocation = false;
-            self.showToast('You denied localization. For better performance, please allow your location.', 3000);
-          });
+        //Localization
+        let self = this;
+        this.map.on('locationerror', function (e) {
+          self.allowLocation = false;
+          self.showToast('You denied localization. For better performance, please allow your location.', 3000);
         });
-        //console.log("Init Done!");
       });
-      this.first = false;
-    }
-
+    });
   }
 
 
@@ -202,63 +198,13 @@ export class HomePage {
         .setLatLng(e.latlng)
         .openOn(self.map);
 
-      L.DomEvent.on(self.startBtn, 'click', function () {      // ROUTING OF THE MAP
-        self.map.removeLayer(self.planning.orig);
-        self.cancelRoute(false);
-        self.planning.orig = L.marker(e.latlng, { draggable: true, icon: self.iconStart })
-          .bindPopup("Origin")
-          .addTo(self.map)
-          .on('dragend', (e) => {
-            //console.log("dragOrigin", e);
-            self.planningBox.size = 50;
-            self.planningBox.button = "down";
-            self.cancelRoute(false);
-            self.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
-              self.planning.orig.text = resp;
-              self.planning.orig.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
-            });
-          });
-
-        self.dataProvider.getReverseGeoCoder(e.latlng.lat, e.latlng.lng).then((resp) => {
-          self.planning.orig.text = resp;
-          self.planning.orig.latlng = (e.latlng.lat + ',' + e.latlng.lng);
-        });
-        self.map.closePopup();
+      L.DomEvent.on(self.startBtn, 'click', function () {
+        self.planningOrigin(e.latlng.lat, e.latlng.lng);
       });
 
       L.DomEvent.on(self.destBtn, 'click', function () {
-        self.map.removeLayer(self.planning.dest);
-        self.cancelRoute(false);
-        self.planning.dest = L.marker(e.latlng, { draggable: true, icon: self.iconDest })
-          .bindPopup("Destination")
-          .addTo(self.map)
-          .on('dragend', (e) => {
-            //console.log("dragDest", e);
-            self.planningBox.size = 50;
-            self.planningBox.button = "down";
-            self.cancelRoute(false);
-            self.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
-              self.planning.dest.text = resp;
-              self.planning.dest.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
-            });
-          });
-        //console.log("originData", self.planning.orig.latlng);
-        if (self.planning.orig.latlng == undefined) {
-          self.dataProvider.getReverseGeoCoder(self.currentPosition.marker.getLatLng().lat, self.currentPosition.marker.getLatLng().lng).then((resp) => {
-            self.planning.orig.text = resp;
-            self.planning.orig.latlng = (self.currentPosition.marker.getLatLng().lat + ',' + self.currentPosition.marker.getLatLng().lng);
-          });
-        }
-
-        self.dataProvider.getReverseGeoCoder(e.latlng.lat, e.latlng.lng).then((resp) => {
-          self.planning.dest.text = resp;
-          self.planning.dest.latlng = (e.latlng.lat + ',' + e.latlng.lng);
-        });
-
-
-        self.map.closePopup();
+        self.planningDestination(e.latlng.lat, e.latlng.lng);
       });
-
     });
 
     // CONTROLS OF THE MAP
@@ -409,24 +355,71 @@ export class HomePage {
     toast.present();
   }
 
+  planningOrigin(lat: any, lng: any) {      // ROUTING OF THE MAP
+    this.map.removeLayer(this.planning.orig);
+    this.cancelRoute(false);
+    this.planning.orig = L.marker([lat, lng], { draggable: true, icon: this.iconStart })
+      .bindPopup("Origin")
+      .addTo(this.map)
+      .on('dragend', (e) => {
+        this.planningBox.size = 50;
+        this.planningBox.button = "down";
+        this.cancelRoute(false);
+        this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
+          this.planning.orig.text = resp;
+          this.planning.orig.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
+        });
+      });
+
+    this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
+      this.planning.orig.text = resp;
+      this.planning.orig.latlng = (lat + ',' + lng);
+    });
+    this.map.closePopup();
+  }
+
+  planningDestination(lat: any, lng: any) {
+    this.map.removeLayer(this.planning.dest);
+    this.cancelRoute(false);
+    this.planning.dest = L.marker([lat, lng], { draggable: true, icon: this.iconDest })
+      .bindPopup("Destination")
+      .addTo(this.map)
+      .on('dragend', (e) => {
+        this.planningBox.size = 50;
+        this.planningBox.button = "down";
+        this.cancelRoute(false);
+        this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
+          this.planning.dest.text = resp;
+          this.planning.dest.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
+        });
+      });
+
+    if (this.planning.orig.latlng == undefined) {
+      this.dataProvider.getReverseGeoCoder(this.currentPosition.marker.getLatLng().lat, this.currentPosition.marker.getLatLng().lng).then((resp) => {
+        this.planning.orig.text = resp;
+        this.planning.orig.latlng = (this.currentPosition.marker.getLatLng().lat + ',' + this.currentPosition.marker.getLatLng().lng);
+      });
+    }
+
+    this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
+      this.planning.dest.text = resp;
+      this.planning.dest.latlng = (lat + ',' + lng);
+    });
+
+    this.map.closePopup();
+  }
+
   getCurrentLocation() {
     let self = this;
     this.geolocation.getCurrentPosition().then((resp) => {
       console.log("GeoLocation:", resp);
       self.allowLocation = true;
-      //console.log('Distances:');
-      // console.dir(self.currentPosition.getLatLng());
-      //console.log("Location", resp);
       if (self.currentPosition.marker.getLatLng().lat != resp.coords.latitude ||
         self.currentPosition.marker.getLatLng().lng != resp.coords.longitude) {
         self.updateCurrentLocation(resp.coords);
-        //self.updateClusterGroup();
       }
-      //self.debug = self.currentPosition;
-      //console.dir(data);
     }).catch((error) => {
       console.log('Error getting location', error);
-      //self.showToast(error.message, 3000);
       self.allowLocation = false;
     });
   }
@@ -443,7 +436,6 @@ export class HomePage {
   updateClusterGroup() {
     this.map.removeLayer(this.markersCluster);
     this.markersCluster = new L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
-    //console.log("makers", this.markers);
     if (this.markers.length != 0) {
       this.markers.forEach(stop => {
         if (this.allowLocation == true) {
@@ -456,7 +448,6 @@ export class HomePage {
         stop.lines.forEach(line => {
           popUp += '<br>Line ' + line;
         });
-        //popUp += "<br>" + this.container;
         let popUpOptions =
           {
             'className': 'custom'
@@ -489,23 +480,19 @@ export class HomePage {
               console.log("data from checkbox:", line);
               line.checked = true;
               line.value.stops.forEach(stop => {
-                //console.log(stop.id);
                 let existMarker: boolean = false;
                 this.markers.forEach(marker => {
                   if (marker.id == stop.id) {
-                    //console.log('Im old', marker);
                     marker.lines.push(line.shortName);
                     existMarker = true;
                   }
                 });
                 if (existMarker == false) {
-                  // console.log('Im new', stop);
                   stop.lines = [line.shortName];
                   this.markers.push(stop);
                 }
               });
             });
-            //console.dir(this.markers);
             this.updateClusterGroup();
 
             alert.dismiss().then(a => { resolve(); });
@@ -528,28 +515,22 @@ export class HomePage {
         }, {
           text: 'Ok',
           handler: data => {
-            //console.dir(data);
             this.markers = [];
             data.forEach(line => {
-              //console.log("data from checkbox:", line);
               line.stops.forEach(stop => {
-                //console.log(stop.id);
                 let existMarker: boolean = false;
                 this.markers.forEach(marker => {
                   if (marker.id == stop.id) {
-                    //console.log('Im old', marker);
                     marker.lines.push(line.shortName);
                     existMarker = true;
                   }
                 });
                 if (existMarker == false) {
-                  // console.log('Im new', stop);
                   stop.lines = [line.shortName];
                   this.markers.push(stop);
                 }
               });
             });
-            //console.dir(this.markers);
             this.updateClusterGroup();
 
             this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
@@ -565,7 +546,7 @@ export class HomePage {
     });
   }
 
-  // ####################    BEAUTIFUL THINGS  ########################
+  // ####################    ROUTING THINGS  ########################
   async chooseRoute() {
     this.dataProvider.loading = true;
     if (this.planning.orig.latlng != undefined && this.planning.dest.latlng != undefined) {
@@ -573,10 +554,8 @@ export class HomePage {
         if (resp != null) {
           if (resp.error == undefined) {
             this.cancelRoute(false);
-            //console.log("PlanningData", resp);
             this.routingControl.itenarary = [];
             this.routingControl.itenarary.showDetails = false;
-            //this.routingControl.icon = 'ios-add-circle-outline';
             resp.plan.itineraries.forEach(itinerary => {
               itinerary.icon = 'ios-add-circle-outline';
               itinerary.duration = moment.unix(itinerary.duration).format("HH:mm:ss");
@@ -602,7 +581,6 @@ export class HomePage {
               });
               this.routingControl.itenarary.push(itinerary);
             });
-            //console.log("Itenararies", this.routingControl.itenarary);
           } else {
             this.showToast(resp.error.msg, 5000);
           }
@@ -635,9 +613,6 @@ export class HomePage {
     this.routingControl.markers = [];
 
     route.legs.forEach(leg => {
-      //console.log("geometry->encoded", leg.legGeometry.points);
-      //console.log("geometry->decoded", L.Polyline.fromEncoded(leg.legGeometry.points));
-      //console.log("geometry->LatLng", L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());
       this.routingControl.polyline.coords = this.routingControl.polyline.coords.concat(L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());
       if (leg.mode == "BUS") {
         this.routingControl.markers.push(L.circle([leg.from.lat, leg.from.lon], { radius: 20 }).bindPopup("Take bus on " + leg.from.name));
@@ -651,21 +626,18 @@ export class HomePage {
       }
 
     });
-    //console.log("polyMarkersAll", this.routingControl.markers);
     this.routingControl.markers.forEach(circle => {
       circle.addTo(this.map);
     });
-    //console.log("PolyLine", this.routingControl.polyline.coords);
     this.routingControl.polyline = new L.Polyline(this.routingControl.polyline.coords);
     this.routingControl.polyline.addTo(this.map);
 
     this.routingControl.itenarary = undefined;
     this.dataProvider.loading = false;
-    //console.log("routingMarkers", this.routingControl.markers);
-    //console.log("routingPolyline", this.routingControl.polyline);
 
     this.planningBox.size = -100;
     this.planningBox.button = "up";
+    console.log("bounds", this.routingControl.polyline.getBounds());
     this.map.fitBounds(this.routingControl.polyline.getBounds(), { padding: L.point(10, 10) });
   }
 
@@ -731,8 +703,6 @@ export class HomePage {
       data.icon = 'ios-add-circle-outline';
     } else {
       array.forEach(element => {
-        /* console.log("data", data);
-         console.log("array", element);*/
         if (element != data) {
           element.showDetails = false;
           element.icon = 'ios-add-circle-outline';
@@ -745,7 +715,6 @@ export class HomePage {
   }
 
   tooglePlaning() {
-    //console.log("planningSize", this.planningBox);
     if (this.planningBox.size == 50) {
       this.planningBox.size = -100;
       this.planningBox.button = "up";
@@ -818,7 +787,6 @@ export class HomePage {
         role: 'ok',
         handler: data => {
           alert.dismiss();
-          //this.addToFavoriteRoute();
         }
       }]
     });
@@ -842,7 +810,7 @@ export class HomePage {
           this.searchResults = res;
         } else {
           this.searchResults = [];
-          this.searchResults.push({ "name": "NO RESULTS" });
+          this.searchResults.push({ "name": "NO RESULTS", "icon": "assets/img/error.png" });
         }
         console.log("listPlaces", this.searchResults);
       });

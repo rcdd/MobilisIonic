@@ -167,7 +167,7 @@ page-home {
         position: relative;
         height: 100%;
         width: 30%;
-        top: 25px;
+        top: 10px;
         display: grid;
         float: right;
 
@@ -176,10 +176,14 @@ page-home {
             max-width: 100px;
         }
 
+        .cancel {
+            background-color: red;
+        }
+
     }
 
     .leaflet-control-container .leaflet-routing-container-hide {
-    display: none;
+        display: none;
     }
 
     // Search CSS

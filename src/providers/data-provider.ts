@@ -18,6 +18,7 @@ export class DataProvider {
     public CheckBoxRoutes: any = [];
     public hasNetwork: boolean = null;
     public favoritesRoutes: any = [];
+    public favoriteRoute: any;
 
     public test: any;
 
@@ -41,8 +42,6 @@ export class DataProvider {
             let date = moment().format("YYYYMMDD");
             let time = moment().format("HH:mm");
 
-
-            //http://194.210.216.191/otp/routers/default/plan?fromPlace=39.73983136620544%2C-8.804597854614258&toPlace=39.74448420653371%2C-8.798589706420898&time=5%3A27pm&date=05-01-2017&mode=TRANSIT%2CWALK&maxWalkDistance=750
             let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=TRANSIT%2CWALK&maxWalkDistance=750`).toPromise();
             //console.log("planningRoute", resp.json());
             this.loading = false;
@@ -58,9 +57,11 @@ export class DataProvider {
             //GET PLACES
             let headers = new Headers({ 'Access-Control-Allow-Origin': 'http://localhost:8100' });
             let options = new RequestOptions({ headers: headers });
+            //let lang = "en";
+            let lang = "pt"
             //let key = 'AIzaSyD1i1kgXFRinKusaftvainJ6lqVvIgIfSU'; //PEREIRA
             let key = 'AIzaSyCIAsIQk7fTx3KomXq0fE6klhA8mP5jKtY'; //DOMINGUES
-            let resp = await this.http.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=39.7417679,-8.8090963&radius=5000&keyword=` + keyword + `&key=` + key, options).toPromise();
+            let resp = await this.http.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=39.7454901,-8.807645&language=` + lang + `&radius=6000&keyword=` + keyword + `&key=` + key, options).toPromise();
             console.log("searchPlaces", resp.json());
             if (resp.json().status != "OK" && resp.json().error_message) {
                 let toast = this.toastCtrl.create({

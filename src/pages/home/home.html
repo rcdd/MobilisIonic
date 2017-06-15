@@ -4,7 +4,7 @@
       <img src="assets/img/LogoMobilis_white.png" />
       <img src="assets/img/NomeMobilis_white.png" />
     </div>
-    <div class="searchBar" *ngIf="routingControl.itenarary == undefined">
+    <div class="searchBar" *ngIf="routingControl.itenarary == undefined && dataProvider.innit == 100">
       <div class="searchInput" *ngIf="searchControl">
         <input type="text " [(ngModel)]="searchInput " (ngModelChange)="searchPlace() " placeholder="Search... " autofocus>
       </div>
@@ -77,10 +77,6 @@
           <div class="label">&nbsp; Closest Stop </div>
           <ion-icon name="bus"></ion-icon>
       </button>
-      <button ion-fab id="stops" (click)="showFavorites(fab)"> 
-          <div class="label">&nbsp; Favorites </div>
-          <ion-icon name="star"></ion-icon>
-      </button>
     </ion-fab-list>
   </ion-fab>
 
@@ -108,8 +104,8 @@
     </div>
     <div class="right">
       <button ion-button (click)="chooseRoute()"><ion-icon name="navigate"></ion-icon></button>
-      <button ion-button (click)="cancelRoute(true)"><ion-icon name="close"></ion-icon></button>
       <button ion-button (click)="addToFavoriteRoute()"><ion-icon name="star"></ion-icon></button>
+      <button ion-button class="cancel" (click)="cancelRoute(true)"><ion-icon name="close"></ion-icon></button>
     </div>
   </div>
 
