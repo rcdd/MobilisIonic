@@ -21,12 +21,6 @@ export class Favorites {
         });
     }
 
-    /*initFavorites() {
-        for (var i = 0; i < Object.keys(this.favorites).length; i++) {
-            console.log(this.favorites[i].description);
-        }
-    }*/
-
     travelTo(fav: any) {
         console.dir(fav);
         this.dataProvider.setFavorite(fav);
@@ -36,12 +30,13 @@ export class Favorites {
     deleteFav(fav: any) {
             let alert = this.alertCtrl.create({
                 title: "Delete Favorite",
-                subTitle: "Are you sure you want to delete "+fav.description,
+                subTitle: "Are you sure you want to delete "+fav.description+"?",
                 buttons: [{
                     text: 'Yes',
                     role: 'ok',
                     handler: data => {
                         this.dataProvider.deleteFavorite(fav);
+                        this.showToast("Your favorite was deleted",3000);
                         alert.dismiss();
                     }
                 },{
@@ -55,6 +50,20 @@ export class Favorites {
             alert.present();
         
     }
+
+    showToast(msg: string, ms: number): void {
+    let toast = this.toastCtrl.create({
+      message: msg,
+      duration: ms,
+      position: 'top',
+      showCloseButton: true
+    });
+    toast.onDidDismiss(() => {
+      console.log('Dismissed toast');
+    });
+
+    toast.present();
+  }
 
     getItems(ev) {
         // set val to the value of the ev target
