@@ -138,13 +138,6 @@ export class DataProvider {
             this.isUpdated().then((up) => {
                 //console.log("up", up);
                 if (!up) {
-<<<<<<< HEAD
-                    this.createStorageFavoritesRoutes().then(() => {
-                        /*console.log("DB Not updated!");
-                        console.log("Innit download...");*/
-                    })
-=======
->>>>>>> e9c35031cbbb2e010100df21530d26b56d3ee096
                     return this.getRoutes().then(() => {
                         this.innit = 10;
                         this.loadingText = "Downloading routes...";
@@ -164,17 +157,11 @@ export class DataProvider {
             }).then(() => {
                 this.innit = 80;
                 return this.getStopsFromDB().then((stops) => {
-<<<<<<< HEAD
-                    return this.createStorageFavoritesRoutes().then(a => {
-                        return this.getFavoritesFromDb().then(a => {
-                            resolve(this.stops);
-                        });
-=======
+
                     this.loadingText = "Loading stops...";
                     return this.getFavoritesFromDb().then(a => {
                         this.loadingText = "Loading favorites...";
                         resolve(a);
->>>>>>> e9c35031cbbb2e010100df21530d26b56d3ee096
                     });
                 })
             });
@@ -341,11 +328,8 @@ export class DataProvider {
                 })
                 .catch(err => {
                     console.log("Error: ", err);
-<<<<<<< HEAD
                 });
-=======
-                });;
->>>>>>> e9c35031cbbb2e010100df21530d26b56d3ee096
+
         }).then(() => {
             //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
             return this.favoritesRoutes;
@@ -355,7 +339,6 @@ export class DataProvider {
 
     async  createFavoriteRoute(desc: string, origin: string, destination: string) {
         console.log(origin + "     " + destination);
-<<<<<<< HEAD
         return new Promise((resolve, reject) => {
             let possible = false;
             this.getFavoritesFromDb().then(res => {
@@ -366,14 +349,6 @@ export class DataProvider {
                     }
                 }
                 resolve(res);
-=======
-        await this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination])
-            .then(() => {
-                console.log("FAVORITO ADDED");
-                this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
-            }).catch(err => {
-                console.log("Error: ", err);
->>>>>>> e9c35031cbbb2e010100df21530d26b56d3ee096
             });
 
         }).then(() => {
