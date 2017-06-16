@@ -110,7 +110,7 @@ export class HomePage {
       await this.planningOrigin(origin[0], origin[1]).then(a => {
         return this.planningDestination(destination[0], destination[1]).then(a => {
           // TODO: fitBound of both points
-          this.map.fitBounds({ "lat": origin[0], "lng": origin[1] }, { "lat": destination[0], "lng": destination[1] });
+          //this.map.fitBounds({ "lat": origin[0], "lng": origin[1] }, { "lat": destination[0], "lng": destination[1] });
           this.dataProvider.setFavorite(undefined);
           return true;
         });
@@ -185,8 +185,8 @@ export class HomePage {
 
 
     this.container = L.DomUtil.create('div', 'container');
-    this.startBtn = this.createButton('<img src="assets/img/originRoute.png" />&nbsp Get direction from here', this.container);
-    this.destBtn = this.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp Get direction to here', this.container);
+    this.startBtn = this.createButton('<img src="assets/img/originRoute.png" />&nbsp From here', this.container);
+    this.destBtn = this.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp To here', this.container);
     let self = this;
 
     this.map.on('click', function (e) {
@@ -785,7 +785,7 @@ export class HomePage {
                 if (res) {
                   this.showToast("Your favorite route was saved.", 3000);
                 } else {
-                  this.showAlert("This favorite name already exists","ERROR");
+                  this.showAlert("This favorite name already exists", "ERROR");
                 }
               });
 
@@ -838,34 +838,35 @@ export class HomePage {
     }
   }
 
+  cenas() {
+    console.log("cenas");
+  };
+
   showPlace(res: any) {
     if (this.map.hasLayer(this.searchMarker)) {
       this.map.removeLayer(this.searchMarker);
     }
 
-    let container = L.DomUtil.create('div', 'container');
-    let startBtn = this.createButton('<img src="assets/img/originRoute.png" />&nbsp Get direction from here', container);
-    let destBtn = this.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp Get direction to here', container);
-    let self = this;
-    this.map
-
-    let ballon = (res.name + "<hr>" + container.innerHTML);
     this.searchMarker = L.marker(res.geometry.location, {
       draggable: false, icon:
       L.icon({
         iconUrl: res.icon,
         iconSize: [35, 35],
-        //iconAnchor: [-50, 45],
         popupAnchor: [0, -15]
       })
     })
-      .bindPopup(ballon)
+      .bindPopup(this.container)
       .addTo(this.map)
       .openPopup();
 
-    L.DomEvent.on(destBtn, 'click', () => {
+    let self = this;
+    L.DomEvent.on(this.startBtn, 'click', function () {
+      self.planningOrigin(res.geometry.location.lat, res.geometry.location.lng);
+    });
+
+    L.DomEvent.on(this.destBtn, 'click', function () {
       self.planningDestination(res.geometry.location.lat, res.geometry.location.lng);
-    })
+    });
 
     this.map.panTo([res.geometry.location.lat, res.geometry.location.lng]);
 
