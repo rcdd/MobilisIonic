@@ -15,6 +15,7 @@ export class DataProvider {
     public stops: any[] = [];
     public innit: number = 0;
     public loading: boolean = false;
+    public loadingText: string = "";
     public CheckBoxRoutes: any = [];
     public hasNetwork: boolean = null;
     public favoritesRoutes: any = [];
@@ -139,10 +140,13 @@ export class DataProvider {
                 if (!up) {
                     return this.getRoutes().then(() => {
                         this.innit = 10;
+                        this.loadingText = "Downloading routes...";
                         return this.getStationsFromBusLines().then(() => {
+                            this.loadingText = "Downloading stops...";
                             this.dataInfoToDB();
                             //console.log("Download DONE!", this.stops);
                             return this.createStorageFavoritesRoutes().then(() => {
+                                this.loadingText = "Creating favorites...";
                                 /*console.log("DB Not updated!");
                                 console.log("Innit download...");*/
                             })
@@ -153,14 +157,11 @@ export class DataProvider {
             }).then(() => {
                 this.innit = 80;
                 return this.getStopsFromDB().then((stops) => {
-                    return this.createStorageFavoritesRoutes().then(a => {
-                      return this.getFavoritesFromDb().then(a => {
-                        resolve(this.stops);
-                      });
+                    this.loadingText = "Loading stops...";
+                    return this.getFavoritesFromDb().then(a => {
+                        this.loadingText = "Loading favorites...";
+                        resolve(a);
                     });
-                    //this.innit = 100;
-                    //console.log("Stops", Object.keys(stops).length);
-                    //console.log("DB updated!");
                 })
             });
         }).then((stops) => {
@@ -324,7 +325,7 @@ export class DataProvider {
                     resolve(this.favoritesRoutes);
                 })
                 .catch(err => {
-                  console.log("Error: ", err);
+                    console.log("Error: ", err);
                 });;
         }).then(() => {
             //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
@@ -336,12 +337,12 @@ export class DataProvider {
     async createFavoriteRoute(desc: string, origin: string, destination: string) {
         console.log(origin + "     " + destination);
         await this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination])
-        .then(() => {
-            console.log("FAVORITO ADDED");
-            this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
-        }).catch(err => {
-            console.log("Error: ", err);
-        });
+            .then(() => {
+                console.log("FAVORITO ADDED");
+                this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
+            }).catch(err => {
+                console.log("Error: ", err);
+            });
 
     }
 
