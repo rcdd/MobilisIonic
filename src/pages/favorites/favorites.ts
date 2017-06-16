@@ -3,8 +3,6 @@ import { NavController, ToastController } from 'ionic-angular';
 import { Http, Response } from '@angular/http';
 import { DataProvider } from '../../providers/data-provider';
 import 'rxjs/add/operator/map';
-import { HomePage } from '../home/home'
-import { TabsPage } from '../tabs/tabs'
 
 @Component({
     selector: 'page-favorites',
@@ -14,9 +12,7 @@ import { TabsPage } from '../tabs/tabs'
 @Injectable()
 export class Favorites {
     private favorites: any = [];
-    private home: any;
     constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController, public dataProvider: DataProvider, ) {
-        this.home = HomePage;
         this.dataProvider.getFavoritesFromDb().then(res => {
             //console.dir(res);
             this.favorites = res;

@@ -559,8 +559,8 @@ export class HomePage {
             resp.plan.itineraries.forEach(itinerary => {
               itinerary.icon = 'ios-add-circle-outline';
               itinerary.duration = moment.unix(itinerary.duration).format("HH:mm:ss");
-              itinerary.startTime = moment.unix((itinerary.startTime) / 1000).format("DD/MM HH:mm");
-              itinerary.endTime = moment.unix((itinerary.endTime) / 1000).format("DD/MM HH:mm");
+              itinerary.startTime = moment.unix((itinerary.startTime) / 1000).format("HH:mm");
+              itinerary.endTime = moment.unix((itinerary.endTime) / 1000).format("HH:mm");
               itinerary.walkDistance = this.getDistance(itinerary.walkDistance);
               itinerary.legs.forEach(leg => {
                 leg.distance = this.getDistance(leg.distance);
@@ -572,7 +572,7 @@ export class HomePage {
                     leg.icon = 'ios-add-circle-outline';
                   });
                 } else if (leg.mode == "BUS") {
-                  leg.direction = ("Get bus on " + leg.routeLongName + " at " + moment.unix((leg.startTime) / 1000).format("HH:mm") + "h and exit on " + leg.to.name);
+                  leg.direction = ("(" + (moment.unix((leg.startTime) / 1000).format("HH:mm")) + "h) Get bus on " + leg.routeLongName.split(":")[0]  + " exit on " + leg.to.name);
                   leg.showDetails = false;
                   leg.icon = 'ios-add-circle-outline';
                 } else {

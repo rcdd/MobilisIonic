@@ -318,7 +318,14 @@ export class DataProvider {
                     }
                     //this.favoritesRoutes = res;
                     resolve(this.favoritesRoutes);
-                });
+                })
+                .catch(err => {
+                  /*console.log("Error: ", err);
+                  if(err.code == 5){
+                    this.createStorageFavoritesRoutes();
+                    this.getFavoritesFromDb();
+                  }*/
+                });;
         }).then(() => {
             //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
             return this.favoritesRoutes;
