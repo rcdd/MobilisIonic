@@ -137,15 +137,15 @@ export class DataProvider {
             this.isUpdated().then((up) => {
                 //console.log("up", up);
                 if (!up) {
+                    this.createStorageFavoritesRoutes().then(() => {
+                                /*console.log("DB Not updated!");
+                                console.log("Innit download...");*/
+                            })
                     return this.getRoutes().then(() => {
                         this.innit = 10;
                         return this.getStationsFromBusLines().then(() => {
                             this.dataInfoToDB();
                             //console.log("Download DONE!", this.stops);
-                            return this.createStorageFavoritesRoutes().then(() => {
-                                /*console.log("DB Not updated!");
-                                console.log("Innit download...");*/
-                            })
                         })
                     });
 
@@ -312,6 +312,7 @@ export class DataProvider {
         return new Promise((resolve, reject) => {
             this.db.query("SELECT * FROM FAVORITES_ROUTES")
                 .then(res => {
+                    this.favoritesRoutes=[];
                     for (var i = 0; i < Object.keys(res.rows).length; i++) {
                         //console.log(res.rows[i].DESCRIPTION);
                         this.favoritesRoutes.push({ description: res.rows[i].DESCRIPTION, origin: res.rows[i].ORIGIN, destination: res.rows[i].DESTINATION })

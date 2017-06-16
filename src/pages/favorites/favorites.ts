@@ -14,7 +14,14 @@ export class Favorites {
     private favorites: any = [];
     private favoritesToShow: any = [];
     private home: any;
-    constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
+    constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController, public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
+        this.dataProvider.getFavoritesFromDb().then(res => {
+            this.favorites = res;
+            this.favoritesToShow = this.favorites;
+        });
+    }
+
+    ionViewWillEnter() {
         this.dataProvider.getFavoritesFromDb().then(res => {
             this.favorites = res;
             this.favoritesToShow = this.favorites;
@@ -28,42 +35,42 @@ export class Favorites {
     }
 
     deleteFav(fav: any) {
-            let alert = this.alertCtrl.create({
-                title: "Delete Favorite",
-                subTitle: "Are you sure you want to delete "+fav.description+"?",
-                buttons: [{
-                    text: 'Yes',
-                    role: 'ok',
-                    handler: data => {
-                        this.dataProvider.deleteFavorite(fav);
-                        this.showToast("Your favorite was deleted",3000);
-                        alert.dismiss();
-                    }
-                },{
-                    text: 'Cancel',
-                    role: 'cancel',
-                    handler: data => {
-                        alert.dismiss();
-                    }
-                }]
-            });
-            alert.present();
-        
+        let alert = this.alertCtrl.create({
+            title: "Delete Favorite",
+            subTitle: "Are you sure you want to delete " + fav.description + "?",
+            buttons: [{
+                text: 'Yes',
+                role: 'ok',
+                handler: data => {
+                    this.dataProvider.deleteFavorite(fav);
+                    this.showToast("Your favorite was deleted", 3000);
+                    alert.dismiss();
+                }
+            }, {
+                text: 'Cancel',
+                role: 'cancel',
+                handler: data => {
+                    alert.dismiss();
+                }
+            }]
+        });
+        alert.present();
+
     }
 
     showToast(msg: string, ms: number): void {
-    let toast = this.toastCtrl.create({
-      message: msg,
-      duration: ms,
-      position: 'top',
-      showCloseButton: true
-    });
-    toast.onDidDismiss(() => {
-      console.log('Dismissed toast');
-    });
+        let toast = this.toastCtrl.create({
+            message: msg,
+            duration: ms,
+            position: 'top',
+            showCloseButton: true
+        });
+        toast.onDidDismiss(() => {
+            console.log('Dismissed toast');
+        });
 
-    toast.present();
-  }
+        toast.present();
+    }
 
     getItems(ev) {
         // set val to the value of the ev target
