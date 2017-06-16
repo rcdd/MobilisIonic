@@ -110,15 +110,15 @@ export class HomePage {
 
   ionViewWillEnter() {
     //console.log("fav", this.dataProvider.favoriteToGo);
-    if (this.dataProvider.favoriteRoute != undefined) {
-      let origin = this.dataProvider.favoriteRoute.origin.split(',');
-      let destination = this.dataProvider.favoriteRoute.destination.split(',');
+    if (this.dataProvider.getFavorite() != undefined) {
+      let origin = this.dataProvider.getFavorite().origin.split(',');
+      let destination = this.dataProvider.getFavorite().destination.split(',');
       this.planningOrigin(origin[0], origin[1]);
       this.planningDestination(destination[0], destination[1]);
 
       // TODO: fitBound of both points
       //this.map.fitBounds({ "_northEast": { "lat": origin[0], "lng": origin[1] }, "_southWest": { "lat": destination[0], "lng": destination[1] } });
-      this.dataProvider.favoriteRoute = undefined;
+      this.dataProvider.setFavorite(undefined);
     }
   }
 
@@ -371,6 +371,7 @@ export class HomePage {
         this.planningBox.size = 50;
         this.planningBox.button = "down";
         this.cancelRoute(false);
+        this.planning.orig = [];
         this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
           this.planning.orig.text = resp;
           this.planning.orig.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
@@ -394,17 +395,19 @@ export class HomePage {
         this.planningBox.size = 50;
         this.planningBox.button = "down";
         this.cancelRoute(false);
+         this.planning.dest = [];
         this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
           this.planning.dest.text = resp;
           this.planning.dest.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
         });
       });
 
-    if (this.planning.orig.latlng == undefined) {
+    if (this.planning.orig.latlng == undefined && this.dataProvider.getFavorite() == undefined) {
       this.dataProvider.getReverseGeoCoder(this.currentPosition.marker.getLatLng().lat, this.currentPosition.marker.getLatLng().lng).then((resp) => {
         this.planning.orig.text = resp;
         this.planning.orig.latlng = (this.currentPosition.marker.getLatLng().lat + ',' + this.currentPosition.marker.getLatLng().lng);
-      });
+        console.log(this.planning.orig.latlng);
+    });
     }
 
     this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
@@ -556,6 +559,8 @@ export class HomePage {
   async chooseRoute() {
     this.dataProvider.loading = true;
     if (this.planning.orig.latlng != undefined && this.planning.dest.latlng != undefined) {
+      console.log(this.planning.orig.latlng);
+      console.log(this.planning.dest.latlng);
       await this.dataProvider.planningRoute(this.planning.orig.latlng, this.planning.dest.latlng).then((resp) => {
         if (resp != null) {
           if (resp.error == undefined) {

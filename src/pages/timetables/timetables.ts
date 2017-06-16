@@ -31,6 +31,8 @@ export class TimeTables {
   public maxDate: Date = new Date();
   public selectedDate: any = new Date().toISOString();
   public setFirst: any;
+  public possibleTimesVisible: boolean;
+  public passedTimesVisible: boolean;
   //@ViewChild(Content)
   //content: Content;
   // @ViewChild('listTimesAutoScroll')
@@ -135,9 +137,11 @@ export class TimeTables {
       //console.log((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')));
       if ((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')) < 0) {
         this.possibleTimes.push(time);
+        this.possibleTimesVisible = true;
       } else {
         if (this.passedTimes.indexOf(time) == -1) {
-          this.passedTimes.push(time)
+          this.passedTimes.push(time);
+          this.passedTimesVisible= true;
         }
       }
     });
@@ -153,27 +157,24 @@ export class TimeTables {
       b = new Date(b);
       return a > b ? -1 : a < b ? 1 : 0;
     });
-    //this.scrollToTop();
-    //this.scrollElement();
-    //console.log(this.possibleTimes)
   }
 
-  /*scrollToTop() {
-    setTimeout(function () {
-      var itemList = document.getElementById("listTimesAutoScroll");
-      itemList.scrollTop = itemList.scrollHeight;
-    }, 10);
-  }
-  scrollElement() {
-    //this.content.scrollTo(0, this.listTimesAutoScroll.offsetTop, 500);
-    console.log(this.content.getContentDimensions());
-    this.content.scrollToBottom();
-    if (this.listTimesAutoScroll != undefined) {
-      let yOffset =  this.listTimesAutoScroll.offsetTop;
-      this.listTimesAutoScroll.nativeElement.scrollTo(0, yOffset, 4000);
+  changeVilibilityPossibleTimes() {
+    if (this.possibleTimesVisible) {
+      this.possibleTimesVisible = false;
+    } else {
+      this.possibleTimesVisible = true;
     }
+  }
 
-  }*/
+  changeVilibilityPassedTimes() {
+    if (this.passedTimesVisible) {
+      this.passedTimesVisible = false;
+    } else {
+      this.passedTimesVisible = true;
+    }
+  }
+
 
   showAlert(title: any, msg: any) {
     let alert = this.alertCtrl.create({

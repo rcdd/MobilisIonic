@@ -1,16 +1,19 @@
 <ion-header>
   <ion-navbar>
-    <ion-title>
-      Favorites
-    </ion-title>
+    <div class="searchBar">
+      <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
+    </div>
   </ion-navbar>
 </ion-header>
 
-  <ion-content padding>
-  <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
-  <ion-list>
-    <button ion-button block color="light" (click)="travelTo(fav)" *ngFor="let fav of favorites">
-      {{ fav.description }}
+<ion-content padding>
+
+  <ion-list class="listFavorites">
+    <ion-item id="item" *ngFor="let fav of favoritesToShow" >
+      <button ion-button block color="light" (click)="travelTo(fav)">
+      {{ fav.description }} 
     </button>
+      <button ion-button color="danger" (click)="deleteFav(fav)">Delete</button>
+    </ion-item>
   </ion-list>
 </ion-content>
