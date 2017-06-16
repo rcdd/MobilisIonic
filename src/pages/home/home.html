@@ -42,6 +42,7 @@
 
     <h3>Loading...</h3>
     <div class="progress-bar" [style.width.%]=dataProvider.innit>{{dataProvider.innit}}%</div>
+    <h6>{{dataProvider.loadingText}}</h6>
   </div>
 
   <div id="mapid">
@@ -54,7 +55,7 @@
           <ion-label text-wrap>{{line.label}}</ion-label>
             <ion-checkbox type="checkbox" id="line.id" name="line.shortName" value="line"> </ion-checkbox>
         </ion-item>
-      </div>
+      </div> 
     </div>
   </div> -->
 
@@ -123,14 +124,14 @@
             <ion-col width-75>
               <ion-row>
                 <ion-col width-10>
-              <ion-icon name="timer"></ion-icon>
-            </ion-col>
-            <ion-col width-90>
-              <h1>{{d.startTime}} -> {{d.endTime}}</h1>
-            </ion-col>
-             </ion-row>
+                  <ion-icon name="timer"></ion-icon>
+                </ion-col>
+                <ion-col width-90>
+                  <h1>{{d.startTime}} -> {{d.endTime}}</h1>
+                </ion-col>
+              </ion-row>
               <h6> Duration: <b>{{d.duration}}</b> </h6>
-                <!-- <br /> Walking distance: <b>{{d.walkDistance}}</b> </h6> -->
+              <!-- <br /> Walking distance: <b>{{d.walkDistance}}</b> </h6> -->
               <!-- <h6> Start: <b>{{d.startTime}}</b> <br /> End: <b>{{d.endTime}}</b> </h6> -->
             </ion-col>
             <ion-col width-10>
