@@ -383,7 +383,6 @@ export class HomePage {
       resolve(this.planning.orig);
     });
   }
-
   async planningDestination(lat: any, lng: any) {
     return new Promise((resolve, reject) => {
       this.map.removeLayer(this.planning.dest);
@@ -781,8 +780,15 @@ export class HomePage {
               this.showAlert("You have to type a description", "ERROR");
 
             } else {
-              this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng);
-              this.showToast("Your favorite route was saved.", 3000)
+              this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng).then(res => {
+                console.log(res);
+                if (res) {
+                  this.showToast("Your favorite route was saved.", 3000);
+                } else {
+                  this.showAlert("This favorite name already exists","ERROR");
+                }
+              });
+
             }
           }
         }

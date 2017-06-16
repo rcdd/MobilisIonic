@@ -157,6 +157,7 @@ export class DataProvider {
             }).then(() => {
                 this.innit = 80;
                 return this.getStopsFromDB().then((stops) => {
+
                     this.loadingText = "Loading stops...";
                     resolve(this.stops);
                     return this.getFavoritesFromDb().then(a => {
@@ -328,7 +329,8 @@ export class DataProvider {
                 })
                 .catch(err => {
                     console.log("Error: ", err);
-                });;
+                });
+
         }).then(() => {
             //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
             return this.favoritesRoutes;
@@ -336,16 +338,33 @@ export class DataProvider {
     }
 
 
-    async createFavoriteRoute(desc: string, origin: string, destination: string) {
+    async  createFavoriteRoute(desc: string, origin: string, destination: string) {
         console.log(origin + "     " + destination);
-        await this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination])
-            .then(() => {
-                console.log("FAVORITO ADDED");
-                this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
-            }).catch(err => {
-                console.log("Error: ", err);
+        return new Promise((resolve, reject) => {
+            let possible = false;
+            this.getFavoritesFromDb().then(res => {
+                for (var i = 0; i < res.length; i++) {
+                    if (this.removeAccents(res[i].description).toLowerCase().trim() == this.removeAccents(desc).toLowerCase().trim()) {
+                        console.log("EI JA EXISTE")
+                        reject(res);
+                    }
+                }
+                resolve(res);
             });
 
+        }).then(() => {
+            this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination])
+                .then(() => {
+                    this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
+                    console.log("FAVORITO ADDED");
+                }).catch(err => {
+                    console.log("Error: ", err);
+                });
+            return true;
+        }).catch(() => {
+            console.log("reject");
+            return false;
+        });
     }
 
 
@@ -475,4 +494,5 @@ export class DataProvider {
             console.log(err);
         });
     }
+
 }

@@ -1,4 +1,37 @@
+$darkBlue: #03396c;
+$lightBlue: #005b96;
+
 page-favorites {
+
+    ion-header {
+        position: absolute;
+        color: white;
+        background-color: $lightBlue;
+        top: 0;
+        height: 65px;
+        font-size: 30px;
+        padding-left: 10px;
+        padding-top: 10px;
+
+        .row {
+            flex: wrap;
+            height: 50px;
+            padding-top: 10px;
+        }
+
+        .searchBar{
+        display: flex;
+        width: 100%;
+    }
+    }
+
+    .toolbar  {
+        background-color: transparent;
+    }
+    
+    
+    
+
     .listFavorites {
         .label {
             display: inherit;
