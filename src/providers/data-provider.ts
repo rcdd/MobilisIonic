@@ -138,9 +138,9 @@ export class DataProvider {
                 //console.log("up", up);
                 if (!up) {
                     this.createStorageFavoritesRoutes().then(() => {
-                                /*console.log("DB Not updated!");
-                                console.log("Innit download...");*/
-                            })
+                        /*console.log("DB Not updated!");
+                        console.log("Innit download...");*/
+                    })
                     return this.getRoutes().then(() => {
                         this.innit = 10;
                         return this.getStationsFromBusLines().then(() => {
@@ -154,9 +154,9 @@ export class DataProvider {
                 this.innit = 80;
                 return this.getStopsFromDB().then((stops) => {
                     return this.createStorageFavoritesRoutes().then(a => {
-                      return this.getFavoritesFromDb().then(a => {
-                        resolve(this.stops);
-                      });
+                        return this.getFavoritesFromDb().then(a => {
+                            resolve(this.stops);
+                        });
                     });
                     //this.innit = 100;
                     //console.log("Stops", Object.keys(stops).length);
@@ -316,7 +316,7 @@ export class DataProvider {
         return new Promise((resolve, reject) => {
             this.db.query("SELECT * FROM FAVORITES_ROUTES")
                 .then(res => {
-                    this.favoritesRoutes=[];
+                    this.favoritesRoutes = [];
                     for (var i = 0; i < Object.keys(res.rows).length; i++) {
                         //console.log(res.rows[i].DESCRIPTION);
                         this.favoritesRoutes.push({ description: res.rows[i].DESCRIPTION, origin: res.rows[i].ORIGIN, destination: res.rows[i].DESTINATION })
@@ -325,8 +325,8 @@ export class DataProvider {
                     resolve(this.favoritesRoutes);
                 })
                 .catch(err => {
-                  console.log("Error: ", err);
-                });;
+                    console.log("Error: ", err);
+                });
         }).then(() => {
             //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
             return this.favoritesRoutes;
@@ -334,16 +334,33 @@ export class DataProvider {
     }
 
 
-    async createFavoriteRoute(desc: string, origin: string, destination: string) {
+    async  createFavoriteRoute(desc: string, origin: string, destination: string) {
         console.log(origin + "     " + destination);
-        await this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination])
-        .then(() => {
-            console.log("FAVORITO ADDED");
-            this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
-        }).catch(err => {
-            console.log("Error: ", err);
-        });
+        return new Promise((resolve, reject) => {
+            let possible = false;
+            this.getFavoritesFromDb().then(res => {
+                for (var i = 0; i < res.length; i++) {
+                    if (this.removeAccents(res[i].description).toLowerCase().trim() == this.removeAccents(desc).toLowerCase().trim()) {
+                        console.log("EI JA EXISTE")
+                        reject(res);
+                    }
+                }
+                resolve(res);
+            });
 
+        }).then(() => {
+            this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination])
+                .then(() => {
+                    this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
+                    console.log("FAVORITO ADDED");
+                }).catch(err => {
+                    console.log("Error: ", err);
+                });
+            return true;
+        }).catch(() => {
+            console.log("reject");
+            return false;
+        });
     }
 
 
@@ -467,10 +484,11 @@ export class DataProvider {
     }
 
     private deleteFavFromBd(fav) {
-        this.db.query("DELETE FROM FAVORITES_ROUTES WHERE DESCRIPTION = '" + fav.description+"';").then(res => {
+        this.db.query("DELETE FROM FAVORITES_ROUTES WHERE DESCRIPTION = '" + fav.description + "';").then(res => {
             console.log(fav.description + " Deleted");
         }).catch(err => {
             console.log(err);
         });
     }
+
 }

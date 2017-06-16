@@ -37,6 +37,10 @@
       </button>
   </div>
 
+  <div *ngIf='!isVisibleSearchbar && timesToShowInList.length == 0 && dataProvider.loading == false' >
+    <ion-item style="color: red; text-align: center;"> You have to select the busLine that you want. </ion-item> 
+  </div>
+
   <div class="showTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
     <ion-segment assertive [(ngModel)]="setFirst">
       <ion-segment-button *ngFor="let time of timesToShow ; let i = index" [value]="i" (ionSelect)="selectedLine(time.times)" (ionSelect)="showToast('Line '+time.line.desc)">

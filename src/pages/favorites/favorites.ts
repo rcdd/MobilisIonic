@@ -14,21 +14,17 @@ export class Favorites {
     private favorites: any = [];
     private favoritesToShow: any = [];
     private home: any;
+    private currentSearch: any="";
     constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController, public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
-
         this.dataProvider.getFavoritesFromDb().then(res => {
             this.favorites = res;
             this.favoritesToShow = this.favorites;
         });
     }
-    
-    async ionViewWillEnter() {
-      this.dataProvider.loading = true;
-      await this.dataProvider.getFavoritesFromDb().then(res => {
-            console.dir(res);
-            return this.favorites = res;
-        });
-        this.dataProvider.loading = false;
+
+    ionViewWillEnter() {
+        this.favoritesToShow = this.dataProvider.favoritesRoutes;
+        this.favorites = this.dataProvider.favoritesRoutes;
     }
 
     travelTo(fav: any) {
@@ -46,6 +42,10 @@ export class Favorites {
                 role: 'ok',
                 handler: data => {
                     this.dataProvider.deleteFavorite(fav);
+                    let index: number = this.favoritesToShow.indexOf(fav);
+                    if (index !== -1) {
+                        this.favoritesToShow.splice(index, 1);
+                    }
                     this.showToast("Your favorite was deleted", 3000);
                     alert.dismiss();
                 }
@@ -79,6 +79,7 @@ export class Favorites {
         // set val to the value of the ev target
         var val = ev.target.value;
         console.log(val);
+        this.currentSearch = val;
 
         this.resetNamesFavorites();
 

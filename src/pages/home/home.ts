@@ -194,7 +194,7 @@ export class HomePage {
     let self = this;
 
     this.map.on('click', function (e) {
-      if(!self.planningBallonOpened){
+      if (!self.planningBallonOpened) {
         self.planningBallonOpened = true;
         L.popup()
           .setContent(self.container)
@@ -208,7 +208,7 @@ export class HomePage {
         L.DomEvent.on(self.destBtn, 'click', function () {
           self.planningDestination(e.latlng.lat, e.latlng.lng);
         });
-      }else {
+      } else {
         self.planningBallonOpened = false;
       }
     });
@@ -395,7 +395,7 @@ export class HomePage {
         this.planningBox.size = 50;
         this.planningBox.button = "down";
         this.cancelRoute(false);
-         this.planning.dest = [];
+        this.planning.dest = [];
         this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
           this.planning.dest.text = resp;
           this.planning.dest.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
@@ -407,7 +407,7 @@ export class HomePage {
         this.planning.orig.text = resp;
         this.planning.orig.latlng = (this.currentPosition.marker.getLatLng().lat + ',' + this.currentPosition.marker.getLatLng().lng);
         console.log(this.planning.orig.latlng);
-    });
+      });
     }
 
     this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
@@ -583,7 +583,7 @@ export class HomePage {
                     leg.icon = 'ios-add-circle-outline';
                   });
                 } else if (leg.mode == "BUS") {
-                  leg.direction = ("(" + (moment.unix((leg.startTime) / 1000).format("HH:mm")) + "h) Get bus on " + leg.routeLongName.split(":")[0]  + " exit on " + leg.to.name);
+                  leg.direction = ("(" + (moment.unix((leg.startTime) / 1000).format("HH:mm")) + "h) Get bus on " + leg.routeLongName.split(":")[0] + " exit on " + leg.to.name);
                   leg.showDetails = false;
                   leg.icon = 'ios-add-circle-outline';
                 } else {
@@ -779,8 +779,15 @@ export class HomePage {
               this.showAlert("You have to type a description", "ERROR");
 
             } else {
-              this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng);
-              this.showToast("Your favorite route was saved.", 3000)
+              this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng).then(res => {
+                console.log(res);
+                if (res) {
+                  this.showToast("Your favorite route was saved.", 3000);
+                } else {
+                  this.showAlert("This favorite name already exists","ERROR");
+                }
+              });
+
             }
           }
         }
