@@ -153,10 +153,14 @@ export class DataProvider {
             }).then(() => {
                 this.innit = 80;
                 return this.getStopsFromDB().then((stops) => {
+                    return this.createStorageFavoritesRoutes().then(a => {
+                      return this.getFavoritesFromDb().then(a => {
+                        resolve(this.stops);
+                      });
+                    });
                     //this.innit = 100;
                     //console.log("Stops", Object.keys(stops).length);
                     //console.log("DB updated!");
-                    resolve(this.stops)
                 })
             });
         }).then((stops) => {
@@ -297,7 +301,7 @@ export class DataProvider {
     }
 
     async createStorageFavoritesRoutes() {
-        await this.DBDropTable("FAVORITES_ROUTES");
+        //await this.DBDropTable("FAVORITES_ROUTES");
 
         await this.db.query("CREATE TABLE IF NOT EXISTS FAVORITES_ROUTES (DESCRIPTION TEXT, ORIGIN TEXT, DESTINATION TEXT)")
             .then(res => {
@@ -320,11 +324,7 @@ export class DataProvider {
                     resolve(this.favoritesRoutes);
                 })
                 .catch(err => {
-                  /*console.log("Error: ", err);
-                  if(err.code == 5){
-                    this.createStorageFavoritesRoutes();
-                    this.getFavoritesFromDb();
-                  }*/
+                  console.log("Error: ", err);
                 });;
         }).then(() => {
             //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
@@ -335,7 +335,8 @@ export class DataProvider {
 
     async createFavoriteRoute(desc: string, origin: string, destination: string) {
         console.log(origin + "     " + destination);
-        this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination]).then(() => {
+        await this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination])
+        .then(() => {
             console.log("FAVORITO ADDED");
             this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
         }).catch(err => {

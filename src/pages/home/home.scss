@@ -7,7 +7,7 @@ page-home {
         color: white;
         background-color: $lightBlue;
         top: 0;
-        height: 50px;
+        height: 60px;
         font-size: 30px;
         padding-left: 10px;
         padding-top: 10px;
@@ -15,6 +15,7 @@ page-home {
         .row {
             flex: wrap;
             height: 50px;
+            padding-top: 10px;
         }
 
         .logo img {
@@ -24,7 +25,6 @@ page-home {
 
     ion-content{
         position: absolute;
-        //top: 25px;
     }
 
     #mapid {
@@ -198,7 +198,7 @@ page-home {
         .searchButton{
             position: fixed;
             overflow: hidden;
-            top: 0;
+            top: 10px;
             left: 88%;
             width: 40px;
             height: 35px;
@@ -218,7 +218,7 @@ page-home {
             color: white;
             margin: 0px 3px;
             left: -3px;
-            top: 0px;
+            top: 10px;
             background-color: $darkBlue;
             font-size: 18px;
             animation: fadeLeft 0.3s;
