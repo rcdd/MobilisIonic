@@ -58,6 +58,7 @@ export class HomePage {
 
   public planning: any = [];
   public planningBox: any = [];
+  public planningBallonOpened: boolean = false;
   public route: any;
   public container: any;
   public startBtn: any;
@@ -192,19 +193,24 @@ export class HomePage {
     this.destBtn = this.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp Get direction to here', this.container);
     let self = this;
 
-    this.map.on('contextmenu', function (e) {
-      L.popup()
-        .setContent(self.container)
-        .setLatLng(e.latlng)
-        .openOn(self.map);
+    this.map.on('click', function (e) {
+      if(!self.planningBallonOpened){
+        self.planningBallonOpened = true;
+        L.popup()
+          .setContent(self.container)
+          .setLatLng(e.latlng)
+          .openOn(self.map);
 
-      L.DomEvent.on(self.startBtn, 'click', function () {
-        self.planningOrigin(e.latlng.lat, e.latlng.lng);
-      });
+        L.DomEvent.on(self.startBtn, 'click', function () {
+          self.planningOrigin(e.latlng.lat, e.latlng.lng);
+        });
 
-      L.DomEvent.on(self.destBtn, 'click', function () {
-        self.planningDestination(e.latlng.lat, e.latlng.lng);
-      });
+        L.DomEvent.on(self.destBtn, 'click', function () {
+          self.planningDestination(e.latlng.lat, e.latlng.lng);
+        });
+      }else {
+        self.planningBallonOpened = false;
+      }
     });
 
     // CONTROLS OF THE MAP
@@ -480,7 +486,7 @@ export class HomePage {
             console.dir(data);
             this.markers = [];
             this.dataProvider.CheckBoxRoutes.forEach(line => {
-              console.log("data from checkbox:", line);
+              //console.log("data from checkbox:", line);
               line.checked = true;
               line.value.stops.forEach(stop => {
                 let existMarker: boolean = false;
@@ -564,8 +570,8 @@ export class HomePage {
             resp.plan.itineraries.forEach(itinerary => {
               itinerary.icon = 'ios-add-circle-outline';
               itinerary.duration = moment.unix(itinerary.duration).format("HH:mm:ss");
-              itinerary.startTime = moment.unix((itinerary.startTime) / 1000).format("DD/MM HH:mm");
-              itinerary.endTime = moment.unix((itinerary.endTime) / 1000).format("DD/MM HH:mm");
+              itinerary.startTime = moment.unix((itinerary.startTime) / 1000).format("HH:mm");
+              itinerary.endTime = moment.unix((itinerary.endTime) / 1000).format("HH:mm");
               itinerary.walkDistance = this.getDistance(itinerary.walkDistance);
               itinerary.legs.forEach(leg => {
                 leg.distance = this.getDistance(leg.distance);
@@ -577,7 +583,7 @@ export class HomePage {
                     leg.icon = 'ios-add-circle-outline';
                   });
                 } else if (leg.mode == "BUS") {
-                  leg.direction = ("Get bus on " + leg.routeLongName + " at " + moment.unix((leg.startTime) / 1000).format("HH:mm") + "h and exit on " + leg.to.name);
+                  leg.direction = ("(" + (moment.unix((leg.startTime) / 1000).format("HH:mm")) + "h) Get bus on " + leg.routeLongName.split(":")[0]  + " exit on " + leg.to.name);
                   leg.showDetails = false;
                   leg.icon = 'ios-add-circle-outline';
                 } else {
@@ -828,8 +834,9 @@ export class HomePage {
     if (this.map.hasLayer(this.searchMarker)) {
       this.map.removeLayer(this.searchMarker);
     }
+    let ballon = (res.name + "<hr>" + "<button ion-fab id='filter' (click)='planningOrigin(res[0], res[1])'>GO TO</button>" + "<br>" + "<button ion-fab id='filter' (click)='planningOrigin(res[0], res[1])'>GO FROM</button>");
     this.searchMarker = L.marker(res.geometry.location, { draggable: false, icon: this.iconPlace })
-      .bindPopup(res.name)
+      .bindPopup(ballon)
       .addTo(this.map)
       .openPopup();
 

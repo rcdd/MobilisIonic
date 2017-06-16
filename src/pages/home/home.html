@@ -65,7 +65,7 @@
           <div class="label">&nbsp; Lines </div>
           <ion-icon name="list"></ion-icon>
       </button>
-      <button ion-fab id="street" (click)="toogleMapTile(fab)"> 
+      <button ion-fab id="street" (click)="toogleMapTile(fab)">
           <div class="label">&nbsp; {{chooseMap}} </div>
           <ion-icon name="map"></ion-icon>
       </button>
@@ -73,7 +73,7 @@
           <div class="label">&nbsp; Fit Markers </div>
            <ion-icon name="barcode"></ion-icon>
       </button>
-      <button ion-fab id="stops" (click)="closedStop(fab)"> 
+      <button ion-fab id="stops" (click)="closedStop(fab)">
           <div class="label">&nbsp; Closest Stop </div>
           <ion-icon name="bus"></ion-icon>
       </button>
@@ -121,9 +121,17 @@
         <div (click)="toggleDetails(d)">
           <ion-row text-wrap>
             <ion-col width-75>
-              <h1>Route {{i+1}}</h1>
-              <h6> Duration: <b>{{d.duration}}</b> <br /> Walking distance: <b>{{d.walkDistance}}</b> </h6>
-              <h6> Start: <b>{{d.startTime}}</b> <br /> End: <b>{{d.endTime}}</b> </h6>
+              <ion-row>
+                <ion-col width-10>
+              <ion-icon name="timer"></ion-icon>
+            </ion-col>
+            <ion-col width-90>
+              <h1>{{d.startTime}} -> {{d.endTime}}</h1>
+            </ion-col>
+             </ion-row>
+              <h6> Duration: <b>{{d.duration}}</b> </h6>
+                <!-- <br /> Walking distance: <b>{{d.walkDistance}}</b> </h6> -->
+              <!-- <h6> Start: <b>{{d.startTime}}</b> <br /> End: <b>{{d.endTime}}</b> </h6> -->
             </ion-col>
             <ion-col width-10>
               <ion-icon color="primary" item-right [name]="d.icon"></ion-icon>
@@ -139,7 +147,7 @@
               <ion-col width-75 text-wrap>
                 On <b>{{l.mode}}</b>: {{l.distance}}
               </ion-col>
-              <ion-col width-10>
+              <ion-col width-25>
                 <ion-icon color="primary" item-right [name]="l.icon"></ion-icon>
               </ion-col>
             </ion-row>

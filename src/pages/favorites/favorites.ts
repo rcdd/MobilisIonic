@@ -15,17 +15,20 @@ export class Favorites {
     private favoritesToShow: any = [];
     private home: any;
     constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController, public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
+
         this.dataProvider.getFavoritesFromDb().then(res => {
             this.favorites = res;
             this.favoritesToShow = this.favorites;
         });
     }
-
-    ionViewWillEnter() {
-        this.dataProvider.getFavoritesFromDb().then(res => {
-            this.favorites = res;
-            this.favoritesToShow = this.favorites;
+    
+    async ionViewWillEnter() {
+      this.dataProvider.loading = true;
+      await this.dataProvider.getFavoritesFromDb().then(res => {
+            console.dir(res);
+            return this.favorites = res;
         });
+        this.dataProvider.loading = false;
     }
 
     travelTo(fav: any) {
