@@ -72,13 +72,6 @@ export class HomePage {
     popupAnchor: [0, -35]
   });
 
-  private iconPlace = L.icon({
-    iconUrl: 'assets/img/iconPlace.png',
-    iconSize: [40, 55],
-    //iconAnchor: [-50, 45],
-    popupAnchor: [-3, -25]
-  });
-
   private iconStart = L.icon({
     iconUrl: 'assets/img/startPin.png',
     iconSize: [75, 75],
@@ -108,17 +101,20 @@ export class HomePage {
     this.planningBox.button = "down";
   }
 
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     //console.log("fav", this.dataProvider.favoriteToGo);
     if (this.dataProvider.getFavorite() != undefined) {
+      this.cancelRoute(true);
       let origin = this.dataProvider.getFavorite().origin.split(',');
       let destination = this.dataProvider.getFavorite().destination.split(',');
-      this.planningOrigin(origin[0], origin[1]);
-      this.planningDestination(destination[0], destination[1]);
-
-      // TODO: fitBound of both points
-      //this.map.fitBounds({ "_northEast": { "lat": origin[0], "lng": origin[1] }, "_southWest": { "lat": destination[0], "lng": destination[1] } });
-      this.dataProvider.setFavorite(undefined);
+      await this.planningOrigin(origin[0], origin[1]).then(a => {
+        return this.planningDestination(destination[0], destination[1]).then(a => {
+          // TODO: fitBound of both points
+          this.map.fitBounds({ "lat": origin[0], "lng": origin[1] }, { "lat": destination[0], "lng": destination[1] });
+          this.dataProvider.setFavorite(undefined);
+          return true;
+        });
+      });
     }
   }
 
@@ -194,7 +190,7 @@ export class HomePage {
     let self = this;
 
     this.map.on('click', function (e) {
-      if(!self.planningBallonOpened){
+      if (!self.planningBallonOpened) {
         self.planningBallonOpened = true;
         L.popup()
           .setContent(self.container)
@@ -208,7 +204,7 @@ export class HomePage {
         L.DomEvent.on(self.destBtn, 'click', function () {
           self.planningDestination(e.latlng.lat, e.latlng.lng);
         });
-      }else {
+      } else {
         self.planningBallonOpened = false;
       }
     });
@@ -361,61 +357,67 @@ export class HomePage {
     toast.present();
   }
 
-  planningOrigin(lat: any, lng: any) {      // ROUTING OF THE MAP
-    this.map.removeLayer(this.planning.orig);
-    this.cancelRoute(false);
-    this.planning.orig = L.marker([lat, lng], { draggable: true, icon: this.iconStart })
-      .bindPopup("Origin")
-      .addTo(this.map)
-      .on('dragend', (e) => {
-        this.planningBox.size = 50;
-        this.planningBox.button = "down";
-        this.cancelRoute(false);
-        this.planning.orig = [];
-        this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
-          this.planning.orig.text = resp;
-          this.planning.orig.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
+  async planningOrigin(lat: any, lng: any) {      // ROUTING OF THE MAP
+    return new Promise((resolve, reject) => {
+      this.map.removeLayer(this.planning.orig);
+      this.cancelRoute(false);
+      this.planning.orig = L.marker([lat, lng], { draggable: true, icon: this.iconStart })
+        .bindPopup("Origin")
+        .addTo(this.map)
+        .on('dragend', (e) => {
+          this.planningBox.size = 50;
+          this.planningBox.button = "down";
+          this.cancelRoute(false);
+          this.planning.orig.setLatLng([e.target._latlng.lat, e.target._latlng.lng]);
+          this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
+            this.planning.orig.text = resp;
+            this.planning.orig.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
+          });
         });
-      });
 
-    this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
-      this.planning.orig.text = resp;
-      this.planning.orig.latlng = (lat + ',' + lng);
+      this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
+        this.planning.orig.text = resp;
+        this.planning.orig.latlng = (lat + ',' + lng);
+      });
+      this.map.closePopup();
+      resolve(this.planning.orig);
     });
-    this.map.closePopup();
   }
 
-  planningDestination(lat: any, lng: any) {
-    this.map.removeLayer(this.planning.dest);
-    this.cancelRoute(false);
-    this.planning.dest = L.marker([lat, lng], { draggable: true, icon: this.iconDest })
-      .bindPopup("Destination")
-      .addTo(this.map)
-      .on('dragend', (e) => {
-        this.planningBox.size = 50;
-        this.planningBox.button = "down";
-        this.cancelRoute(false);
-         this.planning.dest = [];
-        this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
-          this.planning.dest.text = resp;
-          this.planning.dest.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
+  async planningDestination(lat: any, lng: any) {
+    return new Promise((resolve, reject) => {
+      this.map.removeLayer(this.planning.dest);
+      this.cancelRoute(false);
+      this.planning.dest = L.marker([lat, lng], { draggable: true, icon: this.iconDest })
+        .bindPopup("Destination")
+        .addTo(this.map)
+        .on('dragend', (e) => {
+          this.planningBox.size = 50;
+          this.planningBox.button = "down";
+          this.cancelRoute(false);
+          this.planning.dest.setLatLng([e.target._latlng.lat, e.target._latlng.lng]);
+          this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
+            this.planning.dest.text = resp;
+            this.planning.dest.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
+          });
         });
+
+      if (this.planning.orig.latlng == undefined && this.dataProvider.getFavorite() == undefined) {
+        this.dataProvider.getReverseGeoCoder(this.currentPosition.marker.getLatLng().lat, this.currentPosition.marker.getLatLng().lng).then((resp) => {
+          this.planning.orig.text = resp;
+          this.planning.orig.latlng = (this.currentPosition.marker.getLatLng().lat + ',' + this.currentPosition.marker.getLatLng().lng);
+          console.log(this.planning.orig.latlng);
+        });
+      }
+
+      this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
+        this.planning.dest.text = resp;
+        this.planning.dest.latlng = (lat + ',' + lng);
       });
 
-    if (this.planning.orig.latlng == undefined && this.dataProvider.getFavorite() == undefined) {
-      this.dataProvider.getReverseGeoCoder(this.currentPosition.marker.getLatLng().lat, this.currentPosition.marker.getLatLng().lng).then((resp) => {
-        this.planning.orig.text = resp;
-        this.planning.orig.latlng = (this.currentPosition.marker.getLatLng().lat + ',' + this.currentPosition.marker.getLatLng().lng);
-        console.log(this.planning.orig.latlng);
+      this.map.closePopup();
+      resolve(this.planning.dest);
     });
-    }
-
-    this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
-      this.planning.dest.text = resp;
-      this.planning.dest.latlng = (lat + ',' + lng);
-    });
-
-    this.map.closePopup();
   }
 
   getCurrentLocation() {
@@ -583,7 +585,7 @@ export class HomePage {
                     leg.icon = 'ios-add-circle-outline';
                   });
                 } else if (leg.mode == "BUS") {
-                  leg.direction = ("(" + (moment.unix((leg.startTime) / 1000).format("HH:mm")) + "h) Get bus on " + leg.routeLongName.split(":")[0]  + " exit on " + leg.to.name);
+                  leg.direction = ("(" + (moment.unix((leg.startTime) / 1000).format("HH:mm")) + "h) Get bus on " + leg.routeLongName.split(":")[0] + " exit on " + leg.to.name);
                   leg.showDetails = false;
                   leg.icon = 'ios-add-circle-outline';
                 } else {
@@ -834,11 +836,30 @@ export class HomePage {
     if (this.map.hasLayer(this.searchMarker)) {
       this.map.removeLayer(this.searchMarker);
     }
-    let ballon = (res.name + "<hr>" + "<button ion-fab id='filter' (click)='planningOrigin(res[0], res[1])'>GO TO</button>" + "<br>" + "<button ion-fab id='filter' (click)='planningOrigin(res[0], res[1])'>GO FROM</button>");
-    this.searchMarker = L.marker(res.geometry.location, { draggable: false, icon: this.iconPlace })
+
+    let container = L.DomUtil.create('div', 'container');
+    let startBtn = this.createButton('<img src="assets/img/originRoute.png" />&nbsp Get direction from here', container);
+    let destBtn = this.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp Get direction to here', container);
+    let self = this;
+    this.map
+
+    let ballon = (res.name + "<hr>" + container.innerHTML);
+    this.searchMarker = L.marker(res.geometry.location, {
+      draggable: false, icon:
+      L.icon({
+        iconUrl: res.icon,
+        iconSize: [35, 35],
+        //iconAnchor: [-50, 45],
+        popupAnchor: [0, -15]
+      })
+    })
       .bindPopup(ballon)
       .addTo(this.map)
       .openPopup();
+
+    L.DomEvent.on(destBtn, 'click', () => {
+      self.planningDestination(res.geometry.location.lat, res.geometry.location.lng);
+    })
 
     this.map.panTo([res.geometry.location.lat, res.geometry.location.lng]);
 

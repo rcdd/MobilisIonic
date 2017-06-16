@@ -23,8 +23,7 @@
       <ion-item *ngFor="let res of searchResults" (click)="showPlace(res)">
         <ion-row>
           <ion-col width-25>
-            <img src="{{res.icon}}" *ngIf="res.icon" />
-            <img src="assets/img/android-bus.png" *ngIf="res.icon == undefined" />
+            <img src="{{res.icon}}" />
           </ion-col>
           <ion-col text-wrap width-75>
             {{res.name}}

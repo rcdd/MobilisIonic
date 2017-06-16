@@ -21,15 +21,7 @@ export class Favorites {
             this.favoritesToShow = this.favorites;
         });
     }
-    
-    async ionViewWillEnter() {
-      this.dataProvider.loading = true;
-      await this.dataProvider.getFavoritesFromDb().then(res => {
-            console.dir(res);
-            return this.favorites = res;
-        });
-        this.dataProvider.loading = false;
-    }
+
 
     travelTo(fav: any) {
         console.dir(fav);

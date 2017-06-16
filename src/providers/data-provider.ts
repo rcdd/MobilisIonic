@@ -91,7 +91,7 @@ export class DataProvider {
                             }
                         });
                         if (!duplicate) {
-                            res.push({ "id": stop.id, "name": stop.name, "geometry": { "location": { "lat": stop.lat, "lng": stop.lon } } });
+                            res.push({ "id": stop.id, "name": stop.name, "icon": "assets/img/android-bus.png", "geometry": { "location": { "lat": stop.lat, "lng": stop.lon } } });
                         }
                     }
                 });
@@ -158,6 +158,7 @@ export class DataProvider {
                 this.innit = 80;
                 return this.getStopsFromDB().then((stops) => {
                     this.loadingText = "Loading stops...";
+                    resolve(this.stops);
                     return this.getFavoritesFromDb().then(a => {
                         this.loadingText = "Loading favorites...";
                         resolve(a);
