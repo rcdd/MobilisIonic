@@ -15,22 +15,16 @@ export class Favorites {
     private favoritesToShow: any = [];
     private currentSearch: any = "";
 
-    constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController, public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
-        /*this.dataProvider.loading = true;
-        this.dataProvider.getFavoritesFromDb().then(res => {
-            this.favorites = res;
-            this.dataProvider.loading = false;
-        });*/
+    constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
+        public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
     }
 
     ionViewWillEnter() {
-        console.log("fav", this.favorites.length);
         this.dataProvider.loading = true;
         this.dataProvider.getFavoritesFromDb().then(res => {
             if (res != null) {
                 this.favorites = res;
                 this.favoritesToShow = this.favorites;
-                console.log("fav in", this.favorites.length);
             }
             this.dataProvider.loading = false;
         });

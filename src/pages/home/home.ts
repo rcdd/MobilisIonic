@@ -127,13 +127,21 @@ export class HomePage {
         //console.log("imported stops:", this.stops);
         this.initMap();
         this.dataProvider.populateCheckBoxs();
-        this.getCurrentLocation();
 
         //Localization
         let self = this;
         this.map.on('locationerror', function (e) {
           self.allowLocation = false;
-          self.showToast('You denied localization. For better performance, please allow your location.', 3000);
+          self.showToast('You denied localization. For better performance, please allow your location. If already, please restart the app.', 5000);
+        });
+
+        this.getCurrentLocation();
+        let watch = this.geolocation.watchPosition()
+        watch.subscribe((data) => {
+          if (data.coords !== undefined) {
+            //console.log("data from watchingPosition", data);
+            this.updateCurrentLocation(data.coords);
+          }
         });
       });
     });
@@ -434,7 +442,7 @@ export class HomePage {
   }
 
   updateCurrentLocation(data): void {
-    console.log("updateLocation", data);
+    //console.log("updateLocation", data);
     var radius = (data.accuracy / 2).toFixed(1);
     var currentPosition = [data.latitude, data.longitude];
     this.currentPosition.marker.setLatLng(currentPosition);
@@ -758,7 +766,6 @@ export class HomePage {
         {
           name: "desc",
           placeholder: "Type a description."
-
         }
       ],
       buttons: [
@@ -773,14 +780,11 @@ export class HomePage {
         {
           text: 'Ok',
           handler: data => {
-            console.log(this.planning.orig.latlng + "  " + this.planning.dest.latlng);
-            console.dir(data.desc);
             if (data.desc == "" || data == undefined || data == null) {
               this.showAlert("You have to type a description", "ERROR");
 
             } else {
               this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng).then(res => {
-                //console.log(res);
                 if (res) {
                   this.showToast("Your favorite route was saved.", 3000);
                 } else {
