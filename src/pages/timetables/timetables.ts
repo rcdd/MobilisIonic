@@ -13,7 +13,7 @@ declare var moment: any;
   templateUrl: 'timetables.html',
 })
 
-@Injectable()
+@Injectable() 
 export class TimeTables {
 
   private stops: any[];

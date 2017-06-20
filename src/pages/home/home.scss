@@ -190,6 +190,7 @@ page-home {
     .searchBar {
         position: fixed;
         top:5px;
+        z-index: 50000;
 
         button{
             background-color: transparent;
@@ -199,10 +200,10 @@ page-home {
             position: fixed;
             overflow: hidden;
             top: 10px;
-            left: 88%;
-            width: 40px;
-            height: 35px;
-            margin: 10px 0 0 10px;
+            left: 85%;
+            width: 80px;
+            height: 55px;
+            padding: 8px;
 
             .img {
                 width: 40px;
