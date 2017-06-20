@@ -8,10 +8,9 @@ import { Geolocation } from '@ionic-native/geolocation';
 
 import { FabContainer } from 'ionic-angular';
 
-// import { busLines } from './busLines';
 import { DatabaseProvider } from '../../providers/database-provider';
+
 import { DataProvider } from '../../providers/data-provider';
-//import { Observable } from 'rxjs/Observable';
 
 import 'rxjs/add/operator/map';
 import 'leaflet';
@@ -781,7 +780,7 @@ export class HomePage {
 
             } else {
               this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng).then(res => {
-                console.log(res);
+                //console.log(res);
                 if (res) {
                   this.showToast("Your favorite route was saved.", 3000);
                 } else {

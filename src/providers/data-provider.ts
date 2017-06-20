@@ -19,7 +19,7 @@ export class DataProvider {
     public CheckBoxRoutes: any = [];
     public hasNetwork: boolean = null;
     public favoritesRoutes: any = [];
-    public favoriteRoute: any;
+    public favoriteToRoute: any;
 
     public test: any;
 
@@ -162,6 +162,7 @@ export class DataProvider {
                     resolve(this.stops);
                     return this.getFavoritesFromDb().then(a => {
                         this.loadingText = "Loading favorites...";
+                        this.favoritesRoutes = a;
                         resolve(a);
                     });
                 })
@@ -319,21 +320,31 @@ export class DataProvider {
         return new Promise((resolve, reject) => {
             this.db.query("SELECT * FROM FAVORITES_ROUTES")
                 .then(res => {
+                    console.log("read fav from db", res);
                     this.favoritesRoutes = [];
-                    for (var i = 0; i < Object.keys(res.rows).length; i++) {
-                        //console.log(res.rows[i].DESCRIPTION);
-                        this.favoritesRoutes.push({ description: res.rows[i].DESCRIPTION, origin: res.rows[i].ORIGIN, destination: res.rows[i].DESTINATION })
+                    if (res.rows.length > 0) {
+                        for (let i = 0; i < res.rows.length; i++) {
+                            this.favoritesRoutes.push({
+                                "description": res.rows.item(i).DESCRIPTION,
+                                "origin": res.rows.item(i).ORIGIN,
+                                "destination": res.rows.item(i).DESTINATION
+                            })
+                        }
+                        resolve(this.favoritesRoutes);
+                    } else {
+                        reject();
                     }
-                    //this.favoritesRoutes = res;
-                    resolve(this.favoritesRoutes);
                 })
                 .catch(err => {
                     console.log("Error: ", err);
+                    reject(this.favoritesRoutes);
                 });
 
         }).then(() => {
             //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
             return this.favoritesRoutes;
+        }).catch(() => {
+            return null;
         });
     }
 
@@ -343,10 +354,12 @@ export class DataProvider {
         return new Promise((resolve, reject) => {
             let possible = false;
             this.getFavoritesFromDb().then(res => {
-                for (var i = 0; i < res.length; i++) {
-                    if (this.removeAccents(res[i].description).toLowerCase().trim() == this.removeAccents(desc).toLowerCase().trim()) {
-                        console.log("EI JA EXISTE")
-                        reject(res);
+                if (res != null) {
+                    for (var i = 0; i < res.length; i++) {
+                        if (this.removeAccents(res[i].description).toLowerCase().trim() == this.removeAccents(desc).toLowerCase().trim()) {
+                            console.log("EI JA EXISTE")
+                            reject(res);
+                        }
                     }
                 }
                 resolve(res);
@@ -354,11 +367,11 @@ export class DataProvider {
 
         }).then(() => {
             this.db.query("INSERT INTO FAVORITES_ROUTES (DESCRIPTION, ORIGIN, DESTINATION) VALUES(?,?,?);", [desc, origin, destination])
-                .then(() => {
+                .then((res) => {
                     this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
-                    console.log("FAVORITO ADDED");
+                    console.log("FAVORITO ADDED", this.favoritesRoutes);
                 }).catch(err => {
-                    console.log("Error: ", err);
+                    console.log("Favorite Error: ", err);
                 });
             return true;
         }).catch(() => {
@@ -472,11 +485,11 @@ export class DataProvider {
     }
 
     public setFavorite(fav: any) {
-        this.favoriteRoute = fav;
+        this.favoriteToRoute = fav;
     }
 
     public getFavorite() {
-        return this.favoriteRoute;
+        return this.favoriteToRoute;
     }
 
     public deleteFavorite(fav: any) {
