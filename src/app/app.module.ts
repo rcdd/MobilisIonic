@@ -36,4 +36,4 @@ import { Network } from '@ionic-native/network';
   [{ provide: ErrorHandler, useClass: IonicErrorHandler },
   [SplashScreen, DatabaseProvider, NavController, DataProvider, Geolocation, Network]]
 })
-export class AppModule { }
+export class AppModule {}

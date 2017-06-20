@@ -38,7 +38,7 @@
   </div>
 
   <div *ngIf='!isVisibleSearchbar && timesToShowInList.length == 0 && dataProvider.loading == false' >
-    <ion-item style="color: red; text-align: center;"> You have to select the busLine that you want. </ion-item> 
+    <ion-item style="color: red; text-align: center;"> You have to select the busLine that you want. </ion-item>
   </div>
 
   <div class="showTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
@@ -51,7 +51,7 @@
   <div class="listTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
 
     <ion-list no-lines>
-      <button id="buttonHideShowPossible"  (click)="changeVilibilityPossibleTimes()"> Next trips  
+      <button id="buttonHideShowPossible"  (click)="changeVilibilityPossibleTimes()"> Next trips
         <div *ngIf="!possibleTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropdown"></ion-icon> </div>
         <div *ngIf="possibleTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropup"></ion-icon> </div>
         </button>
@@ -63,7 +63,7 @@
       </div>
 
 
-      <button id="buttonHideShowPassed" (click)="changeVilibilityPassedTimes()"> Other times 
+      <button id="buttonHideShowPassed" (click)="changeVilibilityPassedTimes()"> Other times
       <div *ngIf="!passedTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropdown"></ion-icon> </div>
       <div *ngIf="passedTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropup"></ion-icon> </div>
       </button>

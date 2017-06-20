@@ -1,6 +1,6 @@
 import { Component, Injectable } from '@angular/core';
 import { NavController, ToastController, AlertController } from 'ionic-angular';
-import { Http, Response } from '@angular/http';
+import { Http } from '@angular/http';
 import { DataProvider } from '../../providers/data-provider';
 import 'rxjs/add/operator/map';
 
@@ -13,18 +13,21 @@ import 'rxjs/add/operator/map';
 export class Favorites {
     private favorites: any = [];
     private favoritesToShow: any = [];
-    private home: any;
-    private currentSearch: any="";
-    constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController, public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
-        this.dataProvider.getFavoritesFromDb().then(res => {
-            this.favorites = res;
-            this.favoritesToShow = this.favorites;
-        });
+    private currentSearch: any = "";
+
+    constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
+        public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
     }
 
     ionViewWillEnter() {
-        this.favoritesToShow = this.dataProvider.favoritesRoutes;
-        this.favorites = this.dataProvider.favoritesRoutes;
+        this.dataProvider.loading = true;
+        this.dataProvider.getFavoritesFromDb().then(res => {
+            if (res != null) {
+                this.favorites = res;
+                this.favoritesToShow = this.favorites;
+            }
+            this.dataProvider.loading = false;
+        });
     }
 
     travelTo(fav: any) {
