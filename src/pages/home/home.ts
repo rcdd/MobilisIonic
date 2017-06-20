@@ -63,6 +63,8 @@ export class HomePage {
   public container: any;
   public startBtn: any;
   public destBtn: any;
+  public startBtnPop: any;
+  public destBtnPop: any;
 
 
   private iconBus = L.icon({
@@ -110,7 +112,7 @@ export class HomePage {
       await this.planningOrigin(origin[0], origin[1]).then(a => {
         return this.planningDestination(destination[0], destination[1]).then(a => {
           // TODO: fitBound of both points
-          this.map.fitBounds({ "lat": origin[0], "lng": origin[1] }, { "lat": destination[0], "lng": destination[1] });
+          //this.map.fitBounds({ "lat": origin[0], "lng": origin[1] }, { "lat": destination[0], "lng": destination[1] });
           this.dataProvider.setFavorite(undefined);
           return true;
         });
@@ -487,7 +489,7 @@ export class HomePage {
             console.dir(data);
             this.markers = [];
             this.dataProvider.CheckBoxRoutes.forEach(line => {
-              //console.log("data from checkbox:", line);
+              console.log("data from checkbox:", line);
               line.checked = true;
               line.value.stops.forEach(stop => {
                 let existMarker: boolean = false;
@@ -844,10 +846,9 @@ export class HomePage {
     }
 
     let container = L.DomUtil.create('div', 'container');
-    let startBtn = this.createButton('<img src="assets/img/originRoute.png" />&nbsp Get direction from here', container);
-    let destBtn = this.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp Get direction to here', container);
+    this.startBtnPop = this.createButton('<img src="assets/img/originRoute.png" />&nbsp direction from here', container);
+    this.destBtnPop = this.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp direction to here', container);
     let self = this;
-    this.map
 
     let ballon = (res.name + "<hr>" + container.innerHTML);
     this.searchMarker = L.marker(res.geometry.location, {
@@ -862,13 +863,18 @@ export class HomePage {
       .bindPopup(ballon)
       .addTo(this.map)
       .openPopup();
-
-    L.DomEvent.on(destBtn, 'click', () => {
+      console.log("TOUUUU");
+    L.DomEvent.on(this.startBtnPop, 'click', () => {
       self.planningDestination(res.geometry.location.lat, res.geometry.location.lng);
-    })
+    });
+    
+    L.DomEvent.on(this.destBtnPop, 'click', () => {
+      self.planningOrigin(res.geometry.location.lat, res.geometry.location.lng);
+    });
 
     this.map.panTo([res.geometry.location.lat, res.geometry.location.lng]);
 
     this.toogleSearchBox();
+    console.log("FUII");
   }
 }
