@@ -1,8 +1,6 @@
 $darkBlue: #03396c;
 $lightBlue: #005b96;
-
 page-favorites {
-
     ion-header {
         position: absolute;
         color: white;
@@ -12,31 +10,43 @@ page-favorites {
         font-size: 30px;
         padding-left: 10px;
         padding-top: 10px;
-
         .row {
             flex: wrap;
             height: 50px;
             padding-top: 10px;
         }
-
-        .searchBar{
-        display: flex;
-        width: 100%;
+        .searchBar {
+            display: flex;
+            width: 100%;
+        }
     }
-    }
-
-    .toolbar  {
+    .toolbar {
         background-color: transparent;
     }
-    
-    
-    
-
     .listFavorites {
+        position: relative;
+        width: 100%;
+        .item {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            padding: 5px;
+            border-bottom: 1px solid lightgrey;
+            .btnFav {
+                position: relative;
+                left: 5px;
+                width: 75%;
+            }
+            .btnDel {
+                position: relative;
+                margin-left: 5px;
+                width: 20%;
+            }
+        }
         .label {
             display: inherit;
             width: 100%;
             height: 100%;
-        }  
+        }
     }
 }

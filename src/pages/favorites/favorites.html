@@ -1,20 +1,19 @@
-<ion-header >
-    <div class="searchBar" *ngIf="favorites.length != 0">
-      <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
-    </div>
-    <ion-row *ngIf="favorites.length == 0"> Favorites </ion-row>
+<ion-header>
+  <div class="searchBar" *ngIf="favorites.length != 0">
+    <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
+  </div>
+  <ion-row *ngIf="favorites.length == 0"> Favorites </ion-row>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
 
-  <ion-item *ngIf="favoritesToShow.length == 0 && favorites.length == 0" style="color: red"> You don't have any favorites </ion-item>
-  <ion-list class="listFavorites">
-     <ion-item *ngIf="favoritesToShow.length == 0 && favorites.length != 0" style="color: red"> No results found </ion-item>
-    <ion-item id="item" *ngFor="let fav of favoritesToShow">
-      <button ion-button block color="light" (click)="travelTo(fav)">
-      {{ fav.description }} 
-    </button>
-      <button ion-button color="danger" (click)="deleteFav(fav)">Delete</button>
-    </ion-item>
-  </ion-list>
+  <div *ngIf="favoritesToShow.length == 0 && favorites.length == 0" style="color: red"> You don't have any favorites </div>
+
+  <div class="listFavorites">
+    <div *ngIf="favoritesToShow.length == 0 && favorites.length != 0" style="color: red"> No results found </div>
+    <div class="item" *ngFor="let fav of favoritesToShow">
+      <button ion-button text-wrap class="btnFav" color="light" (click)="travelTo(fav)"> {{ fav.description }} </button>
+      <button ion-button class="btnDel" color="danger" (click)="deleteFav(fav)">Delete</button>
+    </div>
+  </div>
 </ion-content>

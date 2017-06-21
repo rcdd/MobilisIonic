@@ -239,7 +239,10 @@ export class DataProvider {
         if (this.hasNetwork) {
             let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`).toPromise();
             for (let route of resp.json()) {
-                //console.log("sdfsdf", route);
+                console.log("Routes", route);
+                if (route.shortName == undefined) {
+                    route.shortName = 'Mob.Tour';
+                }
                 this.lines.push(route);
                 this.innit += 5;
             }
