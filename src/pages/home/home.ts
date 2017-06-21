@@ -62,6 +62,8 @@ export class HomePage {
   public container: any;
   public startBtn: any;
   public destBtn: any;
+  public startBtnPop: any;
+  public destBtnPop: any;
 
 
   private iconBus = L.icon({
@@ -905,16 +907,26 @@ export class HomePage {
       .openPopup();
 
     let self = this;
+    L.DomEvent.on(this.startBtnPop, 'click', () => {
+      self.planningDestination(res.geometry.location.lat, res.geometry.location.lng);
+    });
+
+    L.DomEvent.on(this.destBtnPop, 'click', () => {
+      self.planningOrigin(res.geometry.location.lat, res.geometry.location.lng);
+    });
+
+    /*let self = this;
     L.DomEvent.on(this.startBtn, 'click', function () {
       self.planningOrigin(res.geometry.location.lat, res.geometry.location.lng);
     });
 
     L.DomEvent.on(this.destBtn, 'click', function () {
       self.planningDestination(res.geometry.location.lat, res.geometry.location.lng);
-    });
+    });*/
 
     this.map.panTo([res.geometry.location.lat, res.geometry.location.lng]);
 
     this.toogleSearchBox();
+    console.log("FUII");
   }
 }
