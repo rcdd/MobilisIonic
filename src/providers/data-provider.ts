@@ -318,7 +318,7 @@ export class DataProvider {
     }
 
     async createStorageFavoritesRoutes() {
-        //await this.DBDropTable("FAVORITES_ROUTES");
+        await this.DBDropTable("FAVORITES_ROUTES");
 
         await this.db.query("CREATE TABLE IF NOT EXISTS FAVORITES_ROUTES (DESCRIPTION TEXT, ORIGIN TEXT, DESTINATION TEXT)")
             .then(res => {
