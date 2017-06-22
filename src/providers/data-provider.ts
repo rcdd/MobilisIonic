@@ -353,9 +353,7 @@ export class DataProvider {
 
 
     async  createFavoriteRoute(desc: string, origin: string, destination: string) {
-        console.log(origin + "     " + destination);
         return new Promise((resolve, reject) => {
-            let possible = false;
             this.getFavoritesFromDb().then(res => {
                 if (res != null) {
                     for (var i = 0; i < res.length; i++) {

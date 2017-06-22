@@ -61,9 +61,8 @@ export class HomePage {
   public route: any;
   public container: any;
   public startBtn: any;
+  public favBtn: any;
   public destBtn: any;
-  public startBtnPop: any;
-  public destBtnPop: any;
 
 
   private iconBus = L.icon({
@@ -285,11 +284,12 @@ export class HomePage {
 
   }
 
-  createBallon(text: string) {
+  createBallon(text: string, fav: boolean = false) {
     this.container = L.DomUtil.create('div', 'container');
     this.container.innerHTML = text;
-    this.startBtn = this.createButton('<img src="assets/img/originRoute.png" />&nbsp From here', this.container);
-    this.destBtn = this.createButton(' <img src="assets/img/destinationRoute.png" />&nbsp To here', this.container);
+    this.startBtn = this.createButton('<div class="btnNavStart"><img src="assets/img/originRoute.png" /><div class="label"> Start </div></div>', this.container);
+    this.favBtn = this.createButton('<div class="btnNavFav"><img src="assets/img/' + (fav ? "starFull" : "starEmpty") + '.png" /></div>', this.container);
+    this.destBtn = this.createButton('<div class="btnNavEnd"><img class="btnNavEnd" src="assets/img/destinationRoute.png" /><div class="label"> Finish </div></div>', this.container);
   }
 
   // FIT MARKERS
@@ -466,21 +466,23 @@ export class HomePage {
       this.markers.forEach(stop => {
         if (this.allowLocation == true) {
           stop.meters = this.currentPosition.marker.getLatLng().distanceTo([stop.lat, stop.lon]);
-          stop.message = "Distance: " + this.getDistance(stop.meters);
+          stop.message = '<img class="distanceImg" src="assets/img/iconDistance.png" /> Distance: ' + this.getDistance(stop.meters);
         } else {
           stop.message = '';
         }
-        let popUp = '<h6>' + stop.id.split(":")[1] + " - " + stop.name + '</h6><hr>' + stop.message + '<br>Lines:';
+        let popUp = '<div class="header"><div class="stopImg"><img src="assets/img/android-bus.png" /></div><div class="stopLabel"><b>' + stop.id.split(":")[1] + " - " + stop.name + '</b></div></div><hr>';
+        popUp += stop.message + '<hr> <div class="linesDiv"> <div class="labelLines"><b>Lines:</b></div>';
         stop.lines.forEach(line => {
-          popUp += '<br>Line ' + line;
+          popUp += '<br> <div class="lineItem"> <img class="lineImg" src="assets/img/iconLines.png" />Line ' + line + "</div>";
         });
+        popUp += "</div>"
         let popUpOptions =
           {
             'className': 'custom'
           }
 
-        this.createBallon(popUp + "<hr>");
-        new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, meters: stop.meters, message: stop.message, title: stop.name })
+        this.createBallon(popUp + "<hr>", (stop.favorite ? true : false));
+        let marker = new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, meters: stop.meters, message: stop.message, title: stop.name })
           .bindPopup(this.container, popUpOptions)
           .on('click', function (e) {
             this.openPopup();
@@ -489,6 +491,15 @@ export class HomePage {
         let self = this;
         L.DomEvent.on(this.startBtn, 'click', function () {
           self.planningOrigin(stop.lat, stop.lon);
+        });
+
+        L.DomEvent.on(this.favBtn, 'click', function () {
+          stop.favorite = true;
+          /*self.createBallon(popUp + "<hr>", (stop.favorite ? true : false));
+          new L.marker([stop.lat, stop.lon], { icon: self.iconBus, id: stop.id, meters: stop.meters, message: stop.message, title: stop.name })
+            .bindPopup(self.container, popUpOptions)
+            .openPopup()
+            .addTo(self.markersCluster);*/
         });
 
         L.DomEvent.on(this.destBtn, 'click', function () {
@@ -835,7 +846,6 @@ export class HomePage {
                   this.showAlert("This favorite name already exists", "ERROR");
                 }
               });
-
             }
           }
         }
@@ -907,26 +917,16 @@ export class HomePage {
       .openPopup();
 
     let self = this;
-    L.DomEvent.on(this.startBtnPop, 'click', () => {
+    L.DomEvent.on(this.startBtn, 'click', () => {
       self.planningDestination(res.geometry.location.lat, res.geometry.location.lng);
     });
 
-    L.DomEvent.on(this.destBtnPop, 'click', () => {
+    L.DomEvent.on(this.destBtn, 'click', () => {
       self.planningOrigin(res.geometry.location.lat, res.geometry.location.lng);
     });
-
-    /*let self = this;
-    L.DomEvent.on(this.startBtn, 'click', function () {
-      self.planningOrigin(res.geometry.location.lat, res.geometry.location.lng);
-    });
-
-    L.DomEvent.on(this.destBtn, 'click', function () {
-      self.planningDestination(res.geometry.location.lat, res.geometry.location.lng);
-    });*/
 
     this.map.panTo([res.geometry.location.lat, res.geometry.location.lng]);
 
     this.toogleSearchBox();
-    console.log("FUII");
   }
 }

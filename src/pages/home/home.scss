@@ -1,6 +1,5 @@
 $darkBlue: #03396c;
 $lightBlue: #005b96;
-
 page-home {
     ion-header {
         position: absolute;
@@ -11,35 +10,29 @@ page-home {
         font-size: 30px;
         padding-left: 10px;
         padding-top: 10px;
-
         .row {
             flex: wrap;
             height: 50px;
             padding-top: 10px;
         }
-
         .logo img {
             height: 30px;
         }
     }
-
-    ion-content{
+    ion-content {
         position: absolute;
     }
-
     #mapid {
         position: absolute;
         width: 100%;
         height: 100%;
     }
-
     .busLineWindow {
         position: relative;
         width: 100%;
         height: 100%;
-        background-color: rgba(0,0,0,0.3);
+        background-color: rgba(0, 0, 0, 0.3);
         z-index: 1000;
-
         .busLine {
             position: relative;
             top: 20%;
@@ -47,52 +40,134 @@ page-home {
             width: 70%;
             height: 60%;
             z-index: 1000;
-
-            .lines{
+            .lines {
                 position: fixed;
                 overflow: auto;
                 max-height: 60%;
                 width: 60%;
                 border: 1px solid black;
                 border-radius: 15px;
-
-                ion-label{
+                ion-label {
+                    font-size: 12px;
+                }
+            }
+        }
+    } //long press container
+    .leaflet-container a.leaflet-popup-close-button {
+        width: 30px;
+        height: 30px;
+        color: grey;
+        padding: 0px 0px 0px 10px;
+        z-index: 2;
+    }
+    .leaflet-popup-content-wrapper {
+        position: relative;
+        background-color: white;
+        .leaflet-popup-content {
+            position: relative;
+            margin: -10px;
+            width: 300px !important;
+            padding: 15px;
+            text-align: center;
+            .header {
+                position: relative;
+                display: inline-flex;
+                .stopImg {
+                    position: relative;
+                    width: 20px;
+                    margin-right: 10px;
+                }
+                .stopLabel {
+                    position: relative;
+                    top: 3px;
+                }
+            }
+            .distanceImg {
+                width: 20px;
+            }
+            .linesDiv {
+                position: relative;
+                display: inline-block;
+                text-align: initial;
+                .labelLines {
+                    position: relative;
+                    bottom: -10px;
+                    font-size: 15px;
+                }
+            }
+            .lineItem {
+                display: inline-block;
+                height: 20px;
+                margin: -5px;
+                position: relative;
+                left: 3px;
+                .lineImg {
+                    left: 0;
+                    width: 50px;
+                }
+            }
+            button {
+                color: white;
+                background-color: transparent;
+            }
+            .btnNavStart {
+                display: inline-flex;
+                height: 30px;
+                width: 100px;
+                background-color: #0e720f;
+                img {
+                    position: relative;
+                    width: 20px;
+                    height: 20px;
+                    top: 14%;
+                    margin-right: 10px;
+                    margin-left: 10px;
+                }
+                .label {
+                    position: relative;
+                    top: 25%;
+                    left: 10%;
+                    font-size: 12px;
+                }
+            }
+            .btnNavFav {
+                display: inline-flex;
+                height: 30px;
+                width: 30px;
+                img {
+                    position: relative;
+                    width: 30px;
+                    height: 30px;
+                    top: 25%;
+                }
+            }
+            .btnNavEnd {
+                display: inline-flex;
+                height: 30px;
+                width: 100px;
+                background-color: #a70f0f;
+                img {
+                    position: relative;
+                    width: 20px;
+                    height: 20px;
+                    top: 14%;
+                    margin-right: 10px;
+                    margin-left: 10px;
+                }
+                .label {
+                    position: relative;
+                    top: 25%;
+                    left: 10%;
                     font-size: 12px;
                 }
             }
         }
     }
-
-//long press container
-    .leaflet-popup-content-wrapper {
-            background-color: white;
-        .leaflet-popup-content {
-            margin: -10px;
-            width: 220px !important;
-            padding: 15px;
-            text-align: center;
-            button{
-                display: inline-flex;
-                color: white;
-                text-align: center;
-                padding: 5px 10px;
-                background-color: #005b96;
-                border: 1px solid #03396c;
-                border-radius: 15px;
-                margin: 3px;
-            }
-            img{
-                width: 20px;
-            }
-        }
-    }
-
     .labelBusStop {
         position: absolute;
         width: auto;
-        font-size:14px;
+        font-size: 14px;
     }
-
     #debug {
         position: absolute;
         top: 10px;
@@ -101,59 +176,56 @@ page-home {
         background-color: white;
         z-index: 2000;
     }
-
     #planning {
-        position: fixed;
-        //bottom: 50px;
+        position: fixed; //bottom: 50px;
         padding: 10px;
         width: 100%;
         font-size: 10px;
         z-index: 1000;
-        background-color:	#005b96;
+        background-color: #005b96;
         animation: fadeIn 0.3s;
         box-shadow: 0px -5px 3px #03396c;
     }
-
-
     @-webkit-keyframes fadeIn {
-        from { bottom: -100px; }
-        to { bottom: 55px; }
+        from {
+            bottom: -100px;
+        }
+        to {
+            bottom: 55px;
+        }
     }
     @keyframes fadeIn {
-        from { bottom: -100px; }
-        to { bottom: 55px; }
+        from {
+            bottom: -100px;
+        }
+        to {
+            bottom: 55px;
+        }
     }
-
     #planning .buttonTop {
         position: absolute;
         top: -25px;
         left: 45%;
     }
-
-    #planning .left{
+    #planning .left {
         position: relative;
         display: grid;
         float: left;
         width: 60%;
         left: 0px;
         margin-right: 5px;
-
-        .origin{
+        .origin {
             padding: 10px;
-
         }
         .dest {
             padding: 10px;
-
         }
-
-        label{
-                font-size: 16px;
-                margin-bottom: 10px;
-                color: #6497b1;
+        label {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #6497b1;
         }
-
-        input{
+        input {
             position: relative;
             margin-top: 10px;
             margin-left: 5px;
@@ -162,41 +234,32 @@ page-home {
             width: 100%;
         }
     }
-
-    #planning .right{
+    #planning .right {
         position: relative;
         height: 100%;
         width: 30%;
         top: 10px;
         display: grid;
         float: right;
-
-        .button{
+        .button {
             position: relative;
             max-width: 100px;
         }
-
         .cancel {
             background-color: red;
         }
-
     }
-
     .leaflet-control-container .leaflet-routing-container-hide {
         display: none;
-    }
-
-    // Search CSS
+    } // Search CSS
     .searchBar {
         position: fixed;
-        top:5px;
+        top: 5px;
         z-index: 50000;
-
-        button{
+        button {
             background-color: transparent;
         }
-
-        .searchButton{
+        .searchButton {
             position: fixed;
             overflow: hidden;
             top: 10px;
@@ -204,14 +267,11 @@ page-home {
             width: 80px;
             height: 55px;
             padding: 8px;
-
             .img {
                 width: 40px;
                 height: 35px;
             }
-
         }
-
         .searchInput {
             position: fixed;
             height: 50px;
@@ -223,17 +283,23 @@ page-home {
             background-color: $darkBlue;
             font-size: 18px;
             animation: fadeLeft 0.3s;
-
             @-webkit-keyframes fadeLeft {
-                from { left: 100%; }
-                to { left: 0%; }
+                from {
+                    left: 100%;
+                }
+                to {
+                    left: 0%;
+                }
             }
             @keyframes fadeLeft {
-                from { left: 100%; }
-                to { left: 0%; }
+                from {
+                    left: 100%;
+                }
+                to {
+                    left: 0%;
+                }
             }
-
-            input{
+            input {
                 height: 100%;
                 width: 100%;
                 padding: 10px;
@@ -242,9 +308,7 @@ page-home {
             }
         }
     }
-
-
-    .searchResultList{
+    .searchResultList {
         position: fixed;
         width: 100%;
         max-height: 55%;
@@ -252,101 +316,83 @@ page-home {
         z-index: 1001;
         box-shadow: 0px 3px 10px 3px #03396c;
         background-color: white;
-
         .item-md {
             font-size: 14px;
         }
-
         img {
             width: 35px;
             height: 35px;
         }
-
-    }
-
-    // LOADING BAR
-
-
-/* ========================================================
+    } // LOADING BAR
+    /* ========================================================
   Progress Bar
 ======================================================== */
-.progress {
-    overflow: hidden;
-    position: absolute;
-    top:15%;
-    margin: 10px 2%;
-    padding: 3px;
-    text-align: center;
-    background-color: transparent;
-    //border: 1px solid #dcdcdc;
-    color: black;
-    //border-radius: 20px;
-    text-align: center;
-    vertical-align: middle;
-    z-index: 2000;
-}
-
-.progress img{
-    width: 50%;
-    animation: bounce 2s infinite;
-}
-
-
-@-webkit-keyframes bounce {
-    0% {
-        transform: scale(1.0);
-        opacity: 1;
+    .progress {
+        overflow: hidden;
+        position: absolute;
+        top: 15%;
+        margin: 10px 2%;
+        padding: 3px;
+        text-align: center;
+        background-color: transparent; //border: 1px solid #dcdcdc;
+        color: black; //border-radius: 20px;
+        text-align: center;
+        vertical-align: middle;
+        z-index: 2000;
     }
-    50% {
-        transform: scale(0.8);
-        opacity: 0.7;
+    .progress img {
+        width: 50%;
+        animation: bounce 2s infinite;
     }
-    100% {
-        transform: scale(1.0);
-        opacity: 1;
+    @-webkit-keyframes bounce {
+        0% {
+            transform: scale(1.0);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(0.8);
+            opacity: 0.7;
+        }
+        100% {
+            transform: scale(1.0);
+            opacity: 1;
+        }
     }
-}
-@keyframes bounce {
-    0% {
-        transform: scale(1.0);
-        opacity: 1;
+    @keyframes bounce {
+        0% {
+            transform: scale(1.0);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(0.8);
+            opacity: 0.7;
+        }
+        100% {
+            transform: scale(1.0);
+            opacity: 1;
+        }
     }
-    50% {
-        transform: scale(0.8);
-        opacity: 0.7;
+    .progress-bar {
+        color: #fff;
+        min-width: 15%; //max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        padding: 5px;
+        border-radius: 20px;
+        background-color: map-get($colors, primary);
     }
-    100% {
-        transform: scale(1.0);
-        opacity: 1;
-    }
-}
-
-.progress-bar {
-    color: #fff;
-    min-width: 15%;
-    //max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    padding: 5px;
-    border-radius: 20px;
-    background-color: map-get($colors, primary);
-}
-
-/* ========================================================
+    /* ========================================================
   Acordeon
 ======================================================== */
-    #routing{
-        position: absolute;
-        //top: 21px;
+    #routing {
+        position: absolute; //top: 21px;
         width: 100%;
         height: 100%;
         z-index: 3000;
         overflow: auto;
         background-color: white;
-
     }
-
-    #routing ion-list-header{
+    #routing ion-list-header {
         position: fixed;
         margin-bottom: 0px;
         background-color: white;
@@ -356,12 +402,10 @@ page-home {
         background-color: $lightBlue;
         box-shadow: 0px 5px 2px #03396c;
     }
-
     #routing ion-list {
         position: relative;
         padding: 0;
         top: 40px;
-
         ion-item {
             width: auto;
             position: relative;
@@ -369,40 +413,31 @@ page-home {
             white-space: normal;
             text-align: justify;
             text-transform: none;
-            font-size: 16px;
-            //padding: 1em 0;
+            font-size: 16px; //padding: 1em 0;
             white-space: normal;
             text-align: justify;
-
             .subItemLegs {
                 height: auto;
                 padding-left: 10px;
-
                 ion-row.row {
                     height: 30px;
                     margin: 5px;
                 }
-
                 ion-icon {
-                  top:-10px;
+                    top: -10px;
                 }
             }
-
-            .subItemSteps{
+            .subItemSteps {
                 height: auto;
                 padding-left: 20px;
             }
-
         }
-
-
-
         ion-label {
-        div {
-            z-index: 5000;
+            div {
+                z-index: 5000;
+            }
         }
-        }
-        ion-icon  {
+        ion-icon {
             font-size: 3rem;
             padding: 0em 0;
             text-align: center;
@@ -414,7 +449,7 @@ page-home {
             }
         }
     }
-    #routing .cancelButton{
+    #routing .cancelButton {
         position: fixed;
         width: 100%;
         height: 50px;
@@ -424,10 +459,8 @@ page-home {
         background-color: transparent;
         z-index: 20;
     }
-
     .fab {
-        position: relative;
-        //display: block;
+        position: relative; //display: block;
         overflow: hidden;
         width: 56px;
         height: 56px;
@@ -439,7 +472,6 @@ page-home {
         text-transform: none;
         white-space: nowrap;
     }
-
     .fab-in-list {
         width: 120px;
         height: 40px;
@@ -449,8 +481,6 @@ page-home {
         transform: scale(0);
         margin-left: -100%;
     }
-
-
     .fab ion-icon {
         position: absolute;
         left: 75%;
@@ -458,7 +488,6 @@ page-home {
         -ms-flex: 1;
         flex: 1;
     }
-
     .fab .label {
         position: absolute;
         float: right;
@@ -468,7 +497,6 @@ page-home {
         flex: 1;
         font-size: 14px;
     }
-
     .fab .ion-md-add:before {
         content: "\f273";
         position: relative;
@@ -479,5 +507,4 @@ page-home {
         position: relative;
         left: -15px;
     }
-
 }
