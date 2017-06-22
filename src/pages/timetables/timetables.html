@@ -37,7 +37,7 @@
       </button>
   </div>
 
-  <div *ngIf='!isVisibleSearchbar && timesToShowInList.length == 0 && dataProvider.loading == false' >
+  <div *ngIf='!isVisibleSearchbar && timesToShowInList.length == 0 && dataProvider.loading == false'  >
     <ion-item style="color: red; text-align: center;"> You have to select the busLine that you want. </ion-item>
   </div>
 
@@ -79,7 +79,7 @@
 
   <div class="notTimeAvailable" *ngIf='timesToShowInList.length==0 && isVisible'>
     <ion-row>
-      <h2> Not stops time available at this date: <br> {{selectedDate | date: 'yyyy-MMMM-dd'}} </h2>
+      <h2> Not stopstime available at this date: <br> {{selectedDate | date: 'yyyy-MMMM-dd'}} </h2>
     </ion-row>
   </div>
 
