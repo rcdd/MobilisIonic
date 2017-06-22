@@ -239,7 +239,10 @@ export class DataProvider {
         if (this.hasNetwork) {
             let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`).toPromise();
             for (let route of resp.json()) {
-                //console.log("sdfsdf", route);
+                console.log("Routes", route);
+                if (route.shortName == undefined) {
+                    route.shortName = 'Mob.Tour';
+                }
                 this.lines.push(route);
                 this.innit += 5;
             }
@@ -350,9 +353,7 @@ export class DataProvider {
 
 
     async  createFavoriteRoute(desc: string, origin: string, destination: string) {
-        console.log(origin + "     " + destination);
         return new Promise((resolve, reject) => {
-            let possible = false;
             this.getFavoritesFromDb().then(res => {
                 if (res != null) {
                     for (var i = 0; i < res.length; i++) {
