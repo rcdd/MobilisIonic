@@ -23,6 +23,15 @@ page-favorites {
     .toolbar {
         background-color: transparent;
     }
+    .noFav {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        text-align: center;
+        font-size: 18px;
+        padding: 20px;
+        color: red;
+    }
     .listFavorites {
         position: relative;
         width: 100%;
@@ -35,12 +44,17 @@ page-favorites {
             .btnFav {
                 position: relative;
                 left: 5px;
-                width: 75%;
+                width: 65%;
             }
             .btnDel {
                 position: relative;
                 margin-left: 5px;
                 width: 20%;
+            }
+            .imgFav {
+                position: relative;
+                width: 30px;
+                top: 15px;
             }
         }
         .label {

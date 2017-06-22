@@ -12,6 +12,7 @@ import { NavController } from 'ionic-angular';
 import { DataProvider } from '../providers/data-provider';
 import { Geolocation } from '@ionic-native/geolocation';
 import { Network } from '@ionic-native/network';
+import { Keyboard } from "@ionic-native/keyboard";
 
 @NgModule({
   declarations: [
@@ -34,6 +35,6 @@ import { Network } from '@ionic-native/network';
   ],
   providers:
   [{ provide: ErrorHandler, useClass: IonicErrorHandler },
-  [SplashScreen, DatabaseProvider, NavController, DataProvider, Geolocation, Network]]
+  [SplashScreen, DatabaseProvider, NavController, DataProvider, Geolocation, Network, Keyboard]]
 })
-export class AppModule {}
+export class AppModule { }

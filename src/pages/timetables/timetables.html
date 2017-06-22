@@ -31,13 +31,16 @@
 
 <ion-content>
 
-  <div *ngIf='isVisibleSearchbar' class="listStops">
+  <div *ngIf='isVisibleSearchbar && stopsToShow.length > 0' class="listStops">
     <button ion-button block color="light" (click)="showTimes(stop)" *ngFor="let stop of stopsToShow">
        <div text-wrap> {{ stop.name }} </div>
       </button>
   </div>
 
-  <div *ngIf='!isVisibleSearchbar && timesToShowInList.length == 0 && dataProvider.loading == false' >
+  <div *ngIf='isVisibleSearchbar && stopsToShow.length <= 0' class="listStopsEmpty">
+    <span>No bus stop found!</span>
+  </div>
+  <div *ngIf='!isVisibleSearchbar && !isVisible && timesToShowInList.length == 0 && dataProvider.loading == false'>
     <ion-item style="color: red; text-align: center;"> You have to select the busLine that you want. </ion-item>
   </div>
 
@@ -51,13 +54,13 @@
   <div class="listTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
 
     <ion-list no-lines>
-      <button id="buttonHideShowPossible"  (click)="changeVilibilityPossibleTimes()"> Next trips
+      <button id="buttonHideShowPossible" (click)="changeVilibilityPossibleTimes()"> Next trips
         <div *ngIf="!possibleTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropdown"></ion-icon> </div>
         <div *ngIf="possibleTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropup"></ion-icon> </div>
         </button>
       <ion-item style="color: red" *ngIf='possibleTimes == [] || possibleTimes.length == 0'> No timetables available </ion-item>
       <div *ngIf="possibleTimesVisible">
-        <ion-item *ngFor="let time of possibleTimes" >
+        <ion-item *ngFor="let time of possibleTimes">
           <b>{{time | date: 'dd/MM HH:mm'}}</b>
         </ion-item>
       </div>
@@ -68,10 +71,10 @@
       <div *ngIf="passedTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropup"></ion-icon> </div>
       </button>
       <div *ngIf="passedTimesVisible">
-      <ion-item style="color: green" *ngIf='passedTimes == [] || passedTimes.length == 0'> All timetables are available </ion-item>
-      <ion-item *ngFor="let time of passedTimes">
-        {{time | date: 'dd/MM HH:mm'}}
-      </ion-item>
+        <ion-item style="color: green" *ngIf='passedTimes == [] || passedTimes.length == 0'> All timetables are available </ion-item>
+        <ion-item *ngFor="let time of passedTimes">
+          {{time | date: 'dd/MM HH:mm'}}
+        </ion-item>
       </div>
 
     </ion-list>

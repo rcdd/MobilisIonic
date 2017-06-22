@@ -11,7 +11,8 @@ import 'rxjs/add/operator/map';
 
 @Injectable()
 export class Favorites {
-    private favorites: any = [];
+    private favoritesRoutes: any = [];
+    private favoritesPlaces: any = [];
     private favoritesToShow: any = [];
     private currentSearch: any = "";
 
@@ -21,22 +22,36 @@ export class Favorites {
 
     ionViewWillEnter() {
         this.dataProvider.loading = true;
-        this.dataProvider.getFavoritesFromDb().then(res => {
+        this.favoritesToShow = [];
+        this.dataProvider.getFavoritesRoutesFromDb().then(res => {
             if (res != null) {
-                this.favorites = res;
-                this.favoritesToShow = this.favorites;
+                this.favoritesRoutes = res;
+                this.favoritesToShow.routes = this.favoritesRoutes;
             }
-            this.dataProvider.loading = false;
+        }).then(() => {
+            this.dataProvider.getFavoritesPlacesFromDb().then(res => {
+                if (res != null) {
+                    this.favoritesPlaces = res;
+                    this.favoritesToShow.places = this.favoritesPlaces;
+                }
+                this.dataProvider.loading = false;
+            })
         });
     }
 
-    travelTo(fav: any) {
+    travelToRoute(fav: any) {
         console.dir(fav);
-        this.dataProvider.setFavorite(fav);
+        this.dataProvider.setFavoriteRoute(fav);
         this.navCtrl.parent.select(0);
     }
 
-    deleteFav(fav: any) {
+    travelToPlace(fav: any) {
+        console.dir(fav);
+        this.dataProvider.setFavoritePlace(fav);
+        this.navCtrl.parent.select(0);
+    }
+
+    deleteFav(fav: any, route: boolean = true) {
         let alert = this.alertCtrl.create({
             title: "Delete Favorite",
             subTitle: "Are you sure you want to delete " + fav.description + "?",
@@ -44,13 +59,24 @@ export class Favorites {
                 text: 'Yes',
                 role: 'ok',
                 handler: data => {
-                    this.dataProvider.deleteFavorite(fav);
-                    let index: number = this.favoritesToShow.indexOf(fav);
-                    if (index !== -1) {
-                        this.favoritesToShow.splice(index, 1);
+                    if (route) {
+                        this.dataProvider.deleteFavoriteRoute(fav);
+                        let index: number = this.favoritesToShow.routes.indexOf(fav);
+                        if (index !== -1) {
+                            this.favoritesToShow.routes.splice(index, 1);
+                        }
+                        this.showToast("Your favorite was deleted", 3000);
+                        alert.dismiss();
+                    } else {
+                        this.dataProvider.deleteFavoritePlace(fav);
+                        let index: number = this.favoritesToShow.places.indexOf(fav);
+                        if (index !== -1) {
+                            this.favoritesToShow.places.splice(index, 1);
+                        }
+                        this.showToast("Your favorite was deleted", 3000);
+                        alert.dismiss();
                     }
-                    this.showToast("Your favorite was deleted", 3000);
-                    alert.dismiss();
+
                 }
             }, {
                 text: 'Cancel',
@@ -87,23 +113,21 @@ export class Favorites {
         this.resetNamesFavorites();
 
         if (val && val.trim() != '') {
-            this.favoritesToShow = this.favorites.filter((item) => {
-                let favAccents = this.removeAccents(item.description).toLowerCase().indexOf(val.toLowerCase()) > -1;
-                let favNoAccents = item.description.toLowerCase().indexOf(val.toLowerCase()) > -1;
-                if (favAccents) {
-                    return favAccents;
-                } else {
-                    return favNoAccents;
-                }
-            })
+            this.favoritesToShow.routes = this.favoritesRoutes.filter((item) => {
+                return this.removeAccents(item.description).toLowerCase().indexOf(this.removeAccents(val).toLowerCase()) > -1;
+            });
+            this.favoritesToShow.places = this.favoritesPlaces.filter((item) => {
+                return this.removeAccents(item.description).toLowerCase().indexOf(this.removeAccents(val).toLowerCase()) > -1;
+            });
         }
     }
 
     resetNamesFavorites() {
-        this.favoritesToShow = [];
-        for (var i = 0; i < Object.keys(this.favorites).length; i++) {
-            this.favoritesToShow.push(this.favorites[i]);
-        }
+        this.favoritesToShow.routes = [];
+        this.favoritesToShow.routes = this.favoritesRoutes;
+        this.favoritesToShow.places = [];
+        this.favoritesToShow.places = this.favoritesPlaces;
+
     }
 
     removeAccents(value) {

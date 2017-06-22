@@ -13,7 +13,7 @@ declare var moment: any;
   templateUrl: 'timetables.html',
 })
 
-@Injectable() 
+@Injectable()
 export class TimeTables {
 
   private stops: any[];
@@ -33,9 +33,6 @@ export class TimeTables {
   public setFirst: any;
   public possibleTimesVisible: boolean;
   public passedTimesVisible: boolean;
-  //@ViewChild(Content)
-  //content: Content;
-  // @ViewChild('listTimesAutoScroll')
   listTimesAutoScroll: any;
 
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
@@ -141,7 +138,7 @@ export class TimeTables {
       } else {
         if (this.passedTimes.indexOf(time) == -1) {
           this.passedTimes.push(time);
-          this.passedTimesVisible= true;
+          this.passedTimesVisible = true;
         }
       }
     });

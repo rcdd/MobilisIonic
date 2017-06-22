@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 
 import { Platform, AlertController, NavController, NavParams, ToastController } from 'ionic-angular';
 
@@ -34,6 +34,9 @@ declare var moment: any;
 })
 export class HomePage {
 
+  @ViewChild('mapid')
+  mapElem: ElementRef;
+
   public stops: any; // PARAGENS
   public markersCluster: any; // CLUSTER
   private markers: any = []; // CLUSTER ON MAP
@@ -63,6 +66,7 @@ export class HomePage {
   public startBtn: any;
   public favBtn: any;
   public destBtn: any;
+  public favMarker: any;
 
 
   private iconBus = L.icon({
@@ -70,6 +74,13 @@ export class HomePage {
     iconSize: [50, 50],
     //iconAnchor: [-50, 45],
     popupAnchor: [0, -35]
+  });
+
+  private iconFav = L.icon({
+    iconUrl: 'assets/img/starFull.png',
+    iconSize: [75, 75],
+    //iconAnchor: [40, 65],
+    popupAnchor: [-140, -40],
   });
 
   private iconStart = L.icon({
@@ -101,20 +112,56 @@ export class HomePage {
     this.planningBox.button = "down";
   }
 
+
   async ionViewWillEnter() {
+    if (this.map != undefined) {
+      this.map._onResize();
+    }
     //console.log("fav", this.dataProvider.favoriteToGo);
-    if (this.dataProvider.getFavorite() != undefined) {
+    if (this.dataProvider.getFavoriteRoute() != undefined) {
       this.cancelRoute(true);
-      let origin = this.dataProvider.getFavorite().origin.split(',');
-      let destination = this.dataProvider.getFavorite().destination.split(',');
+      let origin = this.dataProvider.getFavoriteRoute().origin.split(',');
+      let destination = this.dataProvider.getFavoriteRoute().destination.split(',');
       await this.planningOrigin(origin[0], origin[1]).then(a => {
         return this.planningDestination(destination[0], destination[1]).then(a => {
-          // TODO: fitBound of both points
-          //this.map.fitBounds({ "lat": origin[0], "lng": origin[1] }, { "lat": destination[0], "lng": destination[1] });
-          this.dataProvider.setFavorite(undefined);
+          var group = new L.featureGroup([L.marker([origin[0], origin[1]]), L.marker([destination[0], destination[1]])]);
+          this.map.fitBounds(group.getBounds(), { padding: [100, 100] });
+
+          this.dataProvider.setFavoriteRoute(undefined);
           return true;
         });
       });
+    }
+    console.log("favPlace", this.dataProvider.getFavoritePlace);
+    if (this.dataProvider.getFavoritePlace() != undefined) {
+      if (this.map.hasLayer(this.favMarker)) {
+        this.favMarker.remove();
+      }
+      this.cancelRoute(true);
+      let coords = {
+        "latlng": {
+          "lat": this.dataProvider.getFavoritePlace().coords.split(',')[0],
+          "lng": this.dataProvider.getFavoritePlace().coords.split(',')[1]
+        }
+      };
+      this.planningBallonOpened = true;
+      this.createBallon("<h6>" + this.dataProvider.getFavoritePlace().description + "</h6><hr>", true);
+      this.favMarker = L.marker(coords.latlng, { draggable: false, icon: this.iconFav })
+        .bindPopup(this.container)
+        .addTo(this.map)
+        .openPopup();
+
+      let self = this;
+      L.DomEvent.on(this.startBtn, 'click', function () {
+        self.planningOrigin(coords.latlng.lat, coords.latlng.lng);
+      });
+
+      L.DomEvent.on(this.destBtn, 'click', function () {
+        self.planningDestination(coords.latlng.lat, coords.latlng.lng);
+      });
+      // TODO: fitBound of both points
+      this.map.setView([coords.latlng.lat, coords.latlng.lng]);
+      this.dataProvider.setFavoritePlace(undefined);
     }
   }
 
@@ -150,34 +197,19 @@ export class HomePage {
 
 
   initMap(): void {
-    //let tiles = L.tileLayer('https://api.mapbox.com/styles/v1/rcdd/cj0lffm3h006c2qjretw3henw/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
     this.mapStreet = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
       attribution: 'Application power by RD&RP :)',
       maxZoom: 20,
-      minZoom: 8,
+      minZoom: 10,
       id: 'streets-v10',
-      accessToken: 'pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A',
-      //accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA',
-      // CACHE STUFF
-      useCache: true,
-      //useOnlyCache: true,
-      crossOrigin: true,
-      saveToCache: true,
-      //cacheMaxAge: (7 * 24 * 3600000), // 7days
+      accessToken: 'pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A'
     });
     this.mapSatellite = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
       attribution: 'Application power by RD&RP :)',
       maxZoom: 20,
-      minZoom: 8,
+      minZoom: 10,
       id: 'satellite-streets-v10',
-      accessToken: 'pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A',
-      //accessToken: 'sk.eyJ1IjoicmNkZCIsImEiOiJjajBiOGhzOGUwMDF3MzNteDB1MzJpMTl6In0.1fiOkskHZqGiV20G95ENaA',
-      // CACHE STUFF
-      useCache: true,
-      //useOnlyCache: true,
-      crossOrigin: true,
-      saveToCache: true,
-      //cacheMaxAge: (7 * 24 * 3600000), // 7days
+      accessToken: 'pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A'
     });
 
     this.map = L.map('mapid', { zoomControl: false })
@@ -185,13 +217,10 @@ export class HomePage {
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });
 
-
     this.markersCluster = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
 
     this.currentPosition.marker = L.marker(this.map.getCenter()).addTo(this.map);
     this.currentPosition.circle = L.circle(this.map.getCenter()).addTo(this.map);
-
-
 
     let self = this;
 
@@ -204,14 +233,8 @@ export class HomePage {
           .setLatLng(e.latlng)
           .openOn(self.map);
 
+        self._onClickMap(e);
 
-        L.DomEvent.on(self.startBtn, 'click', function () {
-          self.planningOrigin(e.latlng.lat, e.latlng.lng);
-        });
-
-        L.DomEvent.on(self.destBtn, 'click', function () {
-          self.planningDestination(e.latlng.lat, e.latlng.lng);
-        });
       } else {
         self.planningBallonOpened = false;
       }
@@ -282,6 +305,65 @@ export class HomePage {
       ]
     }).addTo(this.map);
 
+  }
+  _onClickMap(e) {
+    let self = this;
+    L.DomEvent.on(this.startBtn, 'click', function () {
+      self.planningOrigin(e.latlng.lat, e.latlng.lng);
+    });
+
+    L.DomEvent.on(this.favBtn, 'click', function () {
+      console
+      let alerte = self.alertCtrl.create({
+        title: "Make a description for your favorite place.",
+        inputs: [
+          {
+            name: "desc",
+            placeholder: "Type a description."
+          }
+        ],
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: data => {
+              console.log('Cancel clicked');
+              alerte.dismiss();
+            }
+          },
+          {
+            text: 'Ok',
+            handler: data => {
+              if (data.desc == "" || data == undefined || data == null) {
+                self.showAlert("You have to type a description", "ERROR");
+              } else if (data.desc.length > 25) {
+                self.showAlert("Your description exceed length (max.25)", "ERROR");
+              } else {
+                self.dataProvider.createFavoritePlace(data.desc, e.latlng.lat + "," + e.latlng.lng).then(res => {
+                  if (res) {
+                    self.showToast("Your favorite place was saved.", 3000);
+                    self.createBallon("<h6>Travel Point</h6><hr>", true);
+                    L.popup()
+                      .setContent(self.container)
+                      .setLatLng(e.latlng)
+                      .openOn(self.map);
+
+                    self._onClickMap(e);
+                  } else {
+                    self.showAlert("This favorite name already exists", "ERROR");
+                  }
+                });
+              }
+            }
+          }
+        ]
+      });
+      alerte.present();
+    });
+
+    L.DomEvent.on(this.destBtn, 'click', function () {
+      self.planningDestination(e.latlng.lat, e.latlng.lng);
+    });
   }
 
   createBallon(text: string, fav: boolean = false) {
@@ -417,7 +499,7 @@ export class HomePage {
           });
         });
 
-      if (this.planning.orig.latlng == undefined && this.dataProvider.getFavorite() == undefined) {
+      if (this.planning.orig.latlng == undefined && this.dataProvider.getFavoriteRoute() == undefined) {
         this.dataProvider.getReverseGeoCoder(this.currentPosition.marker.getLatLng().lat, this.currentPosition.marker.getLatLng().lng).then((resp) => {
           this.planning.orig.text = resp;
           this.planning.orig.latlng = (this.currentPosition.marker.getLatLng().lat + ',' + this.currentPosition.marker.getLatLng().lng);
@@ -488,28 +570,55 @@ export class HomePage {
             this.openPopup();
           }).addTo(this.markersCluster);
 
-        let self = this;
-        L.DomEvent.on(this.startBtn, 'click', function () {
-          self.planningOrigin(stop.lat, stop.lon);
-        });
+        this._onBallonMarker(marker, stop, popUp, popUpOptions);
 
-        L.DomEvent.on(this.favBtn, 'click', function () {
-          stop.favorite = true;
-          /*self.createBallon(popUp + "<hr>", (stop.favorite ? true : false));
-          new L.marker([stop.lat, stop.lon], { icon: self.iconBus, id: stop.id, meters: stop.meters, message: stop.message, title: stop.name })
-            .bindPopup(self.container, popUpOptions)
-            .openPopup()
-            .addTo(self.markersCluster);*/
-        });
-
-        L.DomEvent.on(this.destBtn, 'click', function () {
-          self.planningDestination(stop.lat, stop.lon);
-        });
       });
       this.map.fitBounds(this.markersCluster.getBounds());
     }
     this.map.addLayer(this.markersCluster);
     this.map.closePopup();
+  }
+
+  _onBallonMarker(marker, stop, popUp, popUpOptions) {
+    let self = this;
+    L.DomEvent.on(this.favBtn, 'click', function () {
+      stop.favorite = (stop.favorite ? false : true);
+      //TODO: save favorite persistence
+      ////////////////////////////////////
+      if (stop.favorite) {
+        self.dataProvider.createFavoritePlace(stop.name, (stop.lat + "," + stop.lon)).then(res => {
+          if (res) {
+            self.showToast("Your favorite place was saved.", 3000);
+          } else {
+            self.showAlert("This favorite name already exists", "ERROR");
+            return;
+          }
+        });
+      }
+
+      ////////////////////////////////////
+      self.createBallon(popUp + "<hr>", stop.favorite);
+      self.map.removeLayer(self.markersCluster);
+      self.markersCluster.removeLayer(marker);
+      marker = L.marker([stop.lat, stop.lon], { icon: self.iconBus, id: stop.id, favorite: stop.favorite, meters: stop.meters, message: stop.message, title: stop.name })
+        .bindPopup(self.container, popUpOptions)
+        .on('click', function (e) {
+          this.openPopup();
+        })
+        .openPopup()
+        .addTo(self.markersCluster);
+      self.map.addLayer(self.markersCluster);
+
+      self._onBallonMarker(marker, stop, popUp, popUpOptions);
+
+    });
+    L.DomEvent.on(this.startBtn, 'click', function () {
+      self.planningOrigin(stop.lat, stop.lon);
+    });
+
+    L.DomEvent.on(this.destBtn, 'click', function () {
+      self.planningDestination(stop.lat, stop.lon);
+    });
   }
 
   async showBusLines(fab: FabContainer = null) {
@@ -709,7 +818,7 @@ export class HomePage {
     this.planningBox.size = -100;
     this.planningBox.button = "up";
     console.log("bounds", this.routingControl.polyline.getBounds());
-    this.map.fitBounds(this.routingControl.polyline.getBounds(), { padding: L.point(10, 10) });
+    this.map.fitBounds(this.routingControl.polyline.getBounds(), { padding: [50, 50] });
   }
 
   cancelRoute(all: boolean) {
@@ -910,23 +1019,59 @@ export class HomePage {
         iconUrl: res.icon,
         iconSize: [35, 35],
         popupAnchor: [0, -15]
-      })
+      }),
+      favorite: res.favorite
     })
       .bindPopup(this.container)
       .addTo(this.map)
       .openPopup();
 
-    let self = this;
-    L.DomEvent.on(this.startBtn, 'click', () => {
-      self.planningDestination(res.geometry.location.lat, res.geometry.location.lng);
-    });
+    this._onShowPlace(res);
 
-    L.DomEvent.on(this.destBtn, 'click', () => {
-      self.planningOrigin(res.geometry.location.lat, res.geometry.location.lng);
-    });
 
     this.map.panTo([res.geometry.location.lat, res.geometry.location.lng]);
 
     this.toogleSearchBox();
+  }
+
+  _onShowPlace(res) {
+    let self = this;
+    L.DomEvent.on(this.startBtn, 'click', () => {
+      self.planningOrigin(res.geometry.location.lat, res.geometry.location.lng);
+    });
+
+    L.DomEvent.on(this.favBtn, 'click', () => {
+      res.favorite = (res.favorite ? false : true);
+      self.createBallon("<h6>" + res.name + "</h6><hr>", res.favorite);
+      if (res.favorite) {
+        self.dataProvider.createFavoritePlace(res.name, (res.geometry.location.lat + "," + res.geometry.location.lng)).then(res => {
+          if (res) {
+            self.showToast("Your favorite place was saved.", 3000);
+          } else {
+            self.showAlert("This favorite name already exists", "ERROR");
+            return;
+          }
+        });
+      }
+      this.searchMarker = L.marker(res.geometry.location, {
+        draggable: false, icon:
+        L.icon({
+          iconUrl: res.icon,
+          iconSize: [35, 35],
+          popupAnchor: [0, -15]
+        }),
+        favorite: res.favorite
+      })
+        .bindPopup(this.container)
+        .addTo(this.map)
+        .openPopup();
+
+      this._onShowPlace(res);
+
+    });
+
+    L.DomEvent.on(this.destBtn, 'click', () => {
+      self.planningDestination(res.geometry.location.lat, res.geometry.location.lng);
+    });
   }
 }

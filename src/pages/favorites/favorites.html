@@ -1,19 +1,29 @@
 <ion-header>
-  <div class="searchBar" *ngIf="favorites.length != 0">
+  <div class="searchBar" *ngIf="favoritesRoutes.length != 0  || favoritesPlaces.length != 0">
     <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
   </div>
-  <ion-row *ngIf="favorites.length == 0"> Favorites </ion-row>
+  <ion-row *ngIf="favoritesToShow.routes?.length == 0  && favoritesToShow.places?.length == 0"> Favorites </ion-row>
 </ion-header>
 
 <ion-content>
+  <div class="noFav" *ngIf="favoritesToShow.routes?.length == 0  && favoritesToShow.places?.length == 0  && favoritesRoutes.length == 0 && favoritesPlaces.length == 0">
+    You don't have any favorites
+  </div>
 
-  <div *ngIf="favoritesToShow.length == 0 && favorites.length == 0" style="color: red"> You don't have any favorites </div>
+  <div class="noFav" *ngIf="favoritesToShow.routes?.length == 0  && favoritesToShow.places?.length == 0  && favoritesRoutes.length != 0 && favoritesPlaces.length != 0">
+    No results found
+  </div>
 
   <div class="listFavorites">
-    <div *ngIf="favoritesToShow.length == 0 && favorites.length != 0" style="color: red"> No results found </div>
-    <div class="item" *ngFor="let fav of favoritesToShow">
-      <button ion-button text-wrap class="btnFav" color="light" (click)="travelTo(fav)"> {{ fav.description }} </button>
+    <div class="item" *ngFor="let fav of favoritesToShow.routes">
+      <img src="assets/img/iconDistance.png" class="imgFav" />
+      <button ion-button text-wrap class="btnFav" color="light" (click)="travelToRoute(fav)"> {{ fav.description }} </button>
       <button ion-button class="btnDel" color="danger" (click)="deleteFav(fav)">Delete</button>
+    </div>
+    <div class="item" *ngFor="let fav of favoritesToShow.places">
+      <img src="assets/img/android-location.png" class="imgFav" />
+      <button ion-button text-wrap class="btnFav" color="light" (click)="travelToPlace(fav)"> {{ fav.description }} </button>
+      <button ion-button class="btnDel" color="danger" (click)="deleteFav(fav,false)">Delete</button>
     </div>
   </div>
 </ion-content>

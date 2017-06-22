@@ -19,7 +19,9 @@ export class DataProvider {
     public CheckBoxRoutes: any = [];
     public hasNetwork: boolean = null;
     public favoritesRoutes: any = [];
+    public favoritesPlaces: any = [];
     public favoriteToRoute: any;
+    public favoriteToPlace: any;
 
     public test: any;
 
@@ -78,6 +80,7 @@ export class DataProvider {
                 toast.present();
             }
             let res = resp.json().results;
+            res.reverse();
             //console.log("searchAll", res);
             //GET MARKERS
             for (var index = 0; index < Object.keys(this.stops).length; index++) {
@@ -149,8 +152,11 @@ export class DataProvider {
                                 this.loadingText = "Creating favorites...";
                                 /*console.log("DB Not updated!");
                                 console.log("Innit download...");*/
-                            })
-                        })
+                                return this.createStorageFavoritesPlaces().then(() => {
+                                    this.loadingText = "Creating favorites...";
+                                });
+                            });
+                        });
                     });
 
                 }
@@ -160,10 +166,14 @@ export class DataProvider {
 
                     this.loadingText = "Loading stops...";
                     resolve(this.stops);
-                    return this.getFavoritesFromDb().then(a => {
+                    return this.getFavoritesRoutesFromDb().then(favRoutes => {
                         this.loadingText = "Loading favorites...";
-                        this.favoritesRoutes = a;
-                        resolve(a);
+                        this.favoritesRoutes = favRoutes;
+                        resolve(favRoutes);
+                        return this.getFavoritesPlacesFromDb().then(favPlaces => {
+                            this.favoritesPlaces = favRoutes;
+                            resolve(favPlaces);
+                        });
                     });
                 })
             });
@@ -318,12 +328,22 @@ export class DataProvider {
                 console.log("Error: ", err);
             });
     }
+    async createStorageFavoritesPlaces() {
 
-    async getFavoritesFromDb() {
+        await this.db.query("CREATE TABLE IF NOT EXISTS FAVORITES_PLACES (DESCRIPTION TEXT, COORDINATES TEXT)")
+            .then(res => {
+                console.log("CREATED FAVORITES_PLACES IN BD");
+            })
+            .catch(err => {
+                console.log("Error: ", err);
+            });
+    }
+
+    async getFavoritesRoutesFromDb() {
         return new Promise((resolve, reject) => {
             this.db.query("SELECT * FROM FAVORITES_ROUTES")
                 .then(res => {
-                    console.log("read fav from db", res);
+                    //console.log("read favRoutes from db", res);
                     this.favoritesRoutes = [];
                     if (res.rows.length > 0) {
                         for (let i = 0; i < res.rows.length; i++) {
@@ -351,10 +371,38 @@ export class DataProvider {
         });
     }
 
+    async getFavoritesPlacesFromDb() {
+        return new Promise((resolve, reject) => {
+            this.db.query("SELECT * FROM FAVORITES_PLACES")
+                .then(res => {
+                    //console.log("read favPlaces from db", res);
+                    this.favoritesPlaces = [];
+                    if (res.rows.length > 0) {
+                        for (let i = 0; i < res.rows.length; i++) {
+                            this.favoritesPlaces.push({
+                                "description": res.rows.item(i).DESCRIPTION,
+                                "coords": res.rows.item(i).COORDINATES
+                            })
+                        }
+                        resolve(this.favoritesPlaces);
+                    } else {
+                        reject();
+                    }
+                })
+                .catch(err => {
+                    console.log("Error: ", err);
+                    reject(this.favoritesPlaces);
+                });
+        }).then(() => {
+            return this.favoritesPlaces;
+        }).catch(() => {
+            return null;
+        });
+    }
 
     async  createFavoriteRoute(desc: string, origin: string, destination: string) {
         return new Promise((resolve, reject) => {
-            this.getFavoritesFromDb().then(res => {
+            this.getFavoritesRoutesFromDb().then(res => {
                 if (res != null) {
                     for (var i = 0; i < res.length; i++) {
                         if (this.removeAccents(res[i].description).toLowerCase().trim() == this.removeAccents(desc).toLowerCase().trim()) {
@@ -371,6 +419,33 @@ export class DataProvider {
                 .then((res) => {
                     this.favoritesRoutes.push({ description: desc, origin: origin, destination: destination });
                     console.log("FAVORITO ADDED", this.favoritesRoutes);
+                }).catch(err => {
+                    console.log("Favorite Error: ", err);
+                });
+            return true;
+        }).catch(() => {
+            console.log("reject");
+            return false;
+        });
+    }
+
+    async  createFavoritePlace(desc: string, coords: string) {
+        return new Promise((resolve, reject) => {
+            this.getFavoritesPlacesFromDb().then(res => {
+                if (res != null) {
+                    for (var i = 0; i < res.length; i++) {
+                        if (this.removeAccents(res[i].description).toLowerCase().trim() == this.removeAccents(desc).toLowerCase().trim()) {
+                            reject(res);
+                        }
+                    }
+                }
+                resolve(res);
+            });
+        }).then(() => {
+            this.db.query("INSERT INTO FAVORITES_PLACES (DESCRIPTION, COORDINATES) VALUES(?,?);", [desc, coords])
+                .then((res) => {
+                    this.favoritesPlaces.push({ description: desc, coords: coords });
+                    console.log("FAVORITO ADDED", this.favoritesPlaces);
                 }).catch(err => {
                     console.log("Favorite Error: ", err);
                 });
@@ -485,28 +560,50 @@ export class DataProvider {
         return;
     }
 
-    public setFavorite(fav: any) {
+    public setFavoriteRoute(fav: any) {
         this.favoriteToRoute = fav;
     }
 
-    public getFavorite() {
+    public getFavoriteRoute() {
         return this.favoriteToRoute;
     }
 
-    public deleteFavorite(fav: any) {
+    public setFavoritePlace(fav: any) {
+        this.favoriteToPlace = fav;
+    }
+
+    public getFavoritePlace() {
+        return this.favoriteToPlace;
+    }
+
+    public deleteFavoriteRoute(fav: any) {
         let index: number = this.favoritesRoutes.indexOf(fav);
         if (index !== -1) {
             this.favoritesRoutes.splice(index, 1);
-            this.deleteFavFromBd(fav);
+            this.deleteFavRouteFromBd(fav);
         }
     }
 
-    private deleteFavFromBd(fav) {
+    public deleteFavoritePlace(fav: any) {
+        let index: number = this.favoritesPlaces.indexOf(fav);
+        if (index !== -1) {
+            this.favoritesPlaces.splice(index, 1);
+            this.deleteFavPlaceFromBd(fav);
+        }
+    }
+
+    private deleteFavRouteFromBd(fav) {
         this.db.query("DELETE FROM FAVORITES_ROUTES WHERE DESCRIPTION = '" + fav.description + "';").then(res => {
             console.log(fav.description + " Deleted");
         }).catch(err => {
             console.log(err);
         });
     }
-
+    private deleteFavPlaceFromBd(fav) {
+        this.db.query("DELETE FROM FAVORITES_PLACES WHERE DESCRIPTION = '" + fav.description + "';").then(res => {
+            console.log(fav.description + " Deleted");
+        }).catch(err => {
+            console.log(err);
+        });
+    }
 }
