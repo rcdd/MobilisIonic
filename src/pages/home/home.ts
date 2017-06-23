@@ -734,6 +734,7 @@ export class HomePage {
         if (resp != null) {
           if (resp.error == undefined) {
             this.cancelRoute(false);
+            console.log("planningRoute", resp);
             this.routingControl.itenarary = [];
             this.routingControl.itenarary.showDetails = false;
             resp.plan.itineraries.forEach(itinerary => {
@@ -744,15 +745,23 @@ export class HomePage {
               itinerary.walkDistance = this.getDistance(itinerary.walkDistance);
               itinerary.legs.forEach(leg => {
                 leg.distance = this.getDistance(leg.distance);
+                leg.duration = (leg.duration / 60).toFixed(0);
                 if (leg.mode == "WALK") {
                   leg.steps.forEach(step => {
                     step.distance = this.getDistance(step.distance);
-                    step.direction = "Go " + step.absoluteDirection + " on " + step.streetName + " about " + step.distance;
+                    step.direction = [];
+                    step.direction.push({ name: "Go " + step.absoluteDirection + " on " + step.streetName, distance: step.distance + "m" });
                     step.showDetails = false;
                     leg.icon = 'ios-add-circle-outline';
                   });
                 } else if (leg.mode == "BUS") {
-                  leg.direction = ("(" + (moment.unix((leg.startTime) / 1000).format("HH:mm")) + "h) Get bus on " + leg.routeLongName.split(":")[0] + " exit on " + leg.to.name);
+                  leg.routeColor = "#" + leg.routeColor;
+                  leg.direction = [];
+                  leg.direction.push({ time: (moment.unix((leg.from.arrival) / 1000).format("HH:mm")), name: leg.from.name });
+                  leg.intermediateStops.forEach(stops => {
+                    leg.direction.push({ time: (moment.unix((stops.departure) / 1000).format("HH:mm")), name: stops.name });
+                  });
+                  leg.direction.push({ name: leg.to.name, time: (moment.unix((leg.to.arrival) / 1000).format("HH:mm")) });
                   leg.showDetails = false;
                   leg.icon = 'ios-add-circle-outline';
                 } else {

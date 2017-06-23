@@ -31,7 +31,6 @@
         </ion-row>
       </ion-item>
     </ion-list>
-
   </div>
 
   <div id="debug" *ngIf="debug">{{debug}}</div>
@@ -113,59 +112,72 @@
     <div class="cancelButton">
       <button ion-button (click)="cancelRoute(false)"><ion-icon name="arrow-round-back"></ion-icon></button>
     </div>
-    <ion-list-header text-wrap>
-      Your possibles itineraries:
-    </ion-list-header>
-    <ion-list>
-      <ion-item *ngFor="let d of routingControl.itenarary; let i=index">
-        <div (click)="toggleDetails(d)">
-          <ion-row text-wrap>
-            <ion-col width-75>
-              <ion-row>
-                <ion-col width-10>
-                  <ion-icon name="timer"></ion-icon>
-                </ion-col>
-                <ion-col width-90>
-                  <h1>{{d.startTime}} -> {{d.endTime}}</h1>
-                </ion-col>
-              </ion-row>
+    <div class="title" text-wrap>
+      Your possibles itineraries
+    </div>
+    <div>
+      <div class="route" *ngFor="let d of routingControl.itenarary; let i=index">
+        <div class="item" (click)="toggleDetails(d)">
+          <div text-wrap>
+            <div>
               <h6> Duration: <b>{{d.duration}}</b> </h6>
-              <!-- <br /> Walking distance: <b>{{d.walkDistance}}</b> </h6> -->
-              <!-- <h6> Start: <b>{{d.startTime}}</b> <br /> End: <b>{{d.endTime}}</b> </h6> -->
-            </ion-col>
+            </div>
+            <div>
+              <h1>{{d.startTime}} - {{d.endTime}}</h1>
+            </div>
             <ion-col width-10>
               <ion-icon color="primary" item-right [name]="d.icon"></ion-icon>
             </ion-col>
             <ion-col width-10>
               <button ion-button (click)="showRoute(d)">GO</button>
             </ion-col>
-          </ion-row>
+          </div>
         </div>
         <div *ngIf="d.showDetails">
-          <ion-item class="subItemLegs" *ngFor="let l of d.legs">
-            <ion-row (click)="toggleSubDetails(l, d.legs)">
-              <ion-col width-75 text-wrap>
-                On <b>{{l.mode}}</b>: {{l.distance}}
-              </ion-col>
-              <ion-col width-25>
+          <div class="subItemLegs" *ngFor="let l of d.legs">
+            <div class="mode" (click)="toggleSubDetails(l, d.legs)">
+              <div class="text" text-wrap>
+                <b>{{l.mode}}</b>: {{l.duration}}min
+              </div>
+              <div class="icon">
                 <ion-icon color="primary" item-right [name]="l.icon"></ion-icon>
-              </ion-col>
-            </ion-row>
+              </div>
+            </div>
             <div *ngIf="l.showDetails">
               <div *ngIf='l.mode == "WALK"'>
                 <div text-wrap class="subItemSteps" *ngFor="let s of l.steps" (click)="showToast(s.direction, 3000)">
-                  {{s.direction}}
+                  <div *ngFor="let d of s.direction, let i=index">
+                    <div class="direction">
+                      <div class="pipe" [style.border-left-color]="black"> </div>
+                      <div class="time">
+                      </div>
+                      <div class="name" text-wrap>
+                        <div class="nameM">{{d.name}} {{d.distance}}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div *ngIf='l.mode == "BUS"'>
                 <div text-wrap class="subItemSteps" (click)="showToast(l.direction, 3000)">
-                  {{l.direction}}
+                  <div *ngFor="let d of l.direction, let i=index">
+                    <div class="direction">
+                      <div class="pipe" [style.border-left-color]="l.routeColor"> </div>
+                      <div class="time">
+                        <div *ngIf="i==0 || i==(l.direction.length-1)"><b>{{d.time}}h</b></div>
+                      </div>
+                      <div class="name" text-wrap>
+                        <div *ngIf="i==0 || i==(l.direction.length-1)" class="nameFL"><b>{{d.name}}</b></div>
+                        <div *ngIf="i!=0 && i!=(l.direction.length-1)" class="nameM">{{d.name}}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </ion-item>
+          </div>
         </div>
-      </ion-item>
-    </ion-list>
+      </div>
+    </div>
   </div>
 </ion-content>
