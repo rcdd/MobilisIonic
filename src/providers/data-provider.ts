@@ -575,7 +575,9 @@ export class DataProvider {
     public getFavoritePlace() {
         return this.favoriteToPlace;
     }
-
+    public getAllFavoritesPlaces (){
+        return this.favoritesPlaces;
+    }
     public deleteFavoriteRoute(fav: any) {
         let index: number = this.favoritesRoutes.indexOf(fav);
         if (index !== -1) {

@@ -117,22 +117,26 @@ export class HomePage {
     if (this.map != undefined) {
       this.map._onResize();
     }
-    //console.log("fav", this.dataProvider.favoriteToGo);
+    // ROUTE
     if (this.dataProvider.getFavoriteRoute() != undefined) {
       this.cancelRoute(true);
       let origin = this.dataProvider.getFavoriteRoute().origin.split(',');
       let destination = this.dataProvider.getFavoriteRoute().destination.split(',');
-      await this.planningOrigin(origin[0], origin[1]).then(a => {
-        return this.planningDestination(destination[0], destination[1]).then(a => {
-          var group = new L.featureGroup([L.marker([origin[0], origin[1]]), L.marker([destination[0], destination[1]])]);
-          this.map.fitBounds(group.getBounds(), { padding: [100, 100] });
-
-          this.dataProvider.setFavoriteRoute(undefined);
-          return true;
+      return new Promise((resolve, reject) => {
+        this.planningOrigin(origin[0], origin[1]).then(a => {
+          this.planningDestination(destination[0], destination[1]).then(b => {
+            var group = new L.featureGroup([L.marker([origin[0], origin[1]]), L.marker([destination[0], destination[1]])]);
+            this.map.fitBounds(group.getBounds(), { padding: [100, 100] });
+            this.dataProvider.setFavoriteRoute(undefined);
+            resolve(b);
+          });
+        })
+      })
+        .then((b) => {
+          this.chooseRoute();
         });
-      });
     }
-    console.log("favPlace", this.dataProvider.getFavoritePlace);
+    // PLACE/MARKER  
     if (this.dataProvider.getFavoritePlace() != undefined) {
       if (this.map.hasLayer(this.favMarker)) {
         this.favMarker.remove();
@@ -198,14 +202,14 @@ export class HomePage {
 
   initMap(): void {
     this.mapStreet = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
-      attribution: 'Application power by RD&RP :)',
+      attribution: 'Application powered by RD&RP :)',
       maxZoom: 20,
       minZoom: 10,
       id: 'streets-v10',
       accessToken: 'pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A'
     });
     this.mapSatellite = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
-      attribution: 'Application power by RD&RP :)',
+      attribution: 'Application powered by RD&RP :)',
       maxZoom: 20,
       minZoom: 10,
       id: 'satellite-streets-v10',
@@ -217,24 +221,31 @@ export class HomePage {
       .setView([39.7460465, -8.8059954], 14);
     this.map.locate({ setView: true, maxZoom: 15 });
 
-    this.markersCluster = L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
+    this.markersCluster = L.markerClusterGroup();
 
-    this.currentPosition.marker = L.marker(this.map.getCenter()).addTo(this.map);
-    this.currentPosition.circle = L.circle(this.map.getCenter()).addTo(this.map);
+    this.currentPosition.marker = L.marker(this.map.getCenter());
+    this.currentPosition.circle = L.circle(this.map.getCenter());
+    if (this.allowLocation) {
+      this.currentPosition.marker.addTo(this.map);
+      this.currentPosition.circle.addTo(this.map);
+    }
 
     let self = this;
-
     this.map.on('click', function (e) {
+      console.log("markerGroup", self.markersCluster);
       if (!self.planningBallonOpened) {
+        /*if (self.markersCluster != undefined) {
+          if (self.markersCluster._popup.isOpen()) {
+            return;
+          }
+        }*/
         self.planningBallonOpened = true;
         self.createBallon("<h6>Travel Point</h6><hr>");
         L.popup()
           .setContent(self.container)
           .setLatLng(e.latlng)
           .openOn(self.map);
-
         self._onClickMap(e);
-
       } else {
         self.planningBallonOpened = false;
       }
@@ -475,10 +486,12 @@ export class HomePage {
 
       this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
         this.planning.orig.text = resp;
-        this.planning.orig.latlng = (lat + ',' + lng);
       });
+      this.planning.orig.latlng = (lat + ',' + lng);
       this.map.closePopup();
       resolve(this.planning.orig);
+    }).then(() => {
+      return this.planning.orig;
     });
   }
   async planningDestination(lat: any, lng: any) {
@@ -509,11 +522,13 @@ export class HomePage {
 
       this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
         this.planning.dest.text = resp;
-        this.planning.dest.latlng = (lat + ',' + lng);
       });
+      this.planning.dest.latlng = (lat + ',' + lng);
 
       this.map.closePopup();
       resolve(this.planning.dest);
+    }).then(() => {
+      return this.planning.dest;
     });
   }
 
@@ -543,7 +558,7 @@ export class HomePage {
 
   updateClusterGroup() {
     this.map.removeLayer(this.markersCluster);
-    this.markersCluster = new L.markerClusterGroup({ maxClusterRadius: 100, removeOutsideVisibleBounds: true });
+    this.markersCluster = new L.markerClusterGroup({ maxClusterRadius: 50, removeOutsideVisibleBounds: true, disableClusteringAtZoom: 15 });
     if (this.markers.length != 0) {
       this.markers.forEach(stop => {
         if (this.allowLocation == true) {
@@ -608,7 +623,6 @@ export class HomePage {
         .openPopup()
         .addTo(self.markersCluster);
       self.map.addLayer(self.markersCluster);
-
       self._onBallonMarker(marker, stop, popUp, popUpOptions);
 
     });
@@ -635,8 +649,19 @@ export class HomePage {
             this.dataProvider.CheckBoxRoutes.forEach(line => {
               line.checked = true;
               line.value.stops.forEach(stop => {
+
+                /////////////////////////////////////////////////////////////////////////////
+                //TODO: ver se esta em favorito
+                /////////////////////////////////////////////////////////////////////////////
+                this.dataProvider.getAllFavoritesPlaces().forEach(fav => {
+                  if (fav.description == stop.name) {
+                    stop.favorite = true;
+                  }
+                });
+                /////////////////////////////////////////////////////////////////////////////
                 let existMarker: boolean = false;
                 this.markers.forEach(marker => {
+
                   if (marker.id == stop.id) {
                     let existMarkerLine: boolean = false;
                     marker.lines.forEach(marketLine => {
@@ -739,7 +764,7 @@ export class HomePage {
             this.routingControl.itenarary.showDetails = false;
             resp.plan.itineraries.forEach(itinerary => {
               itinerary.icon = 'ios-add-circle-outline';
-              itinerary.duration = moment.unix(itinerary.duration).format("HH:mm:ss");
+              itinerary.duration = moment.unix(itinerary.duration).format("mm");
               itinerary.startTime = moment.unix((itinerary.startTime) / 1000).format("HH:mm");
               itinerary.endTime = moment.unix((itinerary.endTime) / 1000).format("HH:mm");
               itinerary.walkDistance = this.getDistance(itinerary.walkDistance);
@@ -750,18 +775,18 @@ export class HomePage {
                   leg.steps.forEach(step => {
                     step.distance = this.getDistance(step.distance);
                     step.direction = [];
-                    step.direction.push({ name: "Go " + step.absoluteDirection + " on " + step.streetName, distance: step.distance + "m" });
+                    step.direction.push({ name: "Go " + step.absoluteDirection + " on " + step.streetName, distance: step.distance });
                     step.showDetails = false;
                     leg.icon = 'ios-add-circle-outline';
                   });
                 } else if (leg.mode == "BUS") {
                   leg.routeColor = "#" + leg.routeColor;
                   leg.direction = [];
-                  leg.direction.push({ time: (moment.unix((leg.from.arrival) / 1000).format("HH:mm")), name: leg.from.name });
+                  leg.direction.push({ time: (moment.unix((leg.from.arrival) / 1000).format("HH:mm")), name: leg.from.stopCode + " - " + leg.from.name });
                   leg.intermediateStops.forEach(stops => {
-                    leg.direction.push({ time: (moment.unix((stops.departure) / 1000).format("HH:mm")), name: stops.name });
+                    leg.direction.push({ time: (moment.unix((stops.departure) / 1000).format("HH:mm")), name: stops.stopCode + " - " + stops.name });
                   });
-                  leg.direction.push({ name: leg.to.name, time: (moment.unix((leg.to.arrival) / 1000).format("HH:mm")) });
+                  leg.direction.push({ name: leg.to.stopCode + " - " + leg.to.name, time: (moment.unix((leg.to.arrival) / 1000).format("HH:mm")) });
                   leg.showDetails = false;
                   leg.icon = 'ios-add-circle-outline';
                 } else {
