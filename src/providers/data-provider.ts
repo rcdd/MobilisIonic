@@ -45,8 +45,7 @@ export class DataProvider {
             let date = moment().format("YYYYMMDD");
             let time = moment().format("HH:mm");
 
-            let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=TRANSIT%2CWALK&maxWalkDistance=750&showIntermediateStops=true`).toPromise();
-            //console.log("planningRoute", resp.json());
+            let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=WALK%2CBUS%2CTRANSIT&maxWalkDistance=50000&showIntermediateStops=true`).toPromise();
             this.loading = false;
             return resp.json();
         } else {
@@ -575,7 +574,7 @@ export class DataProvider {
     public getFavoritePlace() {
         return this.favoriteToPlace;
     }
-    public getAllFavoritesPlaces (){
+    public getAllFavoritesPlaces() {
         return this.favoritesPlaces;
     }
     public deleteFavoriteRoute(fav: any) {

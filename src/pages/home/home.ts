@@ -554,6 +554,10 @@ export class HomePage {
     this.currentPosition.marker.setLatLng(currentPosition);
     this.currentPosition.marker.bindPopup("You are within " + radius + " meters from this point");
     this.currentPosition.circle.setLatLng(currentPosition);
+    if (!this.map.hasLayer(this.currentPosition)) {
+      this.currentPosition.marker.addTo(this.map);
+      this.currentPosition.circle.addTo(this.map);
+    }
   }
 
   updateClusterGroup() {
@@ -768,18 +772,23 @@ export class HomePage {
               itinerary.startTime = moment.unix((itinerary.startTime) / 1000).format("HH:mm");
               itinerary.endTime = moment.unix((itinerary.endTime) / 1000).format("HH:mm");
               itinerary.walkDistance = this.getDistance(itinerary.walkDistance);
+              itinerary.sequence = [];
               itinerary.legs.forEach(leg => {
                 leg.distance = this.getDistance(leg.distance);
                 leg.duration = (leg.duration / 60).toFixed(0);
                 if (leg.mode == "WALK") {
+                  let dist: number = 0;
                   leg.steps.forEach(step => {
+                    dist += step.distance;
                     step.distance = this.getDistance(step.distance);
                     step.direction = [];
                     step.direction.push({ name: "Go " + step.absoluteDirection + " on " + step.streetName, distance: step.distance });
                     step.showDetails = false;
                     leg.icon = 'ios-add-circle-outline';
                   });
+                  itinerary.sequence.push({ walk: { distance: this.getDistance(dist) } });
                 } else if (leg.mode == "BUS") {
+                  itinerary.sequence.push({ bus: { number: leg.route, color: "#" + leg.routeColor, time: leg.duration } });
                   leg.routeColor = "#" + leg.routeColor;
                   leg.direction = [];
                   leg.direction.push({ time: (moment.unix((leg.from.arrival) / 1000).format("HH:mm")), name: leg.from.stopCode + " - " + leg.from.name });
@@ -847,12 +856,12 @@ export class HomePage {
     this.routingControl.polyline.addTo(this.map);
 
     this.routingControl.itenarary = undefined;
-    this.dataProvider.loading = false;
 
     this.planningBox.size = -100;
     this.planningBox.button = "up";
-    console.log("bounds", this.routingControl.polyline.getBounds());
+
     this.map.fitBounds(this.routingControl.polyline.getBounds(), { padding: [50, 50] });
+    this.dataProvider.loading = false;
   }
 
   cancelRoute(all: boolean) {

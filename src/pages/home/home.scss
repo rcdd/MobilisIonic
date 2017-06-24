@@ -393,7 +393,7 @@ page-home {
         overflow: auto;
         background-color: white;
         .title {
-            position: relative;
+            position: fixed;
             width: 100%;
             height: 50px;
             background-color: white;
@@ -424,8 +424,8 @@ page-home {
             font-size: 16px;
             white-space: normal;
             text-align: justify;
-            margin-top: 5px;
-            padding-top: 10px;
+            top: 50px;
+            padding-top: 15px;
             .header {
                 position: relative;
                 display: inline-flex;
@@ -443,10 +443,11 @@ page-home {
                     margin-left: 10px;
                     .time {
                         position: relative;
-                        font-size: 1.4rem;
+                        font-size: 1.6rem;
                         margin-top: 20%;
                     }
                     .min {
+                        margin-top: -3px;
                         position: relative;
                         font-size: 1.0rem;
                     }
@@ -455,8 +456,47 @@ page-home {
                     display: inline-block;
                     margin: 10px auto 0 10px;
                     text-align: left;
-                    font-size: 2.0rem;
                     min-width: 115px;
+                    .hours {
+                        font-size: 2.0rem;
+                    }
+                    .sequences {
+                        .sequence {
+                            display: inline-flex;
+                            font-size: 1rem;
+                            .arrow{
+                                height: 20px;
+                            }
+                            .bus {
+                                display: inline-block;
+                                .image {}
+                                .number {
+                                    box-shadow: 2px 2px 3px 0px;
+                                    width: 15px;
+                                    text-align: center;
+                                    margin-left: 5px;
+                                    margin-right: 5px;
+                                }
+                                .time {
+                                    font-size: 1rem;
+                                    margin-top: 5px;
+                                }
+                            }
+                            .walk {
+                                display: inline-block;
+                                .image {
+                                    text-align: center;
+                                    img {
+                                        height: 15px;
+                                    }
+                                }
+                                .distance {
+                                    text-align: center;
+                                    font-size: 1rem;
+                                }
+                            }
+                        }
+                    }
                 }
                 .expand {
                     position: relative;
@@ -504,6 +544,18 @@ page-home {
                             position: relative;
                         }
                     }
+                }
+                .walkingIcon {
+                    position: relative;
+                    width: 20px;
+                    height: 20px;
+                    margin-left: 13px;
+                }
+                .lineName {
+                    position: relative;
+                    display: inline-block;
+                    margin-left: 10px;
+                    font-size: 1.4rem;
                 }
                 .subItemSteps {
                     margin-top: 5px;

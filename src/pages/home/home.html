@@ -119,11 +119,36 @@
       <div class="route" *ngFor="let d of routingControl.itenarary; let i=index">
         <div class="header" (click)="toggleDetails(d)">
           <div class="duration" text-wrap>
-            <div class="time">{{d.duration}}</div>
+            <div class="time"><b>{{d.duration}}</b></div>
             <div class="min">min</div>
           </div>
           <div class="text">
-            {{d.startTime}} - {{d.endTime}}
+            <div class="hours">
+              {{d.startTime}} - {{d.endTime}}
+            </div>
+            <div class="sequences">
+              <div *ngFor="let seq of d.sequence" class="sequence">
+                <div class="arrow">
+                  <img src="assets/img/arrow.png" />
+                </div>
+                <div *ngIf="seq.bus" class="bus">
+                  <div class="number" [style.color]="seq.bus.color">
+                    <b>{{seq.bus.number}}</b>
+                  </div>
+                  <div class="time">
+                    {{seq.bus.time}}min
+                  </div>
+                </div>
+                <div *ngIf="seq.walk" class="walk">
+                  <div class="image">
+                    <img src="assets/img/walking.png" />
+                  </div>
+                  <div class="distance">
+                    {{seq.walk.distance}}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="expand">
             <ion-icon color="primary" [name]="d.icon"></ion-icon>
@@ -149,6 +174,9 @@
             </div>
             <div *ngIf="l.showDetails">
               <div *ngIf='l.mode == "WALK"'>
+                <div class="walkingIcon">
+                  <img src="assets/img/walking.png" />
+                </div>
                 <div text-wrap class="subItemSteps" *ngFor="let s of l.steps">
                   <div *ngFor="let d of s.direction, let i=index">
                     <div class="direction">
@@ -161,6 +189,9 @@
                 </div>
               </div>
               <div *ngIf='l.mode == "BUS"'>
+                <div class="lineName" [style.color]="l.routeColor">
+                  <b>Line {{l.route}}</b>
+                </div>
                 <div text-wrap class="subItemSteps">
                   <div *ngFor="let d of l.direction, let i=index">
                     <div class="direction">
