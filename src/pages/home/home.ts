@@ -16,12 +16,6 @@ import 'rxjs/add/operator/map';
 import 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet-easybutton';
-import 'leaflet-search';
-import 'leaflet-knn';
-import 'leaflet.featuregroup.subgroup'
-import 'leaflet-routing-machine'
-import 'leaflet-control-geocoder';
-import 'leaflet-google-places-autocomplete';
 import 'polyline-encoded';
 import 'moment';
 
@@ -41,7 +35,6 @@ export class HomePage {
   public markersCluster: any; // CLUSTER
   private markers: any = []; // CLUSTER ON MAP
   private routingControl: any; //CONTROLER OF ROUTING
-  //private busLineBox: boolean = false; //CONTROLER OF ROUTING
 
 
   private map: any;
@@ -54,6 +47,7 @@ export class HomePage {
   private searchInput: string = "";
   private searchResults: any = [];
   private searchMarker: any;
+  private markerBallonOpened: boolean = false;
 
   private allowLocation = false;
 
@@ -163,7 +157,6 @@ export class HomePage {
       L.DomEvent.on(this.destBtn, 'click', function () {
         self.planningDestination(coords.latlng.lat, coords.latlng.lng);
       });
-      // TODO: fitBound of both points
       this.map.setView([coords.latlng.lat, coords.latlng.lng]);
       this.dataProvider.setFavoritePlace(undefined);
     }
@@ -175,8 +168,6 @@ export class HomePage {
       this.dataProvider.getDataFromServer().then((resp) => {
         this.dataProvider.innit = 100;
         this.stops = resp;
-        //console.log("imported stops:", Object.keys(this.stops).length);
-        //console.log("imported stops:", this.stops);
         this.initMap();
         this.dataProvider.populateCheckBoxs();
 
@@ -191,7 +182,6 @@ export class HomePage {
         let watch = this.geolocation.watchPosition()
         watch.subscribe((data) => {
           if (data.coords !== undefined) {
-            //console.log("data from watchingPosition", data);
             this.updateCurrentLocation(data.coords);
           }
         });
@@ -232,13 +222,7 @@ export class HomePage {
 
     let self = this;
     this.map.on('click', function (e) {
-      console.log("markerGroup", self.markersCluster);
-      if (!self.planningBallonOpened) {
-        /*if (self.markersCluster != undefined) {
-          if (self.markersCluster._popup.isOpen()) {
-            return;
-          }
-        }*/
+      if (!self.planningBallonOpened && !self.markerBallonOpened) {
         self.planningBallonOpened = true;
         self.createBallon("<h6>Travel Point</h6><hr>");
         L.popup()
@@ -248,6 +232,7 @@ export class HomePage {
         self._onClickMap(e);
       } else {
         self.planningBallonOpened = false;
+        self.markerBallonOpened = false;
       }
     });
 
@@ -562,12 +547,13 @@ export class HomePage {
 
   updateClusterGroup() {
     this.map.removeLayer(this.markersCluster);
-    this.markersCluster = new L.markerClusterGroup({ maxClusterRadius: 50, removeOutsideVisibleBounds: true, disableClusteringAtZoom: 15 });
+    this.markersCluster = new L.markerClusterGroup({ maxClusterRadius: 50, removeOutsideVisibleBounds: true, disableClusteringAtZoom: 17 });
     if (this.markers.length != 0) {
       this.markers.forEach(stop => {
         if (this.allowLocation == true) {
           stop.meters = this.currentPosition.marker.getLatLng().distanceTo([stop.lat, stop.lon]);
-          stop.message = '<img class="distanceImg" src="assets/img/iconDistance.png" /> Distance: ' + this.getDistance(stop.meters);
+          stop.distance = this.getDistance(stop.meters);
+          stop.message = '<img class="distanceImg" src="assets/img/iconDistance.png" /> Distance: ' + stop.distance;
         } else {
           stop.message = '';
         }
@@ -582,12 +568,16 @@ export class HomePage {
             'className': 'custom'
           }
 
+
         this.createBallon(popUp + "<hr>", (stop.favorite ? true : false));
+        let self = this;
         let marker = new L.marker([stop.lat, stop.lon], { icon: this.iconBus, id: stop.id, meters: stop.meters, message: stop.message, title: stop.name })
           .bindPopup(this.container, popUpOptions)
           .on('click', function (e) {
+            self.markerBallonOpened = true;
             this.openPopup();
-          }).addTo(this.markersCluster);
+          })
+          .addTo(this.markersCluster);
 
         this._onBallonMarker(marker, stop, popUp, popUpOptions);
 
@@ -602,32 +592,31 @@ export class HomePage {
     let self = this;
     L.DomEvent.on(this.favBtn, 'click', function () {
       stop.favorite = (stop.favorite ? false : true);
-      //TODO: save favorite persistence
-      ////////////////////////////////////
       if (stop.favorite) {
-        self.dataProvider.createFavoritePlace(stop.name, (stop.lat + "," + stop.lon)).then(res => {
+        self.dataProvider.createFavoritePlace(stop.id.split(":")[1] + " - " + stop.name, (stop.lat + "," + stop.lon)).then(res => {
           if (res) {
             self.showToast("Your favorite place was saved.", 3000);
+            self.createBallon(popUp + "<hr>", stop.favorite);
+            marker._popup.setContent(self.container);
+            self._onBallonMarker(marker, stop, popUp, popUpOptions);
           } else {
             self.showAlert("This favorite name already exists", "ERROR");
             return;
           }
         });
+      } else {
+        let fav = { 'description': stop.id.split(":")[1] + " - " + stop.name, 'coords': (stop.lat + "," + stop.lon) };
+        self.dataProvider.removeFavoritePlace(fav).then(res => {
+          self.showToast("Your favorite place was deleted.", 3000);
+          self.createBallon(popUp + "<hr>", stop.favorite);
+          marker._popup.setContent(self.container);
+          self._onBallonMarker(marker, stop, popUp, popUpOptions);
+        }).catch(() => {
+          self.showToast("Error deleting favorite.", 3000);
+          stop.favorite = true;
+        });
       }
 
-      ////////////////////////////////////
-      self.createBallon(popUp + "<hr>", stop.favorite);
-      self.map.removeLayer(self.markersCluster);
-      self.markersCluster.removeLayer(marker);
-      marker = L.marker([stop.lat, stop.lon], { icon: self.iconBus, id: stop.id, favorite: stop.favorite, meters: stop.meters, message: stop.message, title: stop.name })
-        .bindPopup(self.container, popUpOptions)
-        .on('click', function (e) {
-          this.openPopup();
-        })
-        .openPopup()
-        .addTo(self.markersCluster);
-      self.map.addLayer(self.markersCluster);
-      self._onBallonMarker(marker, stop, popUp, popUpOptions);
 
     });
     L.DomEvent.on(this.startBtn, 'click', function () {
@@ -653,19 +642,13 @@ export class HomePage {
             this.dataProvider.CheckBoxRoutes.forEach(line => {
               line.checked = true;
               line.value.stops.forEach(stop => {
-
-                /////////////////////////////////////////////////////////////////////////////
-                //TODO: ver se esta em favorito
-                /////////////////////////////////////////////////////////////////////////////
                 this.dataProvider.getAllFavoritesPlaces().forEach(fav => {
-                  if (fav.description == stop.name) {
+                  if (fav.description == (stop.id.split(":")[1] + " - " + stop.name)) {
                     stop.favorite = true;
                   }
                 });
-                /////////////////////////////////////////////////////////////////////////////
                 let existMarker: boolean = false;
                 this.markers.forEach(marker => {
-
                   if (marker.id == stop.id) {
                     let existMarkerLine: boolean = false;
                     marker.lines.forEach(marketLine => {
@@ -1051,10 +1034,19 @@ export class HomePage {
 
   showPlace(res: any) {
     if (this.map.hasLayer(this.searchMarker)) {
-      this.map.removeLayer(this.searchMarker);
+      console.log("tem layer", this.searchMarker);
+      this.map.removeControl(this.searchMarker);
+      this.searchMarker.remove();
     }
 
-    this.createBallon("<h6>" + res.name + "</h6><hr>");
+    let fav = this.dataProvider.getAllFavoritesPlaces();
+    for (let i = 0; i < fav.length; i++) {
+      if (fav[i].description == res.name) {
+        res.favorite = true;
+      }
+    }
+
+    this.createBallon("<h6>" + res.name + "</h6><hr>", (res.favorite ? true : false));
 
     this.searchMarker = L.marker(res.geometry.location, {
       draggable: false, icon:
@@ -1067,7 +1059,9 @@ export class HomePage {
     })
       .bindPopup(this.container)
       .addTo(this.map)
-      .openPopup();
+      .openPopup()
+
+    this.markerBallonOpened = true;
 
     this._onShowPlace(res);
 
@@ -1090,24 +1084,15 @@ export class HomePage {
         self.dataProvider.createFavoritePlace(res.name, (res.geometry.location.lat + "," + res.geometry.location.lng)).then(res => {
           if (res) {
             self.showToast("Your favorite place was saved.", 3000);
-          } else {
-            self.showAlert("This favorite name already exists", "ERROR");
-            return;
           }
         });
+      } else {
+        self.dataProvider.removeFavoritePlace({ description: res.name, coords: (res.geometry.location.lat + "," + res.geometry.location.lng) }).then(res => {
+          self.showToast("Your favorite place was deleted.", 3000);
+        });
       }
-      this.searchMarker = L.marker(res.geometry.location, {
-        draggable: false, icon:
-        L.icon({
-          iconUrl: res.icon,
-          iconSize: [35, 35],
-          popupAnchor: [0, -15]
-        }),
-        favorite: res.favorite
-      })
-        .bindPopup(this.container)
-        .addTo(this.map)
-        .openPopup();
+
+      self.searchMarker._popup.setContent(self.container);
 
       this._onShowPlace(res);
 

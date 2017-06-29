@@ -127,12 +127,13 @@
               {{d.startTime}} - {{d.endTime}}
             </div>
             <div class="sequences">
-              <div *ngFor="let seq of d.sequence" class="sequence">
+              <div *ngFor="let seq of d.sequence; let i=index" class="sequence">
                 <div class="arrow">
-                  <img src="assets/img/arrow.png" />
+                  <img src="assets/img/arrow.png" *ngIf="i!=0" />
                 </div>
                 <div *ngIf="seq.bus" class="bus">
                   <div class="number" [style.color]="seq.bus.color">
+                    <img src="assets/img/android-bus.png" />
                     <b>{{seq.bus.number}}</b>
                   </div>
                   <div class="time">

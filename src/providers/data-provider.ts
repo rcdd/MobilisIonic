@@ -11,6 +11,8 @@ declare var moment: any;
 @Injectable()
 export class DataProvider {
 
+    private ipOTP = '194.210.216.191';
+
     public lines: any = [];
     public stops: any[] = [];
     public innit: number = 0;
@@ -45,7 +47,7 @@ export class DataProvider {
             let date = moment().format("YYYYMMDD");
             let time = moment().format("HH:mm");
 
-            let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=WALK%2CBUS%2CTRANSIT&maxWalkDistance=50000&showIntermediateStops=true`).toPromise();
+            let resp = await this.http.get(`http://` + this.ipOTP + `/otp/routers/default/plan?fromPlace=` + origin + `&toPlace=` + destination + `&time=` + time + `&date=` + date + `&mode=WALK%2CBUS%2CTRANSIT&maxWalkDistance=50000&showIntermediateStops=true`).toPromise();
             this.loading = false;
             return resp.json();
         } else {
@@ -119,12 +121,16 @@ export class DataProvider {
     async getReverseGeoCoder(lat: any, lng: any) {
         if (this.hasNetwork) {
             this.loading = true;
-            let resp = await this.http.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/` + lng + `,` + lat + `.json?access_token=pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A&types=address%2Cpoi%2Cpoi.landmark%2Clocality%2Cplace%2Cpostcode`).toPromise();
+            // MAPBOX
+            //let resp = await this.http.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/` + lng + `,` + lat + `.json?access_token=pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A&types=address%2Cpoi%2Cpoi.landmark%2Clocality%2Cplace%2Cpostcode`).toPromise();
+            // GOOGLE
+            let key = 'AIzaSyCIAsIQk7fTx3KomXq0fE6klhA8mP5jKtY';
+            let resp = await this.http.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=` + lat + `,` + lng + `&key=` + key).toPromise();
             let place = resp.json();
             //console.log("ReverseCoder", place);
             this.loading = false;
-            if (place.features.length > 0) {
-                return (place.features[0].properties.address != undefined ? place.features[0].properties.address : (lat + "," + lng));
+            if (place.results.length > 0) {
+                return (place.results[0].formatted_address != undefined ? place.results[0].formatted_address : (lat + "," + lng));
             } else {
                 return (lat + "," + lng);
             }
@@ -162,27 +168,30 @@ export class DataProvider {
             }).then(() => {
                 this.innit = 80;
                 return this.getStopsFromDB().then((stops) => {
-
                     this.loadingText = "Loading stops...";
-                    resolve(this.stops);
-                    return this.getFavoritesRoutesFromDb().then(favRoutes => {
-                        this.loadingText = "Loading favorites...";
-                        this.favoritesRoutes = favRoutes;
-                        resolve(favRoutes);
-                        return this.getFavoritesPlacesFromDb().then(favPlaces => {
-                            this.favoritesPlaces = favRoutes;
-                            resolve(favPlaces);
-                        });
-                    });
-                })
+                    this.getFavoritesFromDB().then(fav => {
+                        resolve();
+                    })
+                });
             });
         }).then((stops) => {
-            //console.log("return promise then", Object.keys(this.stops).length);
             return this.stops;
         });
     }
 
-
+    async getFavoritesFromDB() {
+        new Promise((resolve, reject) => {
+            return this.getFavoritesRoutesFromDb().then(favRoutes => {
+                this.loadingText = "Loading favorites...";
+                this.favoritesRoutes = favRoutes;
+            }).then((s) => {
+                this.getFavoritesPlacesFromDb().then(favPlaces => {
+                    this.favoritesPlaces = favPlaces;
+                    resolve(favPlaces);
+                });
+            });
+        });
+    }
 
     async populateCheckBoxs() {
         //console.log("populate", Object.keys(this.stops).length);
@@ -198,11 +207,9 @@ export class DataProvider {
         return await this.db.query("SELECT * FROM SETTINGS")
             .then(res => {
                 let diff = (moment(new Date(), "YYYYMMDD").diff(res.rows.item(0).value, 'days'));
-                //console.log("Diff time: ", diff);
                 return (diff < 30 ? true : false);
             })
             .catch(err => {
-                //alert("Cenas pah!");
                 console.log("Error: ", err);
                 return false;
             });
@@ -246,7 +253,7 @@ export class DataProvider {
 
     async getRoutes() {
         if (this.hasNetwork) {
-            let resp = await this.http.get(`http://194.210.216.191/otp/routers/default/index/routes`).toPromise();
+            let resp = await this.http.get("http://" + this.ipOTP + "/otp/routers/default/index/routes").toPromise();
             for (let route of resp.json()) {
                 console.log("Routes", route);
                 if (route.shortName == undefined) {
@@ -262,17 +269,19 @@ export class DataProvider {
     }
 
     async getStationsFromBusLines() {
-        for (let route of this.lines) { // http://194.210.216.191/otp/routers/default/index/routes/" + route.id + "/stops
-            this.innit += 5; //http://194.210.216.191/otp/routers/default/index/patterns/1:1018:0:01
+        //////////////////////////////////////////////////////////
+        //          TODO:VERIFICAR PATTERN DAS STOPS            //
+        //////////////////////////////////////////////////////////
+        for (let route of this.lines) { // http://` + this.ipOTP + `/otp/routers/default/index/routes/" + route.id + "/stops
+            this.innit += 5; //http://` + this.ipOTP + `/otp/routers/default/index/patterns/1:1018:0:01
             if (this.hasNetwork) {
-                let stops = await this.http.get("http://194.210.216.191/otp/routers/default/index/patterns/" + route.id + "::01").toPromise();
+                let stops = await this.http.get("http://" + this.ipOTP + "/otp/routers/default/index/patterns/" + route.id + "::01").toPromise();
                 console.dir(stops);
                 await this.createStorageStops(route, stops.json());
             } else {
                 return this.noNetworkOnInit();
             }
         }
-
     }
 
     async createStorageLines() {
@@ -455,8 +464,10 @@ export class DataProvider {
         });
     }
 
-
     async dataInfoToDB() {
+        //////////////////////////////////////////////////////////////////
+        //             TODO: UPDATE TABLE NOT DROP                      //
+        //////////////////////////////////////////////////////////////////
         await this.DBDropTable("SETTINGS");
 
         await this.db.query("CREATE TABLE IF NOT EXISTS SETTINGS (name TEXT, value TEXT)")
@@ -512,7 +523,7 @@ export class DataProvider {
     async getTimeFromStop(stop: any, time: any) {
         this.loading = true;
         let date = moment(time).format("YYYYMMDD");
-        let resp = await this.http.get("http://194.210.216.191/otp/routers/default/index/stops/" + stop + "/stoptimes/" + date).toPromise();
+        let resp = await this.http.get("http://" + this.ipOTP + "/otp/routers/default/index/stops/" + stop + "/stoptimes/" + date).toPromise();
         let respj = resp.json();
         respj.forEach(pat => {
             //console.log(pat.pattern.id);
@@ -578,33 +589,69 @@ export class DataProvider {
         return this.favoritesPlaces;
     }
     public deleteFavoriteRoute(fav: any) {
-        let index: number = this.favoritesRoutes.indexOf(fav);
-        if (index !== -1) {
-            this.favoritesRoutes.splice(index, 1);
-            this.deleteFavRouteFromBd(fav);
-        }
+        new Promise((resolve, reject) => {
+            let index: number = this.favoritesRoutes.indexOf(fav);
+            if (index !== -1) {
+                this.favoritesRoutes.splice(index, 1);
+                this.deleteFavRouteFromBd(fav).then(() => {
+                    resolve();
+                })
+            } else {
+                reject();
+            }
+        });
     }
 
     public deleteFavoritePlace(fav: any) {
-        let index: number = this.favoritesPlaces.indexOf(fav);
-        if (index !== -1) {
-            this.favoritesPlaces.splice(index, 1);
-            this.deleteFavPlaceFromBd(fav);
-        }
+        new Promise((resolve, reject) => {
+            let index: number = this.favoritesPlaces.indexOf(fav);
+            if (index !== -1) {
+                this.favoritesPlaces.splice(index, 1);
+                this.deleteFavPlaceFromBd(fav).then(() => {
+                    resolve();
+                })
+            } else {
+                reject();
+            }
+        });
+    }
+
+    public removeFavoritePlace(fav: any) {
+        return new Promise((resolve, reject) => {
+            for (let i = 0; i < this.favoritesPlaces.length; i++) {
+                if (this.favoritesPlaces[i].description == fav.description) {
+                    this.favoritesPlaces.splice(i, 1);
+                    this.deleteFavPlaceFromBd(fav);
+                    resolve();
+                }
+            }
+            reject();
+        });
     }
 
     private deleteFavRouteFromBd(fav) {
-        this.db.query("DELETE FROM FAVORITES_ROUTES WHERE DESCRIPTION = '" + fav.description + "';").then(res => {
-            console.log(fav.description + " Deleted");
-        }).catch(err => {
-            console.log(err);
+        return new Promise((resolve, reject) => {
+            this.db.query("DELETE FROM FAVORITES_ROUTES WHERE DESCRIPTION = '" + fav.description + "';").then(res => {
+                console.log(fav.description + " Deleted");
+                resolve();
+            }).catch(err => {
+                console.log(err);
+                reject();
+            });
+
         });
+
     }
     private deleteFavPlaceFromBd(fav) {
-        this.db.query("DELETE FROM FAVORITES_PLACES WHERE DESCRIPTION = '" + fav.description + "';").then(res => {
-            console.log(fav.description + " Deleted");
-        }).catch(err => {
-            console.log(err);
+        return new Promise((resolve, reject) => {
+            this.db.query("DELETE FROM FAVORITES_PLACES WHERE DESCRIPTION = '" + fav.description + "';").then(res => {
+                console.log(fav.description + " Deleted");
+                resolve();
+            }).catch(err => {
+                console.log(err);
+                reject();
+            });
+
         });
     }
 }
