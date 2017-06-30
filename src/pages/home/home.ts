@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, trigger, keyframes, animate, transition, style, NgZone } from '@angular/core';
 
 import { Platform, AlertController, NavController, NavParams, ToastController } from 'ionic-angular';
 
@@ -12,6 +12,8 @@ import { DatabaseProvider } from '../../providers/database-provider';
 
 import { DataProvider } from '../../providers/data-provider';
 
+import { TranslateService } from '@ngx-translate/core';
+
 import 'rxjs/add/operator/map';
 import 'leaflet';
 import 'leaflet.markercluster';
@@ -24,7 +26,25 @@ declare var moment: any;
 
 @Component({
   selector: 'page-home',
-  templateUrl: 'home.html'
+  templateUrl: 'home.html',
+  animations: [
+    trigger('right', [
+      transition('inactive => active', animate(300, keyframes([
+        style({ transform: 'none', offset: 0 }),
+        style({ transform: 'translate3d(-100%, 0, 0)', offset: 0.5 }),
+        style({ transform: 'translate3d(100%, 0, 0)', offset: 0.5 }),
+        style({ transform: 'none', offset: 1 }),
+      ]))),
+    ]),
+    trigger('left', [
+      transition('inactive => active', animate(300, keyframes([
+        style({ transform: 'none', offset: 0 }),
+        style({ transform: 'translate3d(100%, 0, 0)', offset: 0.5 }),
+        style({ transform: 'translate3d(-100%, 0, 0)', offset: 0.5 }),
+        style({ transform: 'none', offset: 1 }),
+      ]))),
+    ]),
+  ]
 })
 export class HomePage {
 
@@ -62,6 +82,10 @@ export class HomePage {
   public destBtn: any;
   public favMarker: any;
 
+  public navigationBox: boolean = false;
+  public navigateControl: any;
+  public navigateAnimationLeft: string;
+  public navigateAnimationRight: string;
 
   private iconBus = L.icon({
     iconUrl: 'assets/img/busStop.png',
@@ -96,8 +120,9 @@ export class HomePage {
     public toastCtrl: ToastController, public http: Http,
     public alertCtrl: AlertController, public db: DatabaseProvider,
     public dataProvider: DataProvider, public geolocation: Geolocation,
-    public platform: Platform
+    public platform: Platform, public zone: NgZone, public translate: TranslateService
   ) {
+    translate.setDefaultLang('en');
     this.planning.orig = [];
     this.planning.dest = [];
     this.routingControl = [];
@@ -106,8 +131,17 @@ export class HomePage {
     this.planningBox.button = "down";
   }
 
+  toogleLanguage() {
+    if (this.translate.currentLang == "en") {
+      this.translate.use("pt");
+    } else {
+      this.translate.use("en");
+    }
+  }
+
 
   async ionViewWillEnter() {
+    this.dataProvider.loading = true;
     if (this.map != undefined) {
       this.map._onResize();
     }
@@ -159,7 +193,9 @@ export class HomePage {
       });
       this.map.setView([coords.latlng.lat, coords.latlng.lng]);
       this.dataProvider.setFavoritePlace(undefined);
+
     }
+    this.dataProvider.loading = false;
   }
 
 
@@ -224,12 +260,15 @@ export class HomePage {
     this.map.on('click', function (e) {
       if (!self.planningBallonOpened && !self.markerBallonOpened) {
         self.planningBallonOpened = true;
-        self.createBallon("<h6>Travel Point</h6><hr>");
-        L.popup()
-          .setContent(self.container)
-          .setLatLng(e.latlng)
-          .openOn(self.map);
-        self._onClickMap(e);
+        self.translate.get('MAP.TRAVEL_POINT').subscribe((res: string) => {
+          self.createBallon("<h6>" + res + "</h6><hr>");
+          L.popup()
+            .setContent(self.container)
+            .setLatLng(e.latlng)
+            .openOn(self.map);
+          self._onClickMap(e);
+        });
+
       } else {
         self.planningBallonOpened = false;
         self.markerBallonOpened = false;
@@ -365,9 +404,13 @@ export class HomePage {
   createBallon(text: string, fav: boolean = false) {
     this.container = L.DomUtil.create('div', 'container');
     this.container.innerHTML = text;
-    this.startBtn = this.createButton('<div class="btnNavStart"><img src="assets/img/originRoute.png" /><div class="label"> Start </div></div>', this.container);
+    this.translate.get('MAP.BTN_NAV_START').subscribe((res: string) => {
+      this.startBtn = this.createButton(res, this.container);
+    });
     this.favBtn = this.createButton('<div class="btnNavFav"><img src="assets/img/' + (fav ? "starFull" : "starEmpty") + '.png" /></div>', this.container);
-    this.destBtn = this.createButton('<div class="btnNavEnd"><img class="btnNavEnd" src="assets/img/destinationRoute.png" /><div class="label"> Finish </div></div>', this.container);
+    this.translate.get('MAP.BTN_NAV_DEST').subscribe((res: string) => {
+      this.destBtn = this.createButton(res, this.container);
+    });
   }
 
   // FIT MARKERS
@@ -455,6 +498,8 @@ export class HomePage {
     return new Promise((resolve, reject) => {
       this.map.removeLayer(this.planning.orig);
       this.cancelRoute(false);
+      this.navigateControl = [];
+      this.navigationBox = false;
       this.planning.orig = L.marker([lat, lng], { draggable: true, icon: this.iconStart })
         .bindPopup("Origin")
         .addTo(this.map)
@@ -465,12 +510,14 @@ export class HomePage {
           this.planning.orig.setLatLng([e.target._latlng.lat, e.target._latlng.lng]);
           this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
             this.planning.orig.text = resp;
+            this.planning.orig.bindPopup("Origin in " + resp);
             this.planning.orig.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
           });
         });
 
       this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
         this.planning.orig.text = resp;
+        this.planning.orig.bindPopup("Origin in " + resp);
       });
       this.planning.orig.latlng = (lat + ',' + lng);
       this.map.closePopup();
@@ -483,6 +530,8 @@ export class HomePage {
     return new Promise((resolve, reject) => {
       this.map.removeLayer(this.planning.dest);
       this.cancelRoute(false);
+      this.navigateControl = [];
+      this.navigationBox = false;
       this.planning.dest = L.marker([lat, lng], { draggable: true, icon: this.iconDest })
         .bindPopup("Destination")
         .addTo(this.map)
@@ -493,6 +542,7 @@ export class HomePage {
           this.planning.dest.setLatLng([e.target._latlng.lat, e.target._latlng.lng]);
           this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
             this.planning.dest.text = resp;
+            this.planning.dest.bindPopup("Destination in " + resp);
             this.planning.dest.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
           });
         });
@@ -500,12 +550,14 @@ export class HomePage {
       if (this.planning.orig.latlng == undefined && this.dataProvider.getFavoriteRoute() == undefined) {
         this.dataProvider.getReverseGeoCoder(this.currentPosition.marker.getLatLng().lat, this.currentPosition.marker.getLatLng().lng).then((resp) => {
           this.planning.orig.text = resp;
+          this.planning.orig.bindPopup("Origin in " + resp);
           this.planning.orig.latlng = (this.currentPosition.marker.getLatLng().lat + ',' + this.currentPosition.marker.getLatLng().lng);
           console.log(this.planning.orig.latlng);
         });
       }
 
       this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
+        this.planning.dest.bindPopup("Destination in " + resp);
         this.planning.dest.text = resp;
       });
       this.planning.dest.latlng = (lat + ',' + lng);
@@ -802,6 +854,9 @@ export class HomePage {
 
   showRoute(route) {
     this.dataProvider.loading = true;
+    this.navigationBox = true;
+    this.planning.orig.dragging.disable();
+    this.planning.dest.dragging.disable();
     console.log("Route", route);
     if (this.map.hasLayer(this.routingControl.polyline)) {
       this.map.removeControl(this.routingControl.polyline);
@@ -826,7 +881,7 @@ export class HomePage {
       } else {
         leg.steps.forEach(step => {
           L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs().forEach(element => {
-            this.routingControl.markers.push(L.circle([step.lat, step.lon], { radius: 10 }).bindPopup(step.direction));
+            this.routingControl.markers.push(L.circle([step.lat, step.lon], { radius: 5 }).bindPopup(step.direction));
           });
         });
       }
@@ -844,7 +899,115 @@ export class HomePage {
     this.planningBox.button = "up";
 
     this.map.fitBounds(this.routingControl.polyline.getBounds(), { padding: [50, 50] });
+
+    this.showNavigate(route);
     this.dataProvider.loading = false;
+  }
+
+  showNavigate(route) {
+    this.navigateControl.sequence = [];
+    this.navigateControl.index = 0;
+    route.legs.forEach(leg => {
+      if (leg.mode == "WALK") {
+        leg.steps.forEach(step => {
+          this.navigateControl.sequence.push({ mode: leg.mode, step: step });
+        });
+      }
+      if (leg.mode == "BUS") {
+        leg.intermediateStops.unshift(leg.from);
+        leg.intermediateStops.push(leg.to);
+        this.navigateControl.sequence.push({
+          mode: leg.mode, from: leg.from, step: leg.intermediateStops, route: leg.route, routeColor: leg.routeColor,
+          routeLongName: leg.routeLongName, duration: leg.duration, time: (moment.unix((leg.from.arrival) / 1000).format("HH:mm"))
+        });
+        this.navigateControl.sequence.push({
+          mode: leg.mode, to: leg.to, step: leg.intermediateStops, route: leg.route, routeColor: leg.routeColor,
+          routeLongName: leg.routeLongName, duration: leg.duration, time: (moment.unix((leg.to.arrival) / 1000).format("HH:mm"))
+        });
+      }
+    });
+    console.log("navigate", this.navigateControl);
+    this.navigatePanTo();
+  }
+
+  navigateLeft() {
+    if (this.navigateControl.index > 0) {
+      this.navigateControl.index--;
+      this.navigateAnimationLeft = "active";
+      this.navigatePanTo();
+    }
+  }
+  navigateRight() {
+    if (this.navigateControl.index < this.navigateControl.sequence.length - 1) {
+      this.navigateControl.index++;
+      this.navigateAnimationRight = "active";
+      this.navigatePanTo();
+    }
+  }
+
+  resetAnimationLeft() {
+    this.zone.run(() => {
+      this.navigateAnimationLeft = "inactive";
+    });
+  }
+  resetAnimationRight() {
+    this.zone.run(() => {
+      this.navigateAnimationRight = "inactive";
+    });
+  }
+
+
+
+  navigatePanTo() {
+    let nav = this.navigateControl.sequence[this.navigateControl.index];
+    let zoom = 19;
+    let options = { paddingBottomRight: [0, 200] };
+    let latLng = [0, 0];
+    let content: string = "";
+    if (nav.mode == "WALK") {
+      latLng = [nav.step.lat,
+      nav.step.lon];
+      content = nav.step.relativeDirection + " on " + nav.step.streetName;
+      this.map.flyTo(latLng, zoom, options)
+    }
+    if (nav.mode == "BUS") {
+      if (nav.to) {
+        latLng = [nav.to.lat,
+        nav.to.lon];
+        content = "Exit on " + nav.to.name;
+        this.map.flyTo(latLng, zoom, options);
+      }
+      if (nav.from) {
+        latLng = [nav.from.lat,
+        nav.from.lon];
+        content = "Take bus on " + nav.from.name;
+        this.map.flyTo(latLng, zoom, options);
+      }
+    }
+
+    this.navigateControl.marker = L.popup()
+      .setLatLng(latLng)
+      .setContent(content)
+      .openOn(this.map);
+    this.navigateControl.fitView = true;
+  }
+
+  toogleRoute() {
+    if (this.navigateControl.fitView) {
+      this.map.fitBounds(this.routingControl.polyline.getBounds(), { paddingTopLeft: [0, 20], paddingBottomRight: [0, 200] });
+      this.navigateControl.fitView = false;
+    } else {
+      this.navigatePanTo();
+    }
+  }
+  zoomStop(stop) {
+    let zoom = 19;
+    let options = { paddingBottomRight: [0, 200] };
+    this.navigateControl.marker = L.popup()
+      .setLatLng([stop.lat, stop.lon])
+      .setContent(stop.name)
+      .openOn(this.map);
+    this.map.flyTo([stop.lat, stop.lon], zoom, options);
   }
 
   cancelRoute(all: boolean) {
@@ -882,6 +1045,8 @@ export class HomePage {
       }
       this.planning.orig = [];
       this.planning.dest = [];
+      this.navigateControl = [];
+      this.navigationBox = false;
     }
 
     this.routingControl.itenarary = undefined;

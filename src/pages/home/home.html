@@ -3,6 +3,15 @@
     <div class="logo">
       <img src="assets/img/LogoMobilis_white.png" />
       <img src="assets/img/NomeMobilis_white.png" />
+
+      <button (click)="toogleLanguage() ">
+        <div class="flag" *ngIf="translate.currentLang == 'pt'">
+      <img src="assets/img/flag_pt.png" />
+        </div>
+        <div class="flag" *ngIf="translate.currentLang == 'en'">
+      <img src="assets/img/flag_en.png" />
+        </div>
+        </button>
     </div>
     <div class="searchBar" *ngIf="routingControl.itenarary == undefined && dataProvider.innit == 100">
       <div class="searchInput" *ngIf="searchControl">
@@ -32,36 +41,21 @@
       </ion-item>
     </ion-list>
   </div>
-
-  <div id="debug" *ngIf="debug">{{debug}}</div>
-
   <div class="progress" *ngIf="dataProvider.innit != 100">
     <img src="assets/img/LogoMobilis.png" />
 
-    <h3>Loading...</h3>
+    <h3>{{'MAP.LOADING' | translate}}</h3>
     <div class="progress-bar" [style.width.%]=dataProvider.innit>{{dataProvider.innit}}%</div>
     <h6>{{dataProvider.loadingText}}</h6>
   </div>
 
   <div id="mapid">
   </div>
-
-  <!-- <div class="busLineWindow" *ngIf="busLineBox" (click)="busLineBox=false">
-    <div class="busLine">
-      <div class="lines">
-        <ion-item *ngFor="let line of dataProvider.CheckBoxRoutes">
-          <ion-label text-wrap>{{line.label}}</ion-label>
-            <ion-checkbox type="checkbox" id="line.id" name="line.shortName" value="line"> </ion-checkbox>
-        </ion-item>
-      </div> 
-    </div>
-  </div> -->
-
-  <ion-fab bottom right #fab *ngIf="dataProvider.innit == 100 && routingControl.itenarary == undefined && (planning.orig.text == undefined || planning.orig.text != undefined && planningBox.size != 50) && (planning.dest.text == undefined || planning.dest.text != undefined && planningBox.size != 50)">
+  <ion-fab bottom right #fab *ngIf="dataProvider.innit == 100 && routingControl.itenarary == undefined && (planning.orig.text == undefined || planning.orig.text != undefined && planningBox.size != 50) && (planning.dest.text == undefined || planning.dest.text != undefined && planningBox.size != 50) && !navigationBox">
     <button ion-fab mini><ion-icon name="add"></ion-icon></button>
     <ion-fab-list side="top">
       <button ion-fab id="filter" (click)="showBusLines(fab)">
-          <div class="label">&nbsp; Lines </div>
+          <div class="label">&nbsp; {{'MAP.LINHAS' | translate}} </div>
           <ion-icon name="list"></ion-icon>
       </button>
       <button ion-fab id="street" (click)="toogleMapTile(fab)">
@@ -69,17 +63,17 @@
           <ion-icon name="map"></ion-icon>
       </button>
       <button ion-fab id="markers" (click)="fitMarkers(fab)">
-          <div class="label">&nbsp; Fit Markers </div>
+          <div class="label">&nbsp; {{'MAP.FIT_MARKERS' | translate}} </div>
            <ion-icon name="barcode"></ion-icon>
       </button>
       <button ion-fab id="stops" (click)="closedStop(fab)">
-          <div class="label">&nbsp; Closest Stop </div>
+          <div class="label">&nbsp; {{'MAP.CLOSEST_STOP' | translate}} </div>
           <ion-icon name="bus"></ion-icon>
       </button>
     </ion-fab-list>
   </ion-fab>
 
-  <div id="planning" [style.bottom.px]="planningBox.size" text-wrap *ngIf='planning.orig.text || planning.dest.text'>
+  <div id="planning" [style.bottom.px]="planningBox.size" text-wrap *ngIf='!navigationBox && (planning.orig.text || planning.dest.text)'>
     <div class="buttonTop">
       <button ion-button (click)="tooglePlaning()">
         <div *ngIf='planningBox.button == "down"'>
@@ -92,12 +86,12 @@
     </div>
     <div class="left">
       <div class="origin">
-        <label>Origin</label><br />
+        <label>{{'MAP.ORIGIN' | translate}}</label><br />
         <input [(ngModel)]="planning.orig.text" type="text" readonly placeholder="Origin coordenates" />
         <!-- <button ion-button (click)="chooseRoute()">(My Location)</button> -->
       </div>
       <div class="dest">
-        <label>Destination</label><br />
+        <label>{{'MAP.DESTINATION' | translate}}</label><br />
         <input [(ngModel)]="planning.dest.text" type="text" readonly placeholder="Destination coordenates" />
       </div>
     </div>
@@ -113,7 +107,7 @@
       <button ion-button (click)="cancelRoute(false)"><ion-icon name="arrow-round-back"></ion-icon></button>
     </div>
     <div class="title" text-wrap>
-      Your possibles itineraries
+      {{'MAP.POSSIBLES_ITINERARIES' | translate}}
     </div>
     <div>
       <div class="route" *ngFor="let d of routingControl.itenarary; let i=index">
@@ -164,10 +158,10 @@
           <div class="subItemLegs" *ngFor="let l of d.legs">
             <div class="mode" (click)="toggleSubDetails(l, d.legs)">
               <div *ngIf='l.mode == "WALK"' class="text" text-wrap>
-                <b>FOOT</b>: {{l.duration}}min
+                <b>{{'MAP.WALK'|translate}}</b>: {{l.duration}}min
               </div>
               <div *ngIf='l.mode == "BUS"' class="text" text-wrap>
-                <b>BUS</b> ({{l.direction.length}} Stops): {{l.duration}}min
+                <b>{{'MAP.BUS'|translate}}</b> ({{l.direction.length}} Stops): {{l.duration}}min
               </div>
               <div class="icon">
                 <ion-icon color="primary" item-right [name]="l.icon"></ion-icon>
@@ -191,7 +185,7 @@
               </div>
               <div *ngIf='l.mode == "BUS"'>
                 <div class="lineName" [style.color]="l.routeColor">
-                  <b>Line {{l.route}}</b>
+                  <b>{{'MAP.LINE'|translate}} {{l.route}}</b>
                 </div>
                 <div text-wrap class="subItemSteps">
                   <div *ngFor="let d of l.direction, let i=index">
@@ -212,6 +206,81 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div id="navigationBox" [@left]="navigateAnimationLeft" (@left.done)="resetAnimationLeft()" [@right]="navigateAnimationRight"
+    (@right.done)="resetAnimationRight()" *ngIf="navigationBox">
+    <div class="info">
+      <div class="walk" *ngIf="navigateControl.sequence[navigateControl.index].mode == 'WALK'">
+        <div class="header">
+          <div class="mode">
+            <div class="image">
+              <img src="assets/img/walking.png" />
+            </div>
+            <div class="text">
+              {{'MAP.WALK'|translate}} ({{navigateControl.sequence[navigateControl.index].step.distance}})
+            </div>
+          </div>
+        </div>
+        <div class="highlight">
+          {{navigateControl.sequence[navigateControl.index].step.relativeDirection}} in direction {{navigateControl.sequence[navigateControl.index].step.absoluteDirection}}
+          on {{navigateControl.sequence[navigateControl.index].step.streetName}}
+        </div>
+      </div>
+      <div class="bus" *ngIf="navigateControl.sequence[navigateControl.index].mode == 'BUS'">
+        <div class="header">
+          <div class="mode">
+            <div class="image">
+              <img src="assets/img/android-bus.png" />
+            </div>
+            <div class="text">
+              {{'MAP.BUS'|translate}}
+            </div>
+          </div>
+        </div>
+        <div *ngIf="navigateControl.sequence[navigateControl.index].from">
+          <div class="highlight">
+            {{'MAP.TAKE_BUS'|translate}} {{navigateControl.sequence[navigateControl.index].from.name}} ({{navigateControl.sequence[navigateControl.index].routeLongName}})
+            {{'MAP.AT'|translate}} {{navigateControl.sequence[navigateControl.index].time}}h {{'MAP.AND_GO'|translate}} {{navigateControl.sequence[navigateControl.index].step.length}}
+            {{'MAP.STOPS'|translate}}
+          </div>
+        </div>
+        <div *ngIf="navigateControl.sequence[navigateControl.index].to">
+          <div class="highlight">
+            {{'MAP.LEFT_BUS'|translate}} {{navigateControl.sequence[navigateControl.index].to.name}} {{'MAP.AT'|translate}} {{navigateControl.sequence[navigateControl.index].time}}h
+          </div>
+        </div>
+        <div class="listStops">
+          <div class="block">
+            <div class="pipe" [style.border-left-color]="navigateControl.sequence[navigateControl.index].routeColor"> </div>
+            <div class="stops">
+              <div class="stop" *ngFor="let stop of navigateControl.sequence[navigateControl.index].step" (click)="zoomStop(stop)">
+                {{stop.name}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttonFit">
+      <button ion-button (click)="toogleRoute()">
+          <ion-icon name="barcode"></ion-icon>
+        </button>
+    </div>
+    <div class="buttonClose">
+      <button ion-button (click)="cancelRoute(true)">
+          <ion-icon name="close"></ion-icon>
+        </button>
+    </div>
+    <div class="buttonLeft">
+      <button ion-button (click)="navigateLeft()" *ngIf="this.navigateControl.index > 0">
+          <ion-icon name="arrow-back"></ion-icon>
+        </button>
+    </div>
+    <div class="buttonRight">
+      <button ion-button (click)="navigateRight()" *ngIf="this.navigateControl.index < this.navigateControl.sequence.length - 1">
+          <ion-icon name="arrow-forward"></ion-icon>
+        </button>
     </div>
   </div>
 </ion-content>

@@ -8,6 +8,7 @@ import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { DataProvider } from '../providers/data-provider';
 import { Network } from '@ionic-native/network';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   templateUrl: 'app.html'
@@ -21,7 +22,7 @@ export class MyApp {
     private navController: NavController,
     public dataProvider: DataProvider,
     private network: Network,
-    private alertCtrl: AlertController) {
+    private alertCtrl: AlertController, private translate: TranslateService) {
 
 
     platform.ready().then(() => {
@@ -52,6 +53,13 @@ export class MyApp {
         dataProvider.setNetworkState(true);
         console.log('you are online');
       });
+
+      translate.addLangs(["en", "pt"]);
+      translate.setDefaultLang('en');
+
+      let browserLang = translate.getBrowserLang();
+      translate.use(browserLang.match(/en|pt/) ? browserLang : 'en');
+
     });
   }
 }

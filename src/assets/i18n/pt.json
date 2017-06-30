@@ -1,0 +1,29 @@
+{
+    "TABS": {
+        "MAP": "Mapa",
+        "TIMETABLES": "Horários",
+        "FAVORITES": "Favoritos"
+    },
+    "MAP": {
+        "LOADING": "A carregar...",
+        "LINES": "Linhas",
+        "LINE": "Linha",
+        "SATELLITE": "Satelite",
+        "STREET": "Ruas",
+        "FIT_MARKERS": "Centar Mapa",
+        "CLOSEST_STOP": "Próxima Paragem",
+        "ORIGIN": "Origem",
+        "DESTINATION": "Destino",
+        "POSSIBLES_ITINERARIES": "Itenerários Disponíveis",
+        "WALK": "A pé",
+        "BUS": "Autocarro",
+        "TAKE_BUS": "Espera pelo autocarro em ",
+        "LEFT_BUS": "Sai do autocarro em ",
+        "AT": "às",
+        "AND_GO": " e segue ",
+        "STOPS": " paragens.",
+        "TRAVEL_POINT": "Ponto de Viagem",
+        "BTN_NAV_START": "<div class='btnNavStart'><img src='assets/img/originRoute.png' /><div class='label'> Início </div></div>",
+        "BTN_NAV_DEST": "<div class='btnNavEnd'><img class='btnNavEnd' src='assets/img/destinationRoute.png' /><div class='label'> Fim </div></div>"
+    }
+}

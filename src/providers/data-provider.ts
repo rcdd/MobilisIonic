@@ -3,6 +3,7 @@ import { Platform, AlertController, ToastController } from 'ionic-angular';
 import 'rxjs/Rx';
 import { DatabaseProvider } from './database-provider';
 import { Http, Headers, RequestOptions } from '@angular/http';
+import { TranslateService } from '@ngx-translate/core';
 
 import 'moment';
 
@@ -30,7 +31,7 @@ export class DataProvider {
 
 
     constructor(private http: Http, private db: DatabaseProvider, public toastCtrl: ToastController,
-        private alertCtrl: AlertController, private platform: Platform) {
+        private alertCtrl: AlertController, private platform: Platform, public translate: TranslateService) {
         // watch network for a connection
         this.platform.ready().then(() => {
             this.db.init();
