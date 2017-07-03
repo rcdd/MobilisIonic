@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, trigger, keyframes, animate, transition, style, NgZone } from '@angular/core';
+import { Component, Injectable, ElementRef, trigger, keyframes, animate, transition, style, NgZone } from '@angular/core';
 
 import { Platform, AlertController, NavController, NavParams, ToastController } from 'ionic-angular';
 
@@ -46,10 +46,8 @@ declare var moment: any;
     ]),
   ]
 })
+@Injectable()
 export class HomePage {
-
-  @ViewChild('mapid')
-  mapElem: ElementRef;
 
   public stops: any; // PARAGENS
   public markersCluster: any; // CLUSTER
@@ -60,7 +58,7 @@ export class HomePage {
   private map: any;
   private mapSatellite: any;
   private mapStreet: any;
-  private chooseMap: string = "Satellite";
+  private streetMap: boolean = true;
   private currentPosition: any;
   public debug: any;
   private searchControl: boolean = false;
@@ -70,7 +68,6 @@ export class HomePage {
   private markerBallonOpened: boolean = false;
 
   private allowLocation = false;
-
 
   public planning: any = [];
   public planningBox: any = [];
@@ -120,15 +117,18 @@ export class HomePage {
     public toastCtrl: ToastController, public http: Http,
     public alertCtrl: AlertController, public db: DatabaseProvider,
     public dataProvider: DataProvider, public geolocation: Geolocation,
-    public platform: Platform, public zone: NgZone, public translate: TranslateService
+    public platform: Platform, public zone: NgZone, public translate: TranslateService, private elementRef: ElementRef
   ) {
     translate.setDefaultLang('en');
+    let browserLang = translate.getBrowserLang();
+    this.translate.use(browserLang.match(/en|pt/) ? browserLang : 'en');
     this.planning.orig = [];
     this.planning.dest = [];
     this.routingControl = [];
     this.currentPosition = [];
     this.planningBox.size = 50;
     this.planningBox.button = "down";
+    this.streetMap = true;
   }
 
   toogleLanguage() {
@@ -211,7 +211,7 @@ export class HomePage {
         let self = this;
         this.map.on('locationerror', function (e) {
           self.allowLocation = false;
-          self.showToast('You denied localization. For better performance, please allow your location. If already, please restart the app.', 5000);
+          this.translate.get("MISC.DENIED_LOCATION").subscribe((res: string) => { self.showToast(res, 5000); });
         });
 
         this.getCurrentLocation();
@@ -348,13 +348,16 @@ export class HomePage {
     });
 
     L.DomEvent.on(this.favBtn, 'click', function () {
-      console
+      let title, placeholder, errorTxt: string;
+      self.translate.get('MAP.FAVORITE_PLACE_ALERT.TITLE').subscribe((res: string) => { title = res });
+      self.translate.get('MAP.FAVORITE_PLACE_ALERT.PLACEHOLDER').subscribe((res: string) => { placeholder = res });
+      self.translate.get('MAP.ERROR').subscribe((res: string) => { errorTxt = res });
       let alerte = self.alertCtrl.create({
-        title: "Make a description for your favorite place.",
+        title: title,
         inputs: [
           {
             name: "desc",
-            placeholder: "Type a description."
+            placeholder: placeholder
           }
         ],
         buttons: [
@@ -370,14 +373,16 @@ export class HomePage {
             text: 'Ok',
             handler: data => {
               if (data.desc == "" || data == undefined || data == null) {
-                self.showAlert("You have to type a description", "ERROR");
+                self.translate.get('MAP.FAVORITE.ERROR_NO_TEXT').subscribe((res: string) => { self.showAlert(res, errorTxt); });
               } else if (data.desc.length > 25) {
-                self.showAlert("Your description exceed length (max.25)", "ERROR");
+                self.translate.get('MAP.FAVORITE.ERROR_LENGTH').subscribe((res: string) => { self.showAlert(res, errorTxt); });
               } else {
                 self.dataProvider.createFavoritePlace(data.desc, e.latlng.lat + "," + e.latlng.lng).then(res => {
                   if (res) {
-                    self.showToast("Your favorite place was saved.", 3000);
-                    self.createBallon("<h6>Travel Point</h6><hr>", true);
+                    self.translate.get('MAP.FAVORITE.SAVED').subscribe((res: string) => { self.showToast(res, 3000); });
+                    self.translate.get('MAP.TRAVEL_POINT').subscribe((res: string) => {
+                      self.createBallon("<h6>" + res + "</h6><hr>", true);
+                    });
                     L.popup()
                       .setContent(self.container)
                       .setLatLng(e.latlng)
@@ -385,7 +390,7 @@ export class HomePage {
 
                     self._onClickMap(e);
                   } else {
-                    self.showAlert("This favorite name already exists", "ERROR");
+                    self.translate.get('MAP.FAVORITE.ERROR_FAV_EXIST').subscribe((res: string) => { self.showAlert(res, errorTxt); });
                   }
                 });
               }
@@ -451,11 +456,13 @@ export class HomePage {
               .openOn(self.map);
           }
         });
-        this.showToast(closestStop.options.message + " from you!", 3000);
       } else {
+        let title, subtitle: string;
+        this.translate.get('MAP.ATTENTION').subscribe((res: string) => { title = res; });
+        this.translate.get('MAP.SELECT_ON_LINE').subscribe((res: string) => { subtitle = res; });
         let alert = await this.alertCtrl.create({
-          title: "Atention",
-          subTitle: "Please select at least one busline",
+          title: title,
+          subTitle: subtitle,
           buttons: [{
             text: 'Ok',
             handler: () => {
@@ -468,7 +475,7 @@ export class HomePage {
         alert.present();
       }
     } else {
-      this.showToast("We can't calculate your position", 3000);
+      this.translate.get('MAP.CANT_CALCULE_POSITION').subscribe((res: string) => { this.showToast(res, 3000); });
     }
 
   }
@@ -487,21 +494,21 @@ export class HomePage {
       position: 'top',
       showCloseButton: true
     });
-    toast.onDidDismiss(() => {
-      console.log('Dismissed toast');
-    });
 
     toast.present();
   }
 
   async planningOrigin(lat: any, lng: any) {      // ROUTING OF THE MAP
+    let originTxt, originInTxt: string;
     return new Promise((resolve, reject) => {
       this.map.removeLayer(this.planning.orig);
       this.cancelRoute(false);
       this.navigateControl = [];
       this.navigationBox = false;
+      this.translate.get('MAP.ORIGIN').subscribe((res: string) => { originTxt = res });
+      this.translate.get('MAP.ORIGIN_IN').subscribe((res: string) => { originInTxt = res });
       this.planning.orig = L.marker([lat, lng], { draggable: true, icon: this.iconStart })
-        .bindPopup("Origin")
+        .bindPopup(originTxt)
         .addTo(this.map)
         .on('dragend', (e) => {
           this.planningBox.size = 50;
@@ -510,14 +517,14 @@ export class HomePage {
           this.planning.orig.setLatLng([e.target._latlng.lat, e.target._latlng.lng]);
           this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
             this.planning.orig.text = resp;
-            this.planning.orig.bindPopup("Origin in " + resp);
+            this.planning.orig.bindPopup(originInTxt + resp);
             this.planning.orig.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
           });
         });
 
       this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
         this.planning.orig.text = resp;
-        this.planning.orig.bindPopup("Origin in " + resp);
+        this.planning.orig.bindPopup(originInTxt + resp);
       });
       this.planning.orig.latlng = (lat + ',' + lng);
       this.map.closePopup();
@@ -527,13 +534,19 @@ export class HomePage {
     });
   }
   async planningDestination(lat: any, lng: any) {
+    let originTxt, originInTxt, destinationTxt, destinationInTxt: string;
     return new Promise((resolve, reject) => {
       this.map.removeLayer(this.planning.dest);
       this.cancelRoute(false);
       this.navigateControl = [];
       this.navigationBox = false;
+      this.translate.get('MAP.ORIGIN').subscribe((res: string) => { originTxt = res });
+      this.translate.get('MAP.ORIGIN_IN').subscribe((res: string) => { originInTxt = res });
+      this.translate.get('MAP.DESTINATION').subscribe((res: string) => { destinationTxt = res });
+      this.translate.get('MAP.DESTINATION_IN').subscribe((res: string) => { destinationInTxt = res });
+
       this.planning.dest = L.marker([lat, lng], { draggable: true, icon: this.iconDest })
-        .bindPopup("Destination")
+        .bindPopup(destinationTxt)
         .addTo(this.map)
         .on('dragend', (e) => {
           this.planningBox.size = 50;
@@ -542,22 +555,35 @@ export class HomePage {
           this.planning.dest.setLatLng([e.target._latlng.lat, e.target._latlng.lng]);
           this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
             this.planning.dest.text = resp;
-            this.planning.dest.bindPopup("Destination in " + resp);
+            this.planning.dest.bindPopup(destinationInTxt + resp);
             this.planning.dest.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
           });
         });
 
       if (this.planning.orig.latlng == undefined && this.dataProvider.getFavoriteRoute() == undefined) {
         this.dataProvider.getReverseGeoCoder(this.currentPosition.marker.getLatLng().lat, this.currentPosition.marker.getLatLng().lng).then((resp) => {
+          this.planning.orig = L.marker([this.currentPosition.marker.getLatLng().lat, this.currentPosition.marker.getLatLng().lng], { draggable: true, icon: this.iconStart })
+            .bindPopup(originTxt)
+            .addTo(this.map)
+            .on('dragend', (e) => {
+              this.planningBox.size = 50;
+              this.planningBox.button = "down";
+              this.planning.orig.setLatLng([e.target._latlng.lat, e.target._latlng.lng]);
+              this.dataProvider.getReverseGeoCoder(e.target._latlng.lat, e.target._latlng.lng).then((resp) => {
+                this.planning.orig.text = resp;
+                this.planning.orig.bindPopup(originInTxt + resp);
+                this.planning.orig.latlng = (e.target._latlng.lat + ',' + e.target._latlng.lng);
+              });
+            });
           this.planning.orig.text = resp;
-          this.planning.orig.bindPopup("Origin in " + resp);
+          this.planning.orig.bindPopup(originInTxt + resp);
           this.planning.orig.latlng = (this.currentPosition.marker.getLatLng().lat + ',' + this.currentPosition.marker.getLatLng().lng);
           console.log(this.planning.orig.latlng);
         });
       }
 
       this.dataProvider.getReverseGeoCoder(lat, lng).then((resp) => {
-        this.planning.dest.bindPopup("Destination in " + resp);
+        this.planning.dest.bindPopup(destinationInTxt + resp);
         this.planning.dest.text = resp;
       });
       this.planning.dest.latlng = (lat + ',' + lng);
@@ -586,10 +612,13 @@ export class HomePage {
 
   updateCurrentLocation(data): void {
     //console.log("updateLocation", data);
-    var radius = (data.accuracy / 2).toFixed(1);
+    var radius = (data.accuracy / 2).toFixed(0);
     var currentPosition = [data.latitude, data.longitude];
     this.currentPosition.marker.setLatLng(currentPosition);
-    this.currentPosition.marker.bindPopup("You are within " + radius + " meters from this point");
+    let msg1, msg2: string;
+    this.translate.get("MAP.CURRENT_POSITION_RADIUS_1").subscribe((res: string) => { msg1 = res });
+    this.translate.get("MAP.CURRENT_POSITION_RADIUS_2").subscribe((res: string) => { msg2 = res });
+    this.currentPosition.marker.bindPopup(msg1 + radius + msg2);
     this.currentPosition.circle.setLatLng(currentPosition);
     if (!this.map.hasLayer(this.currentPosition)) {
       this.currentPosition.marker.addTo(this.map);
@@ -605,14 +634,19 @@ export class HomePage {
         if (this.allowLocation == true) {
           stop.meters = this.currentPosition.marker.getLatLng().distanceTo([stop.lat, stop.lon]);
           stop.distance = this.getDistance(stop.meters);
-          stop.message = '<img class="distanceImg" src="assets/img/iconDistance.png" /> Distance: ' + stop.distance;
+          let distanceTxt: string;
+          this.translate.get("MAP.DISTANCE").subscribe((res: string) => { distanceTxt = res });
+          stop.message = '<img class="distanceImg" src="assets/img/iconDistance.png" />' + distanceTxt + stop.distance;
         } else {
           stop.message = '';
         }
         let popUp = '<div class="header"><div class="stopImg"><img src="assets/img/android-bus.png" /></div><div class="stopLabel"><b>' + stop.id.split(":")[1] + " - " + stop.name + '</b></div></div><hr>';
-        popUp += stop.message + '<hr> <div class="linesDiv"> <div class="labelLines"><b>Lines:</b></div>';
+        let lineTxt, linesTxt: string;
+        this.translate.get("MAP.LINES").subscribe((res: string) => { linesTxt = res });
+        this.translate.get("MAP.LINE").subscribe((res: string) => { lineTxt = res });
+        popUp += stop.message + '<hr> <div class="linesDiv"> <div class="labelLines"><b>' + linesTxt + ':</b></div>';
         stop.lines.forEach(line => {
-          popUp += '<br> <div class="lineItem"> <img class="lineImg" src="assets/img/iconLines.png" />Line ' + line + "</div>";
+          popUp += '<br> <div class="lineItem"> <img class="lineImg" src="assets/img/iconLines.png" />' + lineTxt + line + "</div>";
         });
         popUp += "</div>"
         let popUpOptions =
@@ -647,24 +681,24 @@ export class HomePage {
       if (stop.favorite) {
         self.dataProvider.createFavoritePlace(stop.id.split(":")[1] + " - " + stop.name, (stop.lat + "," + stop.lon)).then(res => {
           if (res) {
-            self.showToast("Your favorite place was saved.", 3000);
+            this.translate.get("MAP.FAVORITE.SAVED").subscribe((res: string) => { self.showToast(res, 3000); });
             self.createBallon(popUp + "<hr>", stop.favorite);
             marker._popup.setContent(self.container);
             self._onBallonMarker(marker, stop, popUp, popUpOptions);
           } else {
-            self.showAlert("This favorite name already exists", "ERROR");
+            this.translate.get("MAP.FAVORITE.ERROR_FAV_EXIST").subscribe((res: string) => { self.showToast(res, 3000); });
             return;
           }
         });
       } else {
         let fav = { 'description': stop.id.split(":")[1] + " - " + stop.name, 'coords': (stop.lat + "," + stop.lon) };
         self.dataProvider.removeFavoritePlace(fav).then(res => {
-          self.showToast("Your favorite place was deleted.", 3000);
+          this.translate.get("MAP.FAVORITE.DELETED").subscribe((res: string) => { self.showToast(res, 3000); });
           self.createBallon(popUp + "<hr>", stop.favorite);
           marker._popup.setContent(self.container);
           self._onBallonMarker(marker, stop, popUp, popUpOptions);
         }).catch(() => {
-          self.showToast("Error deleting favorite.", 3000);
+          this.translate.get("MAP.FAVORITE.ERROR_FAV_DELETING").subscribe((res: string) => { self.showToast(res, 3000); });
           stop.favorite = true;
         });
       }
@@ -681,13 +715,18 @@ export class HomePage {
   }
 
   async showBusLines(fab: FabContainer = null) {
+    let title, selectAllTxt, selectNoneTxt: string;
     fab != null ? fab.close() : '';
+
+    this.translate.get("MAP.BUSLINES.TITLE").subscribe((res: string) => { title = res });
+    this.translate.get("MAP.BUSLINES.SELECT_ALL").subscribe((res: string) => { selectAllTxt = res });
+    this.translate.get("MAP.BUSLINES.SELECT_NONE").subscribe((res: string) => { selectNoneTxt = res });
     return new Promise((resolve, reject) => {
       let alert = this.alertCtrl.create({
-        title: 'Filter Bus Lines',
+        title: title,
         inputs: this.dataProvider.CheckBoxRoutes,
         buttons: [{
-          text: 'Select All',
+          text: selectAllTxt,
           handler: data => {
             this.dataProvider.loading = true;
             this.markers = [];
@@ -728,7 +767,7 @@ export class HomePage {
             });
           }
         }, {
-          text: 'Select None',
+          text: selectNoneTxt,
           handler: data => {
             this.dataProvider.CheckBoxRoutes.forEach(checkBox => {
               checkBox.checked = false;
@@ -843,11 +882,11 @@ export class HomePage {
             this.showToast(resp.error.msg, 5000);
           }
         } else {
-          this.showToast("No network!", 5000);
+          this.translate.get("MISC.NO_NETWORK").subscribe((res: string) => { this.showToast(res, 5000); });
         }
       });
     } else {
-      this.showToast("You need to select origin and destinations points", 3000);
+      this.translate.get("MAP.ERROR_SELECT_BOTH_POINTS").subscribe((res: string) => { this.showToast(res, 3000); });
     }
     this.dataProvider.loading = false;
   }
@@ -873,11 +912,15 @@ export class HomePage {
     this.routingControl.polyline.coords = [];
     this.routingControl.markers = [];
 
+    let takeBusTxt, leftBusTxt: string;
+    this.translate.get("MAP.TAKE_BUS").subscribe((res: string) => { takeBusTxt = res });
+    this.translate.get("MAP.LEFT_BUS").subscribe((res: string) => { leftBusTxt = res });
+
     route.legs.forEach(leg => {
       this.routingControl.polyline.coords = this.routingControl.polyline.coords.concat(L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs());
       if (leg.mode == "BUS") {
-        this.routingControl.markers.push(L.circle([leg.from.lat, leg.from.lon], { radius: 20 }).bindPopup("Take bus on " + leg.from.name));
-        this.routingControl.markers.push(L.circle([leg.to.lat, leg.to.lon], { radius: 20 }).bindPopup("Exit on " + leg.to.name));
+        this.routingControl.markers.push(L.circle([leg.from.lat, leg.from.lon], { radius: 20 }).bindPopup(takeBusTxt + leg.from.name));
+        this.routingControl.markers.push(L.circle([leg.to.lat, leg.to.lon], { radius: 20 }).bindPopup(leftBusTxt + leg.to.name));
       } else {
         leg.steps.forEach(step => {
           L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs().forEach(element => {
@@ -971,16 +1014,19 @@ export class HomePage {
       this.map.flyTo(latLng, zoom, options)
     }
     if (nav.mode == "BUS") {
+      let takeBusTxt, leftBusTxt: string;
+      this.translate.get("MAP.TAKE_BUS").subscribe((res: string) => { takeBusTxt = res });
+      this.translate.get("MAP.LEFT_BUS").subscribe((res: string) => { leftBusTxt = res });
       if (nav.to) {
         latLng = [nav.to.lat,
         nav.to.lon];
-        content = "Exit on " + nav.to.name;
+        content = leftBusTxt + nav.to.name;
         this.map.flyTo(latLng, zoom, options);
       }
       if (nav.from) {
         latLng = [nav.from.lat,
         nav.from.lon];
-        content = "Take bus on " + nav.from.name;
+        content = takeBusTxt + nav.from.name;
         this.map.flyTo(latLng, zoom, options);
       }
     }
@@ -1103,21 +1149,26 @@ export class HomePage {
     if (this.map.hasLayer(this.mapSatellite)) {
       this.map.removeLayer(this.mapSatellite);
       this.map.addLayer(this.mapStreet);
-      this.chooseMap = "Satellite";
+      this.streetMap = true;
     } else {
       this.map.removeLayer(this.mapStreet);
       this.map.addLayer(this.mapSatellite);
-      this.chooseMap = "Street";
+      this.streetMap = false;
     }
   }
 
   async addToFavoriteRoute() {
+    let titleTxt, placeholderTxt, errorTxt: string;
+
+    this.translate.get("MAP.FAVORITE_ROUTE_ALERT.TITLE").subscribe((res: string) => { titleTxt = res });
+    this.translate.get("MAP.FAVORITE_ROUTE_ALERT.PLACEHOLDER").subscribe((res: string) => { placeholderTxt = res });
+    this.translate.get('MAP.ERROR').subscribe((res: string) => { errorTxt = res });
     let alerte = await this.alertCtrl.create({
-      title: "Make a description for your favorite route.",
+      title: titleTxt,
       inputs: [
         {
           name: "desc",
-          placeholder: "Type a description."
+          placeholder: placeholderTxt
         }
       ],
       buttons: [
@@ -1133,17 +1184,15 @@ export class HomePage {
           text: 'Ok',
           handler: data => {
             if (data.desc == "" || data == undefined || data == null) {
-              this.showAlert("You have to type a description", "ERROR");
+              this.translate.get("MAP.FAVORITE.ERROR_NO_TEXT").subscribe((res: string) => { this.showAlert(res, errorTxt); });
             } else if (data.desc.length > 25) {
-              this.showAlert("Your description exceed length (max.25)", "ERROR").then((a) => {
-                this.addToFavoriteRoute();
-              });
+              this.translate.get("MAP.FAVORITE.ERROR_LENGTH").subscribe((res: string) => { this.showAlert(res, errorTxt); });
             } else {
               this.dataProvider.createFavoriteRoute(data.desc, this.planning.orig.latlng, this.planning.dest.latlng).then(res => {
                 if (res) {
-                  this.showToast("Your favorite route was saved.", 3000);
+                  this.translate.get("MAP.FAVORITE.SAVED").subscribe((res: string) => { this.showToast(res, 5000); });
                 } else {
-                  this.showAlert("This favorite name already exists", "ERROR");
+                  this.translate.get("MAP.FAVORITE.ERROR_FAV_EXIST").subscribe((res: string) => { this.showAlert(res, errorTxt); });
                 }
               });
             }
@@ -1181,25 +1230,28 @@ export class HomePage {
 
 
   searchPlace() {
-    if (this.searchInput.length > 2) {
-      this.dataProvider.getSearchPlace(this.searchInput).then(res => {
-        console.log("res", res);
-        if (res.length > 0) {
-          this.searchResults = res;
-        } else {
-          this.searchResults = [];
-          this.searchResults.push({ "name": "NO RESULTS", "icon": "assets/img/error.png" });
-        }
-        console.log("listPlaces", this.searchResults);
-      });
-    } else {
-      this.searchResults = [];
+    if (this.dataProvider.hasNetwork) {
+      if (this.searchInput.length > 2) {
+        this.dataProvider.getSearchPlace(this.searchInput).then(res => {
+          console.log("res", res);
+          if (res.length > 0) {
+            this.searchResults = res;
+          } else {
+            this.searchResults = [];
+            let noResultsTxt: string;
+            this.translate.get("MISC.NO_RESULTS").subscribe((res: string) => { noResultsTxt = res });
+            this.searchResults.push({ "name": noResultsTxt, "icon": "assets/img/error.png" });
+          }
+          console.log("listPlaces", this.searchResults);
+        });
+      } else {
+        this.searchResults = [];
+      }
     }
   }
 
   showPlace(res: any) {
     if (this.map.hasLayer(this.searchMarker)) {
-      console.log("tem layer", this.searchMarker);
       this.map.removeControl(this.searchMarker);
       this.searchMarker.remove();
     }
@@ -1248,12 +1300,12 @@ export class HomePage {
       if (res.favorite) {
         self.dataProvider.createFavoritePlace(res.name, (res.geometry.location.lat + "," + res.geometry.location.lng)).then(res => {
           if (res) {
-            self.showToast("Your favorite place was saved.", 3000);
+            this.translate.get("MAP.FAVORITE.SAVED").subscribe((res: string) => { this.showToast(res, 3000); });
           }
         });
       } else {
         self.dataProvider.removeFavoritePlace({ description: res.name, coords: (res.geometry.location.lat + "," + res.geometry.location.lng) }).then(res => {
-          self.showToast("Your favorite place was deleted.", 3000);
+          this.translate.get("MAP.FAVORITE.DELETED").subscribe((res: string) => { this.showToast(res, 3000); });
         });
       }
 

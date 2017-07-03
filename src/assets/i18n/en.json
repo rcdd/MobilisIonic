@@ -1,4 +1,9 @@
 {
+    "MISC": {
+        "NO_NETWORK": "No network!",
+        "DENIED_LOCATION": "You denied your location. For better performance, please allow your location. If already, please restart the app.",
+        "NO_RESULTS": "NO RESULTS"
+    },
     "TABS": {
         "MAP": "Map",
         "TIMETABLES": "Timetables",
@@ -13,8 +18,13 @@
         "FIT_MARKERS": "Fit Markers",
         "CLOSEST_STOP": "Closest Stop",
         "ORIGIN": "Origin",
+        "ORIGIN_IN": "Origin in ",
+        "ORIGIN_COORDS": "Origin Coordenates",
         "DESTINATION": "Destination",
+        "DESTINATION_IN": "Destination in ",
+        "DESTINATION_COORDS": "Destination Coordenates",
         "POSSIBLES_ITINERARIES": "Your possibles itineraries",
+        "ERROR_SELECT_BOTH_POINTS": "You need to select origin and destinations points",
         "WALK": "FOOT",
         "BUS": "BUS",
         "TAKE_BUS": "Take bus in ",
@@ -24,6 +34,34 @@
         "STOPS": " stops.",
         "TRAVEL_POINT": "Travel Point",
         "BTN_NAV_START": "<div class='btnNavStart'><img src='assets/img/originRoute.png' /><div class='label'> Start </div></div>",
-        "BTN_NAV_DEST": "<div class='btnNavEnd'><img class='btnNavEnd' src='assets/img/destinationRoute.png' /><div class='label'> Finish </div></div>"
+        "BTN_NAV_DEST": "<div class='btnNavEnd'><img class='btnNavEnd' src='assets/img/destinationRoute.png' /><div class='label'> Finish </div></div>",
+        "SELECT_ON_LINE": "Please select at least one busline",
+        "ATTENTION": "Attention!",
+        "CANT_CALCULE_POSITION": "It´s not possible calculate your position now",
+        "MAP.CURRENT_POSITION_RADIUS_1": "You are within ",
+        "MAP.CURRENT_POSITION_RADIUS_2": " meters from this point",
+        "DISTANCE": "Distance: ",
+        "BUSLINES": {
+            "TITLE": "Filter Bus Lines",
+            "SELECT_ALL": "Select All",
+            "SELECT_NONE": "Select None"
+        },
+        "FAVORITE_PLACE_ALERT": {
+            "TITLE": "Make a description for your favorite place.",
+            "PLACEHOLDER": "Type a description."
+        },
+        "FAVORITE_ROUTE_ALERT": {
+            "TITLE": "Make a description for your favorite route.",
+            "PLACEHOLDER": "Type a description."
+        },
+        "FAVORITE": {
+            "ERROR_LENGTH": "Your description exceed length (max.25)",
+            "ERROR_NO_TEXT": "You have to type a description",
+            "ERROR_FAV_EXIST": "This favorite name already exists",
+            "ERROR_FAV_DELETING": "Error deleting favorite.",
+            "SAVED": "Your favorite place was saved.",
+            "DELETED": "Your favorite place was deleted."
+        },
+        "ERROR": "ERROR"
     }
 }

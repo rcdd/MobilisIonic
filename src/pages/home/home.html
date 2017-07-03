@@ -52,27 +52,27 @@
   <div id="mapid">
   </div>
   <ion-fab bottom right #fab *ngIf="dataProvider.innit == 100 && routingControl.itenarary == undefined && (planning.orig.text == undefined || planning.orig.text != undefined && planningBox.size != 50) && (planning.dest.text == undefined || planning.dest.text != undefined && planningBox.size != 50) && !navigationBox">
-    <button ion-fab mini><ion-icon name="add"></ion-icon></button>
+    <button ion-fab mini><ion-icon name="menu"></ion-icon></button>
     <ion-fab-list side="top">
       <button ion-fab id="filter" (click)="showBusLines(fab)">
-          <div class="label">&nbsp; {{'MAP.LINHAS' | translate}} </div>
           <ion-icon name="list"></ion-icon>
+          <div class="label">{{'MAP.LINES' | translate}} </div>
       </button>
       <button ion-fab id="street" (click)="toogleMapTile(fab)">
-          <div class="label">&nbsp; {{chooseMap}} </div>
+          <div class="label" *ngIf="streetMap">{{'MAP.SATELLITE' | translate}} </div>
+          <div class="label" *ngIf="!streetMap">{{'MAP.STREET' | translate}} </div>
           <ion-icon name="map"></ion-icon>
       </button>
       <button ion-fab id="markers" (click)="fitMarkers(fab)">
-          <div class="label">&nbsp; {{'MAP.FIT_MARKERS' | translate}} </div>
+          <div class="label">{{'MAP.FIT_MARKERS' | translate}} </div>
            <ion-icon name="barcode"></ion-icon>
       </button>
       <button ion-fab id="stops" (click)="closedStop(fab)">
-          <div class="label">&nbsp; {{'MAP.CLOSEST_STOP' | translate}} </div>
+          <div class="label">{{'MAP.CLOSEST_STOP' | translate}} </div>
           <ion-icon name="bus"></ion-icon>
       </button>
     </ion-fab-list>
   </ion-fab>
-
   <div id="planning" [style.bottom.px]="planningBox.size" text-wrap *ngIf='!navigationBox && (planning.orig.text || planning.dest.text)'>
     <div class="buttonTop">
       <button ion-button (click)="tooglePlaning()">
@@ -87,12 +87,11 @@
     <div class="left">
       <div class="origin">
         <label>{{'MAP.ORIGIN' | translate}}</label><br />
-        <input [(ngModel)]="planning.orig.text" type="text" readonly placeholder="Origin coordenates" />
-        <!-- <button ion-button (click)="chooseRoute()">(My Location)</button> -->
+        <input [(ngModel)]="planning.orig.text" type="text" readonly placeholder="{{'MAP.ORIGIN_COORDS' | translate}}" />
       </div>
       <div class="dest">
         <label>{{'MAP.DESTINATION' | translate}}</label><br />
-        <input [(ngModel)]="planning.dest.text" type="text" readonly placeholder="Destination coordenates" />
+        <input [(ngModel)]="planning.dest.text" type="text" readonly placeholder="{{'MAP.DESTINATION_COORDS' | translate}}" />
       </div>
     </div>
     <div class="right">

@@ -608,53 +608,53 @@ page-home {
     } /////////////////////////////////
     // ACORDEON END ////////////////
     /////////////////////////////////
-    .fab {
-        position: relative; //display: block;
-        overflow: hidden;
-        width: 56px;
-        height: 56px;
-        border-radius: 15px;
-        font-size: 10px;
-        line-height: 56px;
-        text-align: center;
-        text-overflow: ellipsis;
-        text-transform: none;
-        white-space: nowrap;
-    }
-    .fab-in-list {
-        width: 120px;
-        height: 40px;
-        opacity: 0;
-        visibility: hidden;
-        -webkit-transform: scale(0);
-        transform: scale(0);
-        margin-left: -100%;
-    }
-    .fab ion-icon {
-        position: absolute;
-        left: 75%;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-    }
-    .fab .label {
-        position: absolute;
-        float: right;
-        right: 40px;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-        font-size: 14px;
-    }
-    .fab .ion-md-add:before {
-        content: "\f273";
-        position: relative;
-        left: -15px;
-    }
-    .fab .ion-md-close:before {
-        content: "\f2c0";
-        position: relative;
-        left: -15px;
+    //////////////////////////////////////////////////////////////////////////////////
+    /////                       FAB BUTTONS                                      /////
+    //////////////////////////////////////////////////////////////////////////////////
+    ion-fab {
+        .fab-md {
+            box-shadow: 0 0 0;
+        }
+        ion-fab-list button[ion-fab] {
+            text-align: center;
+            overflow: visible;
+            margin: 8px 0;
+            height: 40px;
+            opacity: 0;
+            width: 19rem;
+            -webkit-transform: scale(0);
+            transform: scale(0);
+            background-color: transparent;
+            right: 14.3rem;
+            .label {
+                top: 0px;
+                position: absolute;
+                right: 48px;
+                background: rgba(248, 248, 248, 1);
+                height: 24px;
+                line-height: 16px;
+                padding-left: 8px;
+                padding-right: 8px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                margin-top: 8px;
+                border-radius: 5px;
+            }
+            ion-icon {
+                display: -webkit-inline-flex;
+                display: -ms-inline-flexbox;
+                display: inline-block;
+                margin: auto auto auto 85%;
+                border-radius: 5px;
+                border: 1px;
+                background-color: white;
+                padding-block-end: 5px;
+                padding-block-start: 5px;
+            }
+        }
+        .button-inner {
+            overflow: visible;
+        }
     } //////////////////////////////////////////////////////////////////////////////////
     /////                       NAVIGATION                                       /////
     //////////////////////////////////////////////////////////////////////////////////

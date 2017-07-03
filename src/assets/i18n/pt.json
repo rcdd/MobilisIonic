@@ -1,4 +1,9 @@
 {
+    "MISC": {
+        "NO_NETWORK": "Sem internet!",
+        "DENIED_LOCATION": "Não tem a localização ativa. Para melhor experiência, por favor ativar o serviço de localização. Caso já esteje ativo, por favor reiniciar a aplicação.",
+        "NO_RESULTS": "SEM RESULTADOS"
+    },
     "TABS": {
         "MAP": "Mapa",
         "TIMETABLES": "Horários",
@@ -8,13 +13,18 @@
         "LOADING": "A carregar...",
         "LINES": "Linhas",
         "LINE": "Linha",
-        "SATELLITE": "Satelite",
+        "SATELLITE": "Satélite",
         "STREET": "Ruas",
-        "FIT_MARKERS": "Centar Mapa",
+        "FIT_MARKERS": "Centrar Mapa",
         "CLOSEST_STOP": "Próxima Paragem",
         "ORIGIN": "Origem",
+        "ORIGIN_IN": "Origem em ",
+        "ORIGIN_COORDS": "Coordenada de Origem",
         "DESTINATION": "Destino",
+        "DESTINATION_IN": "Destino em ",
+        "DESTINATION_COORDS": "Coordenadas de Destino",
         "POSSIBLES_ITINERARIES": "Itenerários Disponíveis",
+        "ERROR_SELECT_BOTH_POINTS": "Por favor, selecionar um ponto de origem e um ponto de destino",
         "WALK": "A pé",
         "BUS": "Autocarro",
         "TAKE_BUS": "Espera pelo autocarro em ",
@@ -24,6 +34,34 @@
         "STOPS": " paragens.",
         "TRAVEL_POINT": "Ponto de Viagem",
         "BTN_NAV_START": "<div class='btnNavStart'><img src='assets/img/originRoute.png' /><div class='label'> Início </div></div>",
-        "BTN_NAV_DEST": "<div class='btnNavEnd'><img class='btnNavEnd' src='assets/img/destinationRoute.png' /><div class='label'> Fim </div></div>"
+        "BTN_NAV_DEST": "<div class='btnNavEnd'><img class='btnNavEnd' src='assets/img/destinationRoute.png' /><div class='label'> Fim </div></div>",
+        "SELECT_ON_LINE": "Por favor, selecione pelo menos uma linha...",
+        "ATTENTION": "Atenção!",
+        "CANT_CALCULE_POSITION": "Não é possivel calcular a sua posição neste momento",
+        "CURRENT_POSITION_RADIUS_1": "Encontra-se num raio de ",
+        "CURRENT_POSITION_RADIUS_2": " metros deste ponto",
+        "DISTANCE": "Distância: ",
+        "BUSLINES": {
+            "TITLE": "Filtrar Linhas de Autocarros",
+            "SELECT_ALL": "Selecionar Todas",
+            "SELECT_NONE": "Selecionar Nenhuma"
+        },
+        "FAVORITE_PLACE_ALERT": {
+            "TITLE": "Insira a descrição para o seu lugar favorito.",
+            "PLACEHOLDER": "Inserir descrição."
+        },
+        "FAVORITE_ROUTE_ALERT": {
+            "TITLE": "Insira a descrição para a sua rota favorita.",
+            "PLACEHOLDER": "Inserir descrição."
+        },
+        "FAVORITE": {
+            "ERROR_LENGTH": "A sua descrição excede o tamanho permitido (máx.25 letras)",
+            "ERROR_NO_TEXT": "Precisa de introduzir uma descrição",
+            "ERROR_FAV_EXIST": "Este favorito já se encontra registado",
+            "ERROR_FAV_DELETING": "Erro a eliminar favorito.",
+            "SAVED": "Favorito guardado com sucesso.",
+            "DELETED": "Favorito eliminado com sucesso."
+        },
+        "ERROR": "ERRO"
     }
 }
