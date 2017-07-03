@@ -4,6 +4,8 @@ import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { DataProvider } from '../../providers/data-provider';
 import { AlertController, Platform } from 'ionic-angular';
+
+import { TranslateService } from '@ngx-translate/core';
 import 'moment';
 
 declare var moment: any;
@@ -29,6 +31,10 @@ export class TimeTables {
   public stopNameSelected: any;
   public minDate: Date = new Date();
   public maxDate: Date = new Date();
+  public monthShortNames: any;
+  public dayShortNames: any;
+  public monthNames: any;
+  public dayNames: any;
   public selectedDate: any = new Date().toISOString();
   public setFirst: any;
   public possibleTimesVisible: boolean;
@@ -36,7 +42,7 @@ export class TimeTables {
   listTimesAutoScroll: any;
 
   constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
-    public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform) {
+    public dataProvider: DataProvider, public alertCtrl: AlertController, public platform: Platform, public translate: TranslateService) {
     this.isVisibleSearchbar = false;
     this.maxDate.setDate(this.minDate.getDate() + 8);
 
@@ -53,20 +59,16 @@ export class TimeTables {
 
   updateSelectedValue() {
     this.isVisibleSearchbar = true;
-    //console.dir(this.selectedBusLine);
     this.timesToShowInList = [];
     this.timesToShow = [];
     this.dataProvider.getCheckBoxRoutes().forEach(line => {
       if (line.id.id == this.selectedBusLine) {
-        // this.stopsToShow = line.id.stops;
-        // this.stops = line.id.stops;
         this.removeDuplicates(line.id.stops)
       }
     });
   }
 
   showTimes(stop: any) {
-    //console.log("ShowTime:Stop", stop);
     if (this.dataProvider.getNetworkState()) {
       this.stopNameSelected = stop.name;
       this.isVisibleCkeckBox = false;
@@ -74,23 +76,17 @@ export class TimeTables {
       this.timesToShowInList = [];
       this.timesToShow = [];
       let listOfLines = [];
-      //console.log(this.dataProvider.getNetworkState());
 
       this.dataProvider.getTimeFromStop(stop.id, this.selectedDate).then(resp => {
-
-
         resp.forEach(pat => {
-          //console.dir(pat);
           let storeTimes: any = [];
 
           if (listOfLines.indexOf(pat.pattern.desc) == -1) {
-            //console.log("listOfLines", listOfLines);
             listOfLines.push(pat.pattern.desc);
             storeTimes.line = pat.pattern;
             storeTimes.color = pat.pattern.color;
             let first = true;
             let listTimes: any[] = [];
-
             if (pat.times.length != 0) {
               pat.times.forEach(time => {
                 listTimes.push(time);
@@ -103,7 +99,7 @@ export class TimeTables {
                 if (time.line.id.split(':')[0] + time.line.id.split(':')[1] == this.selectedBusLine.split(':')[0] + this.selectedBusLine.split(':')[1]) {
                   if (first) {
                     this.setFirst = index;
-                    this.selectedLine(time.times);
+                    this.selectedLine(time);
                     first = false;
                   }
                 }
@@ -112,15 +108,15 @@ export class TimeTables {
           }
         });
         this.isVisible = true;
-        // console.dir(this.timesToShow);
       });
     } else {
-      this.showToast("NO NETWORK CONNECTION!");
+      this.translate.get("MISC.NO_NETWORK").subscribe((res: string) => { this.showToast(res); });
     }
   }
 
   selectedLine(time) {
-
+    this.showToast(this.translate.instant('MAP.LINE') + " " + time.line.desc);
+    time = time.times
     this.timesToShowInList = [];
     this.passedTimes = [];
     this.possibleTimes = [];
@@ -131,8 +127,7 @@ export class TimeTables {
     });
 
     this.timesToShowInList.forEach((time, key, index) => {
-      //console.log((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')));
-      if ((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')) < 0) {
+      if ((moment(new Date(), "dd-MM-yyyy hh:mm").diff(time, 'minutes')) <= 0) {
         this.possibleTimes.push(time);
         this.possibleTimesVisible = true;
       } else {
@@ -184,16 +179,9 @@ export class TimeTables {
 
   getItems(ev) {
     this.isVisible = false;
-    // Reset items back to all of the items
     this.resetNamesStops();
-
-    // set val to the value of the ev target
     var val = ev.target.value;
-
-    // if the value is an empty string don't filter the items
-    //console.dir(this.stopsToShow);
     if (val && val.trim() != '') {
-      //console.dir(this.stopsToShow);
       this.stopsToShow = this.stopsToShow.filter((item) => {
         let stopsAccents = this.removeAccents(item.name).toLowerCase().indexOf(val.toLowerCase()) > -1;
         let stopsNoAccents = item.name.toLowerCase().indexOf(val.toLowerCase()) > -1;
@@ -249,6 +237,7 @@ export class TimeTables {
     let toast = this.toastCtrl.create({
       message: msg,
       duration: 3000,
+      showCloseButton: true
     });
 
     toast.present(toast);

@@ -4,6 +4,12 @@
         "DENIED_LOCATION": "You denied your location. For better performance, please allow your location. If already, please restart the app.",
         "NO_RESULTS": "NO RESULTS"
     },
+    "APP": {
+        "NETWORK_ALERT": {
+            "TITLE": "No Internet Connection",
+            "SUBTITLE": "Please Check Your Network connection"
+        }
+    },
     "TABS": {
         "MAP": "Map",
         "TIMETABLES": "Timetables",
@@ -63,5 +69,93 @@
             "DELETED": "Your favorite place was deleted."
         },
         "ERROR": "ERROR"
+    },
+    "TIMETABLES": {
+        "SELECT_BUSLINE": "Select bus line",
+        "DATE": "Date",
+        "NO_BUSTOP_FOUND": "No bus stop found",
+        "NEED_SELECT_BUSLINE": "You have to select the bus line that you want.",
+        "NEXT_TRIPS": "Next trips",
+        "NO_TIMES_AVAILABLE": "No times available",
+        "OTHER_TIMES": "Other Times",
+        "ALL_TIMES_AVAILABLE": "All times are availables",
+        "NO_TIMES_AVAILABLE_FOR_DATE": "No schedule available for this date: ",
+        "PICKER": {
+            "DONE": "DONE",
+            "CANCEL": "CANCEL",
+            "MONTH_NAMES": [
+                "january",
+                "february",
+                "march",
+                "april",
+                "may",
+                "june",
+                "july",
+                "august",
+                "september",
+                "october",
+                "november",
+                "december"
+            ],
+            "MONTH_SHORT_NAMES": [
+                "jan",
+                "feb",
+                "mar",
+                "apr",
+                "may",
+                "jun",
+                "jul",
+                "aug",
+                "sep",
+                "oct",
+                "nov",
+                "dec"
+            ],
+            "DAY_NAMES": [
+                "sunday",
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+            ],
+            "DAY_SHORT_NAMES": [
+                "sun",
+                "mon",
+                "tue",
+                "wed",
+                "thu",
+                "fri",
+                "sat",
+                "sun"
+            ]
+        }
+    },
+    "FAVORITES": {
+        "FAVORITES_TITLE": "Favorites",
+        "FAVORITES_EMPTY": "You don't have any favorites",
+        "FAVORITE_DELETE_ALERT": {
+            "TITLE": "Delete Favorite",
+            "DELETE_FAVORITE_MESSAGE": "Are you sure you want to delete ",
+            "BUTTON_YES": "YES",
+            "BUTTON_NO": "NO",
+            "DELETED_MESSAGE": "Your favorite was deleted"
+        },
+        "DELETE": "DELETE"
+    },
+    "DATAPROVIDER": {
+        "LOADING_TXT": {
+            "ROUTES": "Downloading routes...",
+            "STOPS": "Downloading stops...",
+            "FAVORITES_CREATE": "Creating favorites...",
+            "FAVORITES_LOADING": "Loading favorites...",
+            "STOPS_LOADING": "Loading stops..."
+        },
+        "NETWORK_ALERT": {
+            "TITLE": "No Internet Connection",
+            "SUBTITLE": "You app is out of date! Please turn on your network and run app again!"
+        }
     }
 }

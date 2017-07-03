@@ -2,28 +2,28 @@
   <div class="searchBar" *ngIf="favoritesRoutes.length != 0  || favoritesPlaces.length != 0">
     <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
   </div>
-  <ion-row *ngIf="favoritesToShow.routes?.length == 0  && favoritesToShow.places?.length == 0"> Favorites </ion-row>
+  <ion-row *ngIf="favoritesToShow.routes?.length < 1  && favoritesToShow.places?.length < 1"> {{'FAVORITES.FAVORITES_TITLE' | translate}} </ion-row>
 </ion-header>
 
 <ion-content>
-  <div class="noFav" *ngIf="favoritesToShow.routes?.length == 0  && favoritesToShow.places?.length == 0  && favoritesRoutes.length == 0 && favoritesPlaces.length == 0">
-    You don't have any favorites
+  <div class="noFav" *ngIf="(favoritesToShow.routes?.length < 1 || favoritesToShow.routes?.length == 0)  && (favoritesToShow.places?.length < 1 || favoritesToShow.places?.length == 0)  && favoritesRoutes.length == 0 && favoritesPlaces.length == 0">
+    {{'FAVORITES.FAVORITES_EMPTY' | translate}}
   </div>
 
   <div class="noFav" *ngIf="favoritesToShow.routes?.length == 0  && favoritesToShow.places?.length == 0  && favoritesRoutes.length != 0 && favoritesPlaces.length != 0">
-    No results found
+    {{'MISC.NO_RESULTS' | translate}}
   </div>
 
   <div class="listFavorites">
     <div class="item" *ngFor="let fav of favoritesToShow.routes">
       <img src="assets/img/iconDistance.png" class="imgFav" />
       <button ion-button text-wrap class="btnFav" color="light" (click)="travelToRoute(fav)"> {{ fav.description }} </button>
-      <button ion-button class="btnDel" color="danger" (click)="deleteFav(fav)">Delete</button>
+      <button ion-button class="btnDel" color="danger" (click)="deleteFav(fav)">{{'FAVORITES.DELETE'| translate}}</button>
     </div>
     <div class="item" *ngFor="let fav of favoritesToShow.places">
       <img src="assets/img/android-location.png" class="imgFav" />
       <button ion-button text-wrap class="btnFav" color="light" (click)="travelToPlace(fav)"> {{ fav.description }} </button>
-      <button ion-button class="btnDel" color="danger" (click)="deleteFav(fav,false)">Delete</button>
+      <button ion-button class="btnDel" color="danger" (click)="deleteFav(fav,false)">{{'FAVORITES.DELETE'| translate}}</button>
     </div>
   </div>
 </ion-content>

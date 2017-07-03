@@ -62,8 +62,7 @@ export class DataProvider {
             //GET PLACES
             let headers = new Headers({ 'Access-Control-Allow-Origin': 'http://localhost:8100' });
             let options = new RequestOptions({ headers: headers });
-            //let lang = "en";
-            let lang = "pt"
+            let lang: string = this.translate.currentLang;
             //let key = 'AIzaSyD1i1kgXFRinKusaftvainJ6lqVvIgIfSU'; //PEREIRA
             let key = 'AIzaSyCIAsIQk7fTx3KomXq0fE6klhA8mP5jKtY'; //DOMINGUES
             let resp = await this.http.get(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=39.7454901,-8.807645&language=` + lang + `&radius=6000&keyword=` + keyword + `&key=` + key, options).toPromise();
@@ -74,9 +73,6 @@ export class DataProvider {
                     duration: 3000,
                     position: 'top',
                     showCloseButton: true
-                });
-                toast.onDidDismiss(() => {
-                    console.log('Dismissed toast');
                 });
 
                 toast.present();
@@ -122,13 +118,10 @@ export class DataProvider {
     async getReverseGeoCoder(lat: any, lng: any) {
         if (this.hasNetwork) {
             this.loading = true;
-            // MAPBOX
-            //let resp = await this.http.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/` + lng + `,` + lat + `.json?access_token=pk.eyJ1IjoicmNkZCIsImEiOiJjajBiMHBsbWgwMDB2MnFud2NrODRocXNjIn0.UWZO6WuB6DPU6AMWt5Mr9A&types=address%2Cpoi%2Cpoi.landmark%2Clocality%2Cplace%2Cpostcode`).toPromise();
             // GOOGLE
             let key = 'AIzaSyCIAsIQk7fTx3KomXq0fE6klhA8mP5jKtY';
             let resp = await this.http.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=` + lat + `,` + lng + `&key=` + key).toPromise();
             let place = resp.json();
-            //console.log("ReverseCoder", place);
             this.loading = false;
             if (place.results.length > 0) {
                 return (place.results[0].formatted_address != undefined ? place.results[0].formatted_address : (lat + "," + lng));
@@ -145,31 +138,26 @@ export class DataProvider {
         return new Promise((resolve, reject) => {
             this.innit = 0;
             this.isUpdated().then((up) => {
-                //console.log("up", up);
                 if (!up) {
                     return this.getRoutes().then(() => {
                         this.innit = 10;
-                        this.loadingText = "Downloading routes...";
+                        this.loadingText = this.translate.instant("DATAPROVIDER.LOADING_TXT.ROUTES");
                         return this.getStationsFromBusLines().then(() => {
-                            this.loadingText = "Downloading stops...";
+                            this.loadingText = this.translate.instant("DATAPROVIDER.LOADING_TXT.STOPS");
                             this.dataInfoToDB();
-                            //console.log("Download DONE!", this.stops);
                             return this.createStorageFavoritesRoutes().then(() => {
-                                this.loadingText = "Creating favorites...";
-                                /*console.log("DB Not updated!");
-                                console.log("Innit download...");*/
+                                this.loadingText = this.translate.instant("DATAPROVIDER.LOADING_TXT.FAVORITES_CREATE");
                                 return this.createStorageFavoritesPlaces().then(() => {
-                                    this.loadingText = "Creating favorites...";
+                                    this.loadingText = this.translate.instant("DATAPROVIDER.LOADING_TXT.FAVORITES_CREATE");
                                 });
                             });
                         });
                     });
-
                 }
             }).then(() => {
                 this.innit = 80;
                 return this.getStopsFromDB().then((stops) => {
-                    this.loadingText = "Loading stops...";
+                    this.loadingText = this.translate.instant("DATAPROVIDER.LOADING_TXT.STOPS_LOADING");
                     this.getFavoritesFromDB().then(fav => {
                         resolve();
                     })
@@ -183,7 +171,7 @@ export class DataProvider {
     async getFavoritesFromDB() {
         new Promise((resolve, reject) => {
             return this.getFavoritesRoutesFromDb().then(favRoutes => {
-                this.loadingText = "Loading favorites...";
+                this.loadingText = this.translate.instant("DATAPROVIDER.LOADING_TXT.FAVORITES_LOADING");
                 this.favoritesRoutes = favRoutes;
             }).then((s) => {
                 this.getFavoritesPlacesFromDb().then(favPlaces => {
@@ -290,11 +278,9 @@ export class DataProvider {
 
         await this.db.query("CREATE TABLE IF NOT EXISTS BUSLINES (AGENCYNAME TEXT, IDLINE TEXT, LONGNAME TEXT, MODE TEXT, SHORTNAME TEXT, COLOR TEXT)")
             .then(res => {
-                console.log("lines", this.lines);
                 this.lines.forEach(route => {
                     this.innit += 1;
                     this.db.query("INSERT INTO BUSLINES (AGENCYNAME, IDLINE, LONGNAME, MODE, SHORTNAME, COLOR) VALUES(?,?,?,?,?,?);", [route.agencyName, route.id, route.longName, route.mode, route.shortName, route.color]).then(res => {
-                        // console.dir(res);
                     })
                         .catch(err => {
                             console.log("Error: ", err);
@@ -316,11 +302,9 @@ export class DataProvider {
         await this.db.query("CREATE TABLE IF NOT EXISTS ID_" + id[1] + " (name TEXT, id TEXT, lat TEXT, lon TEXT)")
             .then(res => {
                 stops.stops.forEach(stp => {
-                    //console.log("inserir linha " + id[1]);
                     this.db.query("INSERT INTO ID_" + id[1] + " (name, id, lat, lon) VALUES(?,?,?,?);", [stp.name, stp.id, stp.lat, stp.lon])
                 });
             })
-
             .catch(err => {
                 console.log("Error: ", err);
             });
@@ -352,7 +336,6 @@ export class DataProvider {
         return new Promise((resolve, reject) => {
             this.db.query("SELECT * FROM FAVORITES_ROUTES")
                 .then(res => {
-                    //console.log("read favRoutes from db", res);
                     this.favoritesRoutes = [];
                     if (res.rows.length > 0) {
                         for (let i = 0; i < res.rows.length; i++) {
@@ -373,7 +356,6 @@ export class DataProvider {
                 });
 
         }).then(() => {
-            //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
             return this.favoritesRoutes;
         }).catch(() => {
             return null;
@@ -384,7 +366,6 @@ export class DataProvider {
         return new Promise((resolve, reject) => {
             this.db.query("SELECT * FROM FAVORITES_PLACES")
                 .then(res => {
-                    //console.log("read favPlaces from db", res);
                     this.favoritesPlaces = [];
                     if (res.rows.length > 0) {
                         for (let i = 0; i < res.rows.length; i++) {
@@ -411,11 +392,11 @@ export class DataProvider {
 
     async  createFavoriteRoute(desc: string, origin: string, destination: string) {
         return new Promise((resolve, reject) => {
+            desc = desc.replace(/'/g, "");
             this.getFavoritesRoutesFromDb().then(res => {
                 if (res != null) {
                     for (var i = 0; i < res.length; i++) {
                         if (this.removeAccents(res[i].description).toLowerCase().trim() == this.removeAccents(desc).toLowerCase().trim()) {
-                            console.log("EI JA EXISTE")
                             reject(res);
                         }
                     }
@@ -440,6 +421,7 @@ export class DataProvider {
 
     async  createFavoritePlace(desc: string, coords: string) {
         return new Promise((resolve, reject) => {
+            desc = desc.replace(/'/g, "");
             this.getFavoritesPlacesFromDb().then(res => {
                 if (res != null) {
                     for (var i = 0; i < res.length; i++) {
@@ -484,16 +466,12 @@ export class DataProvider {
         return new Promise((resolve, reject) => {
             this.db.query("SELECT * FROM BUSLINES")
                 .then(res => {
-                    //console.log("BUSLINES:", res);
                     for (let i = 0; i < res.rows.length; i++) {
-                        //console.log("BUSLINE " + res.rows.item(i).IDLINE);
                         let id = res.rows.item(i).IDLINE.split(":");
                         this.db.query("SELECT * FROM ID_" + id[1])
                             .then(resp => {
                                 let stop: any[] = [];
-                                //console.log("Stops from line " + id[1], resp.rows);
                                 for (let i = 0; i < resp.rows.length; i++) {
-                                    //console.log("stop cenas", resp.rows.item(i));
                                     stop.push(resp.rows.item(i))
                                 }
                                 this.stops[res.rows.item(i).IDLINE] = {};
@@ -516,7 +494,6 @@ export class DataProvider {
                     console.log("Error: ", err);
                 })
         }).then(() => {
-            //console.log("Stops in getStopsFromDB", Object.keys(this.stops).length);
             return this.stops;
         });
     }
@@ -527,15 +504,11 @@ export class DataProvider {
         let resp = await this.http.get("http://" + this.ipOTP + "/otp/routers/default/index/stops/" + stop + "/stoptimes/" + date).toPromise();
         let respj = resp.json();
         respj.forEach(pat => {
-            //console.log(pat.pattern.id);
             this.CheckBoxRoutes.forEach(line => {
-                //console.log(line.id.color);
                 if (line.id.id.split(':')[0] + line.id.id.split(':')[1] == pat.pattern.id.split(':')[0] + pat.pattern.id.split(':')[1]) {
                     pat.pattern.color = "#" + line.id.color;
-                    // console.log(line.id,pat.color);
                 }
             });
-
         });
         this.loading = false;
         return respj;
@@ -555,8 +528,8 @@ export class DataProvider {
 
     async noNetworkOnInit() {
         let alert = this.alertCtrl.create({
-            title: "No Internet Connection",
-            subTitle: "You app is out of date! Please turn on your network and run app again!",
+            title: this.translate.instant("DATAPROVIDER.NETWORK_ALERT.TITLE"),
+            subTitle: this.translate.instant("DATAPROVIDER.NETWORK_ALERT.SUBTITLE"),
             buttons: [{
                 text: 'Ok',
                 handler: () => {
@@ -605,6 +578,7 @@ export class DataProvider {
 
     public deleteFavoritePlace(fav: any) {
         new Promise((resolve, reject) => {
+            fav.description = fav.description.replace(/'/g, "");
             let index: number = this.favoritesPlaces.indexOf(fav);
             if (index !== -1) {
                 this.favoritesPlaces.splice(index, 1);
@@ -619,6 +593,7 @@ export class DataProvider {
 
     public removeFavoritePlace(fav: any) {
         return new Promise((resolve, reject) => {
+            fav.description = fav.description.replace(/'/g, "");
             for (let i = 0; i < this.favoritesPlaces.length; i++) {
                 if (this.favoritesPlaces[i].description == fav.description) {
                     this.favoritesPlaces.splice(i, 1);

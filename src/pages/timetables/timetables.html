@@ -1,20 +1,23 @@
 <div class="headers">
 
   <div class="selectBusLine" *ngIf='isVisibleCkeckBox'>
-    <ion-label>Select Bus Line</ion-label>
+    <ion-label>{{'TIMETABLES.SELECT_BUSLINE' | translate}}</ion-label>
     <ion-select [(ngModel)]="selectedBusLine" (ngModelChange)="updateSelectedValue($event)" multiple="false">
       <ion-option *ngFor="let busLine of dataProvider.getCheckBoxRoutes()" value="{{busLine.id.id}}"> {{busLine.label}} </ion-option>
     </ion-select>
   </div>
 
   <div class="dateBox" *ngIf='isVisibleCkeckBox'>
-    <ion-label>Date</ion-label>
-    <ion-datetime displayFormat="YYYY-MM-DD" min="{{minDate | date:'yyyy-MM-dd'}}" max="{{maxDate | date:'yyyy-MM-dd'}}" [(ngModel)]="selectedDate">
+    <ion-label>{{'TIMETABLES.DATE' | translate}}</ion-label>
+    <ion-datetime displayFormat="YYYY-MM-DD" pickerFormat="YYYY-MM-DD" min="{{minDate | date:'yyyy-MM-dd'}}" max="{{maxDate | date:'yyyy-MM-dd'}}"
+      [(ngModel)]="selectedDate" ([dayNames])="dayNames" [dayShortNames]="translate.instant('TIMETABLES.PICKER.DAY_SHORT_NAMES')"
+      ([monthNames])="monthNames " ([monthShortNames])="monthShortNames " [doneText]="translate.instant( 'TIMETABLES.PICKER.DONE') "
+      [cancelText]="translate.instant('TIMETABLES.PICKER.CANCEL')">
     </ion-datetime>
   </div>
 
   <div class="searchBar" *ngIf='isVisibleSearchbar'>
-    <ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>
+    <ion-searchbar (ionInput)="getItems($event) "></ion-searchbar>
   </div>
 
   <div class="stopDetails" *ngIf='isVisible' class="buttonHide">
@@ -38,27 +41,27 @@
   </div>
 
   <div *ngIf='isVisibleSearchbar && stopsToShow.length <= 0' class="listStopsEmpty">
-    <span>No bus stop found!</span>
+    <span>{{'TIMETABLES.NO_BUSTOP_FOUND' | translate}}</span>
   </div>
   <div *ngIf='!isVisibleSearchbar && !isVisible && timesToShowInList.length == 0 && dataProvider.loading == false'>
-    <ion-item style="color: red; text-align: center;"> You have to select the busLine that you want. </ion-item>
+    <ion-item style="color: red; text-align: center;"> {{'TIMETABLES.NEED_SELECT_BUSLINE' | translate}} </ion-item>
   </div>
 
   <div class="showTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
     <ion-segment assertive [(ngModel)]="setFirst">
-      <ion-segment-button *ngFor="let time of timesToShow ; let i = index" [value]="i" (ionSelect)="selectedLine(time.times)" (ionSelect)="showToast('Line '+time.line.desc)">
-        <div [style.backgroundColor]="time.color"> Line {{time.line.desc}} </div>
+      <ion-segment-button *ngFor="let time of timesToShow; let i=index" [value]="i" (ionSelect)="selectedLine(time)">
+        <div [style.backgroundColor]="time.color"> {{'MAP.LINE' | translate}} {{time.line.desc}} </div>
       </ion-segment-button>
     </ion-segment>
   </div>
-  <div class="listTimes" *ngIf='isVisible && timesToShowInList.length !=0'>
+  <div class="listTimes" *ngIf='isVisible && timesToShowInList.length!=0'>
 
     <ion-list no-lines>
-      <button id="buttonHideShowPossible" (click)="changeVilibilityPossibleTimes()"> Next trips
+      <button id="buttonHideShowPossible" (click)="changeVilibilityPossibleTimes()"> {{'TIMETABLES.NEXT_TRIPS' | translate}}
         <div *ngIf="!possibleTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropdown"></ion-icon> </div>
         <div *ngIf="possibleTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropup"></ion-icon> </div>
         </button>
-      <ion-item style="color: red" *ngIf='possibleTimes == [] || possibleTimes.length == 0'> No timetables available </ion-item>
+      <ion-item style="color: red" *ngIf='possibleTimes == [] || possibleTimes.length == 0'> {{'TIMETABLES.NO_TIMES_AVAILABLE' | translate}} </ion-item>
       <div *ngIf="possibleTimesVisible">
         <ion-item *ngFor="let time of possibleTimes">
           <b>{{time | date: 'dd/MM HH:mm'}}</b>
@@ -66,13 +69,13 @@
       </div>
 
 
-      <button id="buttonHideShowPassed" (click)="changeVilibilityPassedTimes()"> Other times
-      <div *ngIf="!passedTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropdown"></ion-icon> </div>
-      <div *ngIf="passedTimesVisible"><ion-icon id="iconHideShow" name="arrow-dropup"></ion-icon> </div>
+      <button id="buttonHideShowPassed" (click)="changeVilibilityPassedTimes() "> {{'TIMETABLES.OTHER_TIMES' | translate}} 
+      <div *ngIf="!passedTimesVisible"><ion-icon id="iconHideShow " name="arrow-dropdown"></ion-icon> </div>
+      <div *ngIf="passedTimesVisible"><ion-icon id="iconHideShow " name="arrow-dropup"></ion-icon> </div>
       </button>
-      <div *ngIf="passedTimesVisible">
-        <ion-item style="color: green" *ngIf='passedTimes == [] || passedTimes.length == 0'> All timetables are available </ion-item>
-        <ion-item *ngFor="let time of passedTimes">
+      <div *ngIf="passedTimesVisible ">
+        <ion-item style="color: green " *ngIf='passedTimes == [] || passedTimes.length == 0'> {{'TIMETABLES.ALL_TIMES_AVAILABLE' | translate}} </ion-item>
+        <ion-item *ngFor="let time of passedTimes ">
           {{time | date: 'dd/MM HH:mm'}}
         </ion-item>
       </div>
@@ -80,9 +83,9 @@
     </ion-list>
   </div>
 
-  <div class="notTimeAvailable" *ngIf='timesToShowInList.length==0 && isVisible'>
+  <div class="notTimeAvailable " *ngIf='timesToShowInList.length==0 && isVisible'>
     <ion-row>
-      <h2> Not stopstime available at this date: <br> {{selectedDate | date: 'yyyy-MMMM-dd'}} </h2>
+      <h2> {{'TIMETABLES.NO_TIMES_AVAILABLE_FOR_DATE' | translate}} <br> {{selectedDate | date: 'dd-MM-yyyy'}} </h2>
     </ion-row>
   </div>
 

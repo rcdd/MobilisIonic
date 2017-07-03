@@ -1,5 +1,5 @@
 <div class="networkError" *ngIf="dataProvider.hasNetwork==false">
-    No internet connection!
+    {{'APP.NETWORK_ALERT.TITLE' | translate}}
 </div>
 <div id="loading" *ngIf="dataProvider.loading">
     <img src="assets/img/loading.png" />

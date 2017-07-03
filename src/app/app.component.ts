@@ -38,8 +38,8 @@ export class MyApp {
       network.onDisconnect().subscribe(() => {
         dataProvider.setNetworkState(false);
         let alert = this.alertCtrl.create({
-          title: "Internet Connection",
-          subTitle: "Please Check Your Network connection",
+          title: this.translate.instant("APP.NETWORK_ALERT.TITLE"),
+          subTitle: this.translate.instant("APP.NETWORK_ALERT.SUBTITLE"),
           buttons: [{
             text: 'Ok',
             handler: () => {
@@ -51,7 +51,6 @@ export class MyApp {
 
       network.onConnect().subscribe(() => {
         dataProvider.setNetworkState(true);
-        console.log('you are online');
       });
 
       translate.addLangs(["en", "pt"]);

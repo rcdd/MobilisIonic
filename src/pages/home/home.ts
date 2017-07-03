@@ -734,7 +734,8 @@ export class HomePage {
               line.checked = true;
               line.value.stops.forEach(stop => {
                 this.dataProvider.getAllFavoritesPlaces().forEach(fav => {
-                  if (fav.description == (stop.id.split(":")[1] + " - " + stop.name)) {
+                  let stopName = (stop.id.split(":")[1] + " - " + stop.name).replace(/'/g, "");
+                  if (fav.description == stopName) {
                     stop.favorite = true;
                   }
                 });
@@ -1258,7 +1259,8 @@ export class HomePage {
 
     let fav = this.dataProvider.getAllFavoritesPlaces();
     for (let i = 0; i < fav.length; i++) {
-      if (fav[i].description == res.name) {
+      res.name_r = (res.name).replace(/'/g, "");
+      if (fav[i].description == res.name_r) {
         res.favorite = true;
       }
     }

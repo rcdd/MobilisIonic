@@ -4,6 +4,7 @@ import { Http } from '@angular/http';
 import { DataProvider } from '../../providers/data-provider';
 import 'rxjs/add/operator/map';
 
+import { TranslateService } from '@ngx-translate/core';
 @Component({
     selector: 'page-favorites',
     templateUrl: 'favorites.html'
@@ -17,7 +18,7 @@ export class Favorites {
     private currentSearch: any = "";
 
     constructor(public navCtrl: NavController, public http: Http, public toastCtrl: ToastController,
-        public alertCtrl: AlertController, public dataProvider: DataProvider, ) {
+        public alertCtrl: AlertController, public dataProvider: DataProvider, public translate: TranslateService) {
     }
 
     ionViewWillEnter() {
@@ -53,10 +54,10 @@ export class Favorites {
 
     deleteFav(fav: any, route: boolean = true) {
         let alert = this.alertCtrl.create({
-            title: "Delete Favorite",
-            subTitle: "Are you sure you want to delete " + fav.description + "?",
+            title: this.translate.instant("FAVORITES.FAVORITE_DELETE_ALERT.TITLE"),
+            subTitle: this.translate.instant("FAVORITES.FAVORITE_DELETE_ALERT.DELETE_FAVORITE_MESSAGE") + fav.description + "?",
             buttons: [{
-                text: 'Yes',
+                text: this.translate.instant("FAVORITES.FAVORITE_DELETE_ALERT.BUTTON_YES"),
                 role: 'ok',
                 handler: data => {
                     if (route) {
@@ -65,21 +66,19 @@ export class Favorites {
                         if (index !== -1) {
                             this.favoritesToShow.routes.splice(index, 1);
                         }
-                        this.showToast("Your favorite was deleted", 3000);
-                        alert.dismiss();
                     } else {
                         this.dataProvider.deleteFavoritePlace(fav);
                         let index: number = this.favoritesToShow.places.indexOf(fav);
                         if (index !== -1) {
                             this.favoritesToShow.places.splice(index, 1);
                         }
-                        this.showToast("Your favorite was deleted", 3000);
-                        alert.dismiss();
                     }
+                    this.showToast(this.translate.instant("FAVORITES.FAVORITE_DELETE_ALERT.DELETED_MESSAGE"), 3000);
+                    alert.dismiss();
 
                 }
             }, {
-                text: 'Cancel',
+                text: this.translate.instant("FAVORITES.FAVORITE_DELETE_ALERT.BUTTON_NO"),
                 role: 'cancel',
                 handler: data => {
                     alert.dismiss();
@@ -97,10 +96,6 @@ export class Favorites {
             position: 'top',
             showCloseButton: true
         });
-        toast.onDidDismiss(() => {
-            console.log('Dismissed toast');
-        });
-
         toast.present();
     }
 
