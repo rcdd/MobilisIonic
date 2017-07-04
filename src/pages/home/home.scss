@@ -672,6 +672,23 @@ page-home {
         background-color: transparent;
         -webkit-animation: fadeIn 0.3s;
         animation: fadeIn 0.3s;
+        .balls {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            margin-top: -2.5rem;
+            .circles {
+                padding: 0.3rem;
+                color: black;
+                font-size: 1.4rem;
+                .filled {}
+                .outline {}
+                ion-icon {}
+            }
+        }
         .buttonFit {
             position: fixed;
             left: 10%;
@@ -714,6 +731,7 @@ page-home {
             position: relative;
             margin: 0 auto;
             width: 100%;
+            height: 80%;
             margin-left: 3rem;
             margin-right: 30px;
             box-shadow: 0px 0px 13px 1px #03396c;
@@ -740,26 +758,37 @@ page-home {
                 text-align: center;
                 background-color: white;
             }
-            .listStops {
-                position: absolute;
-                display: inline-block;
-                margin-left: 25px;
-                width: 100%;
-                top: 9rem;
-                bottom: 5.6rem;
-                overflow-y: auto;
-                .block {
+            .bus {
+                position: relative;
+                height: 100%;
+                .listStops {
                     position: relative;
-                    display: inline-flex;
-                    .pipe {
-                        position: relative;
-                        border-left: 5px solid;
-                    }
-                    .stops {
-                        position: relative;
-                        margin-left: 1rem;
-                        .stop {
-                            padding: 5px;
+                    display: inline-block;
+                    margin-left: 25px;
+                    width: 100%;
+                    height: 100%;
+                    top: 0rem;
+                    bottom: 5.6rem;
+                    .block {
+                        position: absolute;
+                        display: inline-flex;
+                        overflow-y: auto;
+                        top: 5px;
+                        bottom: 50%;
+                        width: 90%;
+                        .pipe {
+                            position: relative;
+                            border-left: 5px solid;
+                            height: 100%;
+                            top: 0;
+                            bottom: 0;
+                        }
+                        .stops {
+                            position: relative;
+                            margin-left: 1rem;
+                            .stop {
+                                //padding: 5px;
+                            }
                         }
                     }
                 }

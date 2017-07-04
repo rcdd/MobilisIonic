@@ -157,5 +157,32 @@
             "TITLE": "Sem Ligação à Internet",
             "SUBTITLE": "A aplicação está desatualizada! Por favor, ligue-se à internet e volte a iniciar a aplicação!"
         }
+    },
+    "ROUTING": {
+        "DEPART": "Partida pela",
+        "HARD_LEFT": "Fazer esquerda apertada na",
+        "LEFT": "Virar à esquerda na",
+        "SLIGHTLY_LEFT": "Fazer esquerda suave na",
+        "CONTINUE": "Continuar na",
+        "SLIGHTLY_RIGHT": "Fazer direita suave na",
+        "RIGHT": "Virar à direita na",
+        "HARD_RIGHT": "Fazer direita apertada na",
+        "CIRCLE_CLOCKWISE": "Entrar na rotuda no sentido dos ponteiros do relógio na",
+        "CIRCLE_COUNTERCLOCKWISE": "Entrar na rotuda no sentido contrário dos ponteiros do relógio na",
+        "ELEVATOR": "elevador",
+        "UTURN_LEFT": "Fazer cotovelo à esquerda na",
+        "UTURN_RIGHT": "Fazer cotovelo à direita na",
+        "NORTH": "norte",
+        "NORTHEAST": "nordeste",
+        "EAST": "este",
+        "SOUTHEAST": "suleste",
+        "SOUTH": "sul",
+        "SOUTHWEST": "suloeste",
+        "WEST": "oeste",
+        "NORTHWEST": "nordoeste",
+        "ROAD": "estrada",
+        "SERVICE_ROAD": "estrada secundária",
+        "LINK": "travessa",
+        "DESTINATION": "Chegou ao seu destino!"
     }
 }

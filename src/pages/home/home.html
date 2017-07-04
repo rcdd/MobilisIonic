@@ -222,8 +222,7 @@
           </div>
         </div>
         <div class="highlight">
-          {{navigateControl.sequence[navigateControl.index].step.relativeDirection}} in direction {{navigateControl.sequence[navigateControl.index].step.absoluteDirection}}
-          on {{navigateControl.sequence[navigateControl.index].step.streetName}}
+          <span> {{('ROUTING.'+navigateControl.sequence[navigateControl.index].step.relativeDirection)|translate}} {{navigateControl.sequence[navigateControl.index].step.streetName}}</span>
         </div>
       </div>
       <div class="bus" *ngIf="navigateControl.sequence[navigateControl.index].mode == 'BUS'">
@@ -237,17 +236,13 @@
             </div>
           </div>
         </div>
-        <div *ngIf="navigateControl.sequence[navigateControl.index].from">
-          <div class="highlight">
-            {{'MAP.TAKE_BUS'|translate}} {{navigateControl.sequence[navigateControl.index].from.name}} ({{navigateControl.sequence[navigateControl.index].routeLongName}})
-            {{'MAP.AT'|translate}} {{navigateControl.sequence[navigateControl.index].time}}h {{'MAP.AND_GO'|translate}} {{navigateControl.sequence[navigateControl.index].step.length}}
-            {{'MAP.STOPS'|translate}}
-          </div>
+        <div class="highlight" *ngIf="navigateControl.sequence[navigateControl.index].from">
+          {{'MAP.TAKE_BUS'|translate}} {{navigateControl.sequence[navigateControl.index].from.name}} ({{navigateControl.sequence[navigateControl.index].routeLongName}})
+          {{'MAP.AT'|translate}} {{navigateControl.sequence[navigateControl.index].time}}h {{'MAP.AND_GO'|translate}} {{navigateControl.sequence[navigateControl.index].step.length}}
+          {{'MAP.STOPS'|translate}}
         </div>
-        <div *ngIf="navigateControl.sequence[navigateControl.index].to">
-          <div class="highlight">
-            {{'MAP.LEFT_BUS'|translate}} {{navigateControl.sequence[navigateControl.index].to.name}} {{'MAP.AT'|translate}} {{navigateControl.sequence[navigateControl.index].time}}h
-          </div>
+        <div class="highlight" *ngIf="navigateControl.sequence[navigateControl.index].to">
+          {{'MAP.LEFT_BUS'|translate}} {{navigateControl.sequence[navigateControl.index].to.name}} {{'MAP.AT'|translate}} {{navigateControl.sequence[navigateControl.index].time}}h
         </div>
         <div class="listStops">
           <div class="block">
@@ -280,6 +275,16 @@
       <button ion-button (click)="navigateRight()" *ngIf="this.navigateControl.index < this.navigateControl.sequence.length - 1">
           <ion-icon name="arrow-forward"></ion-icon>
         </button>
+    </div>
+    <div class="balls">
+      <div class="circles" *ngFor="let nav of navigateControl.sequence, let i=index" (click)="navChangeSeq(i)">
+        <div class="filled" *ngIf="nav==navigateControl.sequence[navigateControl.index]">
+          <ion-icon name="radio-button-on"></ion-icon>
+        </div>
+        <div class="outline" *ngIf="nav!=navigateControl.sequence[navigateControl.index]">
+          <ion-icon name="radio-button-off"></ion-icon>
+        </div>
+      </div>
     </div>
   </div>
 </ion-content>

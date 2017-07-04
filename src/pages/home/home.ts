@@ -530,6 +530,7 @@ export class HomePage {
       this.map.closePopup();
       resolve(this.planning.orig);
     }).then(() => {
+      this.planningBox.size = 50;
       return this.planning.orig;
     });
   }
@@ -591,6 +592,7 @@ export class HomePage {
       this.map.closePopup();
       resolve(this.planning.dest);
     }).then(() => {
+      this.planningBox.size = 50;
       return this.planning.dest;
     });
   }
@@ -646,7 +648,7 @@ export class HomePage {
         this.translate.get("MAP.LINE").subscribe((res: string) => { lineTxt = res });
         popUp += stop.message + '<hr> <div class="linesDiv"> <div class="labelLines"><b>' + linesTxt + ':</b></div>';
         stop.lines.forEach(line => {
-          popUp += '<br> <div class="lineItem"> <img class="lineImg" src="assets/img/iconLines.png" />' + lineTxt + line + "</div>";
+          popUp += '<br> <div class="lineItem"> <img class="lineImg" src="assets/img/iconLines.png" />' + lineTxt + " " + line + "</div>";
         });
         popUp += "</div>"
         let popUpOptions =
@@ -949,12 +951,23 @@ export class HomePage {
   }
 
   showNavigate(route) {
+    this.dataProvider.loading = true;
     this.navigateControl.sequence = [];
     this.navigateControl.index = 0;
     route.legs.forEach(leg => {
       if (leg.mode == "WALK") {
         leg.steps.forEach(step => {
-          this.navigateControl.sequence.push({ mode: leg.mode, step: step });
+          if (step.streetName == "road") {
+            step.streetName = this.translate.instant("ROUTING.ROAD");
+          } else if (step.streetName == "service road") {
+            step.streetName = this.translate.instant("ROUTING.SERVICE_ROAD");
+          } else if (step.streetName == "link") {
+            step.streetName = this.translate.instant("ROUTING.LINK");
+          }
+          this.navigateControl.sequence.push({
+            mode: leg.mode, step: step, startTime: (moment.unix((leg.startTime) / 1000).format("HH:mm")),
+            endTime: (moment.unix((leg.endTime) / 1000).format("HH:mm"))
+          });
         });
       }
       if (leg.mode == "BUS") {
@@ -962,16 +975,24 @@ export class HomePage {
         leg.intermediateStops.push(leg.to);
         this.navigateControl.sequence.push({
           mode: leg.mode, from: leg.from, step: leg.intermediateStops, route: leg.route, routeColor: leg.routeColor,
-          routeLongName: leg.routeLongName, duration: leg.duration, time: (moment.unix((leg.from.arrival) / 1000).format("HH:mm"))
+          routeLongName: leg.routeLongName, duration: leg.duration, time: (moment.unix((leg.from.arrival) / 1000).format("HH:mm")),
+          startTime: (moment.unix((leg.startTime) / 1000).format("HH:mm")), endTime: (moment.unix((leg.endTime) / 1000).format("HH:mm"))
         });
         this.navigateControl.sequence.push({
           mode: leg.mode, to: leg.to, step: leg.intermediateStops, route: leg.route, routeColor: leg.routeColor,
-          routeLongName: leg.routeLongName, duration: leg.duration, time: (moment.unix((leg.to.arrival) / 1000).format("HH:mm"))
+          routeLongName: leg.routeLongName, duration: leg.duration, time: (moment.unix((leg.to.arrival) / 1000).format("HH:mm")),
+          startTime: (moment.unix((leg.startTime) / 1000).format("HH:mm")), endTime: (moment.unix((leg.endTime) / 1000).format("HH:mm"))
         });
       }
     });
+    let last = route.legs[route.legs.length - 1];
+    this.navigateControl.sequence.push({
+      mode: last.mode, step: { relativeDirection: "DESTINATION", distance: "0m", streetName: "", lat: last.to.lat, lon: last.to.lon }
+    });
     console.log("navigate", this.navigateControl);
     this.navigatePanTo();
+
+    this.dataProvider.loading = false;
   }
 
   navigateLeft() {
@@ -1000,6 +1021,10 @@ export class HomePage {
     });
   }
 
+  navChangeSeq(i: number) {
+    this.navigateControl.index = i;
+    this.navigatePanTo();
+  }
 
 
   navigatePanTo() {
@@ -1011,7 +1036,7 @@ export class HomePage {
     if (nav.mode == "WALK") {
       latLng = [nav.step.lat,
       nav.step.lon];
-      content = nav.step.relativeDirection + " on " + nav.step.streetName;
+      content = this.translate.instant("ROUTING." + nav.step.relativeDirection) + " " + nav.step.streetName;
       this.map.flyTo(latLng, zoom, options)
     }
     if (nav.mode == "BUS") {

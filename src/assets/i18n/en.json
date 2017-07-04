@@ -157,5 +157,32 @@
             "TITLE": "No Internet Connection",
             "SUBTITLE": "You app is out of date! Please turn on your network and run app again!"
         }
+    },
+    "ROUTING": {
+        "DEPART": "Depart on",
+        "HARD_LEFT": "Turn hard left on",
+        "LEFT": "Turn left on",
+        "SLIGHTLY_LEFT": "Slightly left on",
+        "CONTINUE": "Continue on",
+        "SLIGHTLY_RIGHT": "Slightly right on",
+        "RIGHT": "Turn right on",
+        "HARD_RIGHT": "Turn hard right on",
+        "CIRCLE_CLOCKWISE": "Take roundabout clockwise on",
+        "CIRCLE_COUNTERCLOCKWISE": "Take roundabout counterclockwise on",
+        "ELEVATOR": "elevator",
+        "UTURN_LEFT": "U-turn left on",
+        "UTURN_RIGHT": "U-turn right on",
+        "NORTH": "north",
+        "NORTHEAST": "northeast",
+        "EAST": "east",
+        "SOUTHEAST": "southeast",
+        "SOUTH": "south",
+        "SOUTHWEST": "southwest",
+        "WEST": "west",
+        "NORTHWEST": "northwest",
+        "ROAD": "road",
+        "SERVICE_ROAD": "service road",
+        "LINK": "link",
+        "DESTINATION": "You arrived at your destination!"
     }
 }
