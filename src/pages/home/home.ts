@@ -683,24 +683,24 @@ export class HomePage {
       if (stop.favorite) {
         self.dataProvider.createFavoritePlace(stop.id.split(":")[1] + " - " + stop.name, (stop.lat + "," + stop.lon)).then(res => {
           if (res) {
-            this.translate.get("MAP.FAVORITE.SAVED").subscribe((res: string) => { self.showToast(res, 3000); });
+            self.translate.get("MAP.FAVORITE.SAVED").subscribe((res: string) => { self.showToast(res, 3000); });
             self.createBallon(popUp + "<hr>", stop.favorite);
             marker._popup.setContent(self.container);
             self._onBallonMarker(marker, stop, popUp, popUpOptions);
           } else {
-            this.translate.get("MAP.FAVORITE.ERROR_FAV_EXIST").subscribe((res: string) => { self.showToast(res, 3000); });
+            self.translate.get("MAP.FAVORITE.ERROR_FAV_EXIST").subscribe((res: string) => { self.showToast(res, 3000); });
             return;
           }
         });
       } else {
         let fav = { 'description': stop.id.split(":")[1] + " - " + stop.name, 'coords': (stop.lat + "," + stop.lon) };
         self.dataProvider.removeFavoritePlace(fav).then(res => {
-          this.translate.get("MAP.FAVORITE.DELETED").subscribe((res: string) => { self.showToast(res, 3000); });
+          self.translate.get("MAP.FAVORITE.DELETED").subscribe((res: string) => { self.showToast(res, 3000); });
           self.createBallon(popUp + "<hr>", stop.favorite);
           marker._popup.setContent(self.container);
           self._onBallonMarker(marker, stop, popUp, popUpOptions);
         }).catch(() => {
-          this.translate.get("MAP.FAVORITE.ERROR_FAV_DELETING").subscribe((res: string) => { self.showToast(res, 3000); });
+          self.translate.get("MAP.FAVORITE.ERROR_FAV_DELETING").subscribe((res: string) => { self.showToast(res, 3000); });
           stop.favorite = true;
         });
       }
@@ -735,12 +735,15 @@ export class HomePage {
             this.dataProvider.CheckBoxRoutes.forEach(line => {
               line.checked = true;
               line.value.stops.forEach(stop => {
-                this.dataProvider.getAllFavoritesPlaces().forEach(fav => {
-                  let stopName = (stop.id.split(":")[1] + " - " + stop.name).replace(/'/g, "");
-                  if (fav.description == stopName) {
-                    stop.favorite = true;
-                  }
-                });
+                let _fav = this.dataProvider.getAllFavoritesPlaces();
+                if (_fav != undefined) {
+                  _fav.forEach(fav => {
+                    let stopName = (stop.id.split(":")[1] + " - " + stop.name).replace(/'/g, "");
+                    if (fav.description == stopName) {
+                      stop.favorite = true;
+                    }
+                  });
+                }
                 let existMarker: boolean = false;
                 this.markers.forEach(marker => {
                   if (marker.id == stop.id) {
@@ -1329,12 +1332,12 @@ export class HomePage {
       if (res.favorite) {
         self.dataProvider.createFavoritePlace(res.name, (res.geometry.location.lat + "," + res.geometry.location.lng)).then(res => {
           if (res) {
-            this.translate.get("MAP.FAVORITE.SAVED").subscribe((res: string) => { this.showToast(res, 3000); });
+            self.translate.get("MAP.FAVORITE.SAVED").subscribe((res: string) => { this.showToast(res, 3000); });
           }
         });
       } else {
         self.dataProvider.removeFavoritePlace({ description: res.name, coords: (res.geometry.location.lat + "," + res.geometry.location.lng) }).then(res => {
-          this.translate.get("MAP.FAVORITE.DELETED").subscribe((res: string) => { this.showToast(res, 3000); });
+          self.translate.get("MAP.FAVORITE.DELETED").subscribe((res: string) => { this.showToast(res, 3000); });
         });
       }
 
