@@ -29,6 +29,7 @@
         "@ngx-translate/core": "^7.0.0",
         "@ngx-translate/http-loader": "^0.1.0",
         "@types/leaflet": "^1.0.62",
+        "cordova-android": "^6.2.3",
         "cordova-ios": "^4.4.0",
         "cordova-plugin-compat": "^1.1.0",
         "cordova-plugin-console": "^1.0.7",
@@ -92,6 +93,7 @@
             }
         },
         "platforms": [
+            "android",
             "ios"
         ]
     }
