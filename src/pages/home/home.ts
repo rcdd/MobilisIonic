@@ -211,7 +211,7 @@ export class HomePage {
         let self = this;
         this.map.on('locationerror', function (e) {
           self.allowLocation = false;
-          this.translate.get("MISC.DENIED_LOCATION").subscribe((res: string) => { self.showToast(res, 5000); });
+          self.translate.get("MISC.DENIED_LOCATION").subscribe((res: string) => { self.showToast(res, 5000); });
         });
 
         this.getCurrentLocation();
@@ -1283,10 +1283,12 @@ export class HomePage {
     }
 
     let fav = this.dataProvider.getAllFavoritesPlaces();
-    for (let i = 0; i < fav.length; i++) {
-      res.name_r = (res.name).replace(/'/g, "");
-      if (fav[i].description == res.name_r) {
-        res.favorite = true;
+    if (fav != undefined) {
+      for (let i = 0; i < fav.length; i++) {
+        res.name_r = (res.name).replace(/'/g, "");
+        if (fav[i].description == res.name_r) {
+          res.favorite = true;
+        }
       }
     }
 

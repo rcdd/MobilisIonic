@@ -159,7 +159,7 @@ export class DataProvider {
                 return this.getStopsFromDB().then((stops) => {
                     this.loadingText = this.translate.instant("DATAPROVIDER.LOADING_TXT.STOPS_LOADING");
                     this.getFavoritesFromDB().then(fav => {
-                        resolve();
+                        resolve(true);
                     })
                 });
             });
