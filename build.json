@@ -1,0 +1,18 @@
+{
+     "android": {
+         "debug": {
+             "keystore": "MobilisWay.keystore",
+             "storePassword": "mobilisEI2017",
+             "alias": "MobilisWayDebug",
+             "password" : "mobilisEI2017",
+             "keystoreType": ""
+         },
+         "release": {
+             "keystore": "MobilisWay.keystore",
+             "storePassword": "mobilisEI2017",
+             "alias": "MobilisWay",
+             "password" : "mobilisEI2017",
+             "keystoreType": ""
+         }
+     }
+ }
